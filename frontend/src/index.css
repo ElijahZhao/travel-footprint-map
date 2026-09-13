@@ -1,0 +1,510 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* === 圆角 === */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* === 核心颜色 === */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* === 功能颜色 (新增) === */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  /* === 主题特色颜色 (新增) === */
+  --color-theme-red: var(--theme-red);
+  --color-theme-green: var(--theme-green);
+  --color-theme-gold: var(--theme-gold);
+  --color-theme-blue: var(--theme-blue);
+
+  /* === 图表颜色 === */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* === 侧边栏颜色 === */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* === Hero 区域颜色 (新增) === */
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+
+  /* === 阴影 === */
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+  --shadow-xl: var(--ds-shadow-xl);
+
+  /* === 字号（仅覆盖基础 3 级，默认值与 Tailwind 一致） === */
+  --text-xs: var(--font-size-small);
+  --text-sm: var(--font-size-label);
+  --text-base: var(--font-size-body);
+}
+
+:root {
+  /* === 圆角基准值 (旅行手帐风: 圆角更明显) === */
+  --radius: 1rem;
+
+  /* === 字体排版 === */
+  --font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-size-display: 3.5rem;
+  --font-size-headline: 2rem;
+  --font-size-title: 1.5rem;
+  --font-size-body: 1rem;
+  --font-size-label: 0.875rem;
+  --font-size-small: 0.75rem;
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --line-height: 1.6;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+
+  /* === 间距系统 === */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* === 阴影层级 (柔和暖调) === */
+  --ds-shadow-sm: 0 1px 3px oklch(0.55 0.05 75 / 0.10);
+  --ds-shadow-md: 0 4px 14px oklch(0.55 0.05 75 / 0.13), 0 2px 4px oklch(0.55 0.05 75 / 0.08);
+  --ds-shadow-lg: 0 10px 30px oklch(0.55 0.05 75 / 0.16), 0 4px 10px oklch(0.55 0.05 75 / 0.10);
+  --ds-shadow-xl: 0 18px 50px oklch(0.55 0.05 75 / 0.20), 0 8px 18px oklch(0.55 0.05 75 / 0.12);
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+  --shadow-xl: var(--ds-shadow-xl);
+
+  /* === 动效时间 === */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === 背景颜色 (暖阳奶油纸感 —— 明亮鲜活) === */
+  --background: oklch(0.975 0.022 88);
+  --foreground: oklch(0.28 0.035 60);
+
+  /* === 卡片 (近白米) === */
+  --card: oklch(0.995 0.008 90);
+  --card-foreground: oklch(0.28 0.035 60);
+
+  /* === 弹出层 === */
+  --popover: oklch(0.995 0.008 90);
+  --popover-foreground: oklch(0.28 0.035 60);
+
+  /* === 主色调 (旅人绿 —— 鲜活有生命力) === */
+  --primary: oklch(0.58 0.145 158);
+  --primary-foreground: oklch(0.99 0.008 90);
+
+  /* === 次要色 === */
+  --secondary: oklch(0.955 0.022 88);
+  --secondary-foreground: oklch(0.28 0.035 60);
+
+  /* === 柔和色 === */
+  --muted: oklch(0.945 0.02 88);
+  --muted-foreground: oklch(0.52 0.035 65);
+
+  /* === 强调色 (落日暖橙 —— 明亮抓眼) === */
+  --accent: oklch(0.72 0.185 48);
+  --accent-foreground: oklch(0.99 0.008 90);
+
+  /* === 危险/错误色 === */
+  --destructive: oklch(0.60 0.22 27);
+
+  /* === 边框和输入框 === */
+  --border: oklch(0.915 0.022 85);
+  --input: oklch(0.915 0.022 85);
+  --ring: oklch(0.58 0.145 158);
+
+  /* === 功能颜色 === */
+  --success: oklch(0.64 0.16 158);
+  --success-foreground: oklch(0.99 0.008 90);
+  --warning: oklch(0.78 0.17 65);
+  --warning-foreground: oklch(0.24 0.04 60);
+  --info: oklch(0.62 0.17 245);
+  --info-foreground: oklch(0.99 0.008 90);
+
+  /* === 主题特色颜色 === */
+  --theme-red: oklch(0.64 0.20 22);
+  --theme-green: oklch(0.62 0.16 158);
+  --theme-gold: oklch(0.78 0.17 65);
+  --theme-blue: oklch(0.62 0.17 245);
+
+  /* === 分类颜色 (6 类 —— 缤纷旅行色) === */
+  --scenery: oklch(0.68 0.16 155);
+  --food: oklch(0.76 0.17 52);
+  --culture: oklch(0.64 0.18 305);
+  --city: oklch(0.66 0.16 240);
+  --family: oklch(0.70 0.18 15);
+  --outdoor: oklch(0.68 0.15 200);
+
+  /* === 图表颜色 === */
+  --chart-1: var(--scenery);
+  --chart-2: var(--food);
+  --chart-3: var(--culture);
+  --chart-4: var(--city);
+  --chart-5: var(--outdoor);
+
+  /* === 侧边栏 === */
+  --sidebar: oklch(0.995 0.008 90);
+  --sidebar-foreground: oklch(0.28 0.035 60);
+  --sidebar-primary: oklch(0.58 0.145 158);
+  --sidebar-primary-foreground: oklch(0.99 0.008 90);
+  --sidebar-accent: oklch(0.955 0.022 88);
+  --sidebar-accent-foreground: oklch(0.28 0.035 60);
+  --sidebar-border: oklch(0.915 0.022 85);
+  --sidebar-ring: oklch(0.58 0.145 158);
+
+  /* === Hero 区域 === */
+  --hero: oklch(0.58 0.145 158);
+  --hero-foreground: oklch(0.99 0.008 90);
+
+  /* === 动画 Token === */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dark {
+  /* === 阴影层级 (深色模式) === */
+  --ds-shadow-sm: 0 1px 3px oklch(0 0 0 / 0.2);
+  --ds-shadow-md: 0 4px 12px oklch(0 0 0 / 0.3), 0 2px 4px oklch(0 0 0 / 0.2);
+  --ds-shadow-lg: 0 8px 24px oklch(0 0 0 / 0.4), 0 4px 8px oklch(0 0 0 / 0.3);
+  --ds-shadow-xl: 0 16px 48px oklch(0 0 0 / 0.5), 0 8px 16px oklch(0 0 0 / 0.4);
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+  --shadow-xl: var(--ds-shadow-xl);
+
+  /* === 背景颜色 === */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+
+  /* === 卡片 === */
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  /* === 弹出层 === */
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* === 主色调 === */
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  /* === 次要色 === */
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  /* === 柔和色 === */
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  /* === 强调色 === */
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  /* === 危险/错误色 === */
+  --destructive: oklch(0.704 0.191 22.216);
+
+  /* === 边框和输入框 === */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  /* === 功能颜色 (新增) === */
+  --success: oklch(0.648 0.15 163.225);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.8 0.165 55.934);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.623 0.214 259.815);
+  --info-foreground: oklch(0.145 0 0);
+
+  /* === 主题特色颜色 (新增) === */
+  --theme-red: oklch(0.704 0.191 22.216);
+  --theme-green: oklch(0.648 0.15 163.225);
+  --theme-gold: oklch(0.8 0.165 55.934);
+  --theme-blue: oklch(0.623 0.214 259.815);
+
+  /* === 图表颜色 === */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* === 侧边栏 === */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+
+  /* === Hero 区域 (新增) === */
+  --hero: oklch(0.269 0 0);
+  --hero-foreground: oklch(0.985 0 0);
+}
+
+.dark .text-grad-vivid {
+  background-image: linear-gradient(100deg, oklch(0.78 0.14 158), oklch(0.80 0.16 55) 75%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ================================================================
+   旅行手帐风 —— 纸纹与质感工具类（对齐概念图）
+   ================================================================ */
+
+/* 极淡纸纹：叠加在暖米纸背景上，营造手帐纸面质感 */
+.paper-texture {
+  position: relative;
+}
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(oklch(0.45 0.05 85 / 0.05) 1px, transparent 1px),
+    radial-gradient(oklch(0.45 0.05 85 / 0.04) 1px, transparent 1px);
+  background-size: 18px 18px, 18px 18px;
+  background-position: 0 0, 9px 9px;
+  z-index: 0;
+}
+
+/* 页面主容器：暖阳奶油底 + 彩色光晕 + 纸纹 */
+.page-bg {
+  position: relative;
+  background: var(--background);
+}
+/* 柔和的彩色光晕（左上暖橙、右上旅人绿、底部暖黄），营造鲜活通透的空气感 */
+.page-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(56% 36% at 10% -6%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 70%),
+    radial-gradient(50% 32% at 97% 4%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 72%),
+    radial-gradient(68% 28% at 50% 105%, color-mix(in oklab, var(--warning) 9%, transparent), transparent 76%);
+}
+.page-bg.paper-texture::before {
+  opacity: 0.28;
+  z-index: 1;
+}
+
+/* 鲜亮渐变（用于英雄区、主按钮等强调场景） */
+.grad-vivid {
+  background-image: linear-gradient(120deg, var(--primary), color-mix(in oklab, var(--primary) 40%, var(--accent)) 60%, var(--accent));
+}
+.grad-sunset {
+  background-image: linear-gradient(120deg, var(--accent), color-mix(in oklab, var(--accent) 45%, var(--family)));
+}
+/* 鲜亮文字渐变（深绿→暖橙，保证浅底上的可读性） */
+.text-grad-vivid {
+  background-image: linear-gradient(100deg, oklch(0.46 0.13 158), oklch(0.56 0.17 48) 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 卡片纸感（内高光 + 暖调柔影，让卡片鲜活浮起） */
+.card-paper {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.85),
+    0 1px 3px oklch(0.55 0.06 75 / 0.09),
+    0 6px 18px oklch(0.55 0.06 75 / 0.07);
+}
+
+/* 点亮发光（心愿点亮态 —— 鲜活绿光） */
+.lit-glow {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.7),
+    0 0 0 1px color-mix(in oklab, var(--primary) 38%, transparent),
+    0 8px 24px color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+/* 呼吸脉冲（地图我的位置 / 打卡按钮） */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 34%, transparent); }
+  50% { box-shadow: 0 0 0 14px color-mix(in oklab, var(--primary) 0%, transparent); }
+}
+.glow-pulse {
+  animation: glow-pulse 2s ease-out infinite;
+}
+
+/* 打卡 FAB 弹性悬浮 */
+@keyframes fab-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.fab-float {
+  animation: fab-float 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-pulse, .fab-float { animation: none !important; }
+}
+
+/* Tailwind v4: container no longer auto-centers. Restore v3 behavior. */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 640px) { max-width: 640px; }
+  @media (width >= 768px) { max-width: 768px; }
+  @media (width >= 1024px) { max-width: 1024px; }
+  @media (width >= 1280px) { max-width: 1280px; }
+  @media (width >= 1536px) { max-width: 1536px; }
+}
+
+/* ================================================================
+   Page Transition System — uses CSS transition (NOT @keyframes)
+   to avoid onAnimationEnd bubbling issues from child elements.
+   
+   Supported modes (set via data-transition attribute):
+     fade        — opacity only (default, safest)
+     slide-up    — opacity + translateY (content rises into view)
+     slide-fade  — opacity + translateX (horizontal slide)
+     blur-fade   — opacity + filter:blur (frosted glass feel)
+     scale       — opacity + scale (zoom in/out)
+     bounce      — opacity + scale with bounce easing
+     none        — instant swap, no animation
+   ================================================================ */
+.page-transition {
+  transition:
+    opacity var(--duration-normal, 200ms) var(--ease-default, ease),
+    transform var(--duration-normal, 200ms) var(--ease-default, ease),
+    filter var(--duration-normal, 200ms) var(--ease-default, ease);
+}
+
+/* === Default: fade (opacity only) === */
+.page-transition.fade-out { opacity: 0; }
+.page-transition.fade-in  { opacity: 1; }
+
+/* === slide-up === */
+.page-transition[data-transition="slide-up"].fade-out {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.page-transition[data-transition="slide-up"].fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === slide-fade (horizontal) === */
+.page-transition[data-transition="slide-fade"].fade-out {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+.page-transition[data-transition="slide-fade"].fade-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* === blur-fade (glassmorphism) === */
+.page-transition[data-transition="blur-fade"].fade-out {
+  opacity: 0;
+  filter: blur(12px);
+}
+.page-transition[data-transition="blur-fade"].fade-in {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+/* === scale (zoom) === */
+.page-transition[data-transition="scale"].fade-out {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.page-transition[data-transition="scale"].fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* === bounce (scale + bounce easing override) === */
+.page-transition[data-transition="bounce"] {
+  transition:
+    opacity var(--duration-normal, 200ms) var(--ease-default, ease),
+    transform var(--duration-slow, 300ms) var(--ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    filter var(--duration-normal, 200ms) var(--ease-default, ease);
+}
+.page-transition[data-transition="bounce"].fade-out {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.page-transition[data-transition="bounce"].fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* === none (instant) === */
+.page-transition[data-transition="none"] {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,41 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建产物
+dist/
+dist-ssr/
+build/
+
+# 环境变量（含云服务标识，禁止上传）
+.env
+.env.*
+!.env.example
+.env.tcb
+frontend/.env
+backend/.env
+
+# 日志
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# 编辑器 / 系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# 沙箱 / IDE 工具目录（与项目代码无关，约 18MB）
+.codebuddy/
+
+# 测试与缓存
+coverage/
+*.local
+.cache/
+
+# 交付物自身
+*.tar.gz

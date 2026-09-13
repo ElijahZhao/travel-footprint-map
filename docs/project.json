@@ -1,0 +1,8 @@
+{
+  "project_type": "web",
+  "sub_project_type": "",
+  "name": "旅行打卡地图足迹",
+  "app_slug": "travel-footprint-map",
+  "version_description": "重构心愿与打卡入口，时间线加搜索",
+  "preview_type": "mobile"
+}

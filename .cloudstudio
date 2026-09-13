@@ -1,0 +1,9 @@
+[[app]]
+name = "frontend"
+port = 5173
+cmd = "cd frontend && pnpm dev"
+
+[[app]]
+name = "backend"
+port = 3000
+cmd = "cd backend && pnpm dev"

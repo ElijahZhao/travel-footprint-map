@@ -1,0 +1,62 @@
+[
+  {
+    "pageKey": "Home",
+    "title": "地图主页",
+    "url": "/"
+  },
+  {
+    "pageKey": "AuthCallback",
+    "title": "登录回调",
+    "url": "/auth/callback"
+  },
+  {
+    "pageKey": "CheckinDetail",
+    "title": "打卡详情",
+    "url": "/checkin/:id"
+  },
+  {
+    "pageKey": "CheckinEdit",
+    "title": "编辑打卡",
+    "url": "/checkin/:id/edit"
+  },
+  {
+    "pageKey": "CheckinNew",
+    "title": "新增打卡",
+    "url": "/checkin/new"
+  },
+  {
+    "pageKey": "Login",
+    "title": "登录",
+    "url": "/login"
+  },
+  {
+    "pageKey": "Me",
+    "title": "我的",
+    "url": "/me"
+  },
+  {
+    "pageKey": "Share",
+    "title": "分享页",
+    "url": "/share/:publicId"
+  },
+  {
+    "pageKey": "Stats",
+    "title": "旅行统计",
+    "url": "/stats"
+  },
+  {
+    "pageKey": "Timeline",
+    "title": "时间线",
+    "url": "/timeline"
+  },
+  {
+    "pageKey": "WishNew",
+    "title": "新增心愿",
+    "url": "/wish/new"
+  },
+  {
+    "pageKey": "Wishlist",
+    "title": "心愿点亮",
+    "url": "/wishlist"
+  }
+]
