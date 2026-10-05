@@ -1,6 +1,18 @@
 import { db, rpc } from '@/lib/cloudbase'
 import { isGuest, getGuestCheckins, setGuestCheckins, buildGuestCheckin } from './guest'
-import type { Checkin, CheckinInput } from './types'
+import type { Checkin, CheckinInput, PhotoItem } from './types'
+
+/** 云端行 → Checkin 的显式映射，避免直接 `as unknown as` 绕过类型校验导致运行时崩溃。 */
+function normalize(row: Record<string, unknown>): Checkin {
+  return {
+    ...(row as unknown as Checkin),
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+    photos: Array.isArray(row.photos) ? (row.photos as PhotoItem[]) : [],
+    status: row.status === 'wish' ? 'wish' : 'visited',
+    rating: Number(row.rating) || 0,
+    is_public: Boolean(row.is_public),
+  }
+}
 
 /** 读取本人全部打卡。游客模式读本地示例数据；正式账号走云端 RLS（仅返回本人）。 */
 export async function fetchMyCheckins(): Promise<Checkin[]> {
@@ -10,7 +22,7 @@ export async function fetchMyCheckins(): Promise<Checkin[]> {
     .select('*')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data ?? []) as unknown as Checkin[]
+  return (data ?? []).map(normalize)
 }
 
 /** 读取某用户的公开精选打卡（命中 select_public 策略，免登录可读）。 */
@@ -22,7 +34,7 @@ export async function fetchPublicCheckins(publicId: string): Promise<Checkin[]> 
     .eq('is_public', true)
     .order('visit_date', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data ?? []) as unknown as Checkin[]
+  return (data ?? []).map(normalize)
 }
 
 export async function fetchCheckinById(id: number): Promise<Checkin | null> {
@@ -33,7 +45,7 @@ export async function fetchCheckinById(id: number): Promise<Checkin | null> {
     .eq('id', id)
     .maybeSingle()
   if (error) throw new Error(error.message)
-  return (data as unknown as Checkin) ?? null
+  return data ? normalize(data as Record<string, unknown>) : null
 }
 
 export async function createCheckin(input: CheckinInput): Promise<void> {

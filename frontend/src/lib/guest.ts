@@ -12,6 +12,18 @@ export function isGuest(): boolean {
   }
 }
 
+/** localStorage 是否可用（隐私模式 / 配额已满会抛错，此时游客数据无法落盘）。 */
+export function isStorageAvailable(): boolean {
+  try {
+    const probe = '__tf_storage_probe__'
+    localStorage.setItem(probe, '1')
+    localStorage.removeItem(probe)
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** 进入本地游客模式：写入标记并首次填充示例数据。 */
 export function enterGuestStore() {
   try {
@@ -58,7 +70,7 @@ export function ensureSeed() {
 export function buildGuestCheckin(input: CheckinInput): Checkin {
   const now = new Date().toISOString()
   return {
-    id: Date.now(),
+    id: Date.now() + Math.floor(Math.random() * 1000),
     user_id: 'guest',
     place_name: input.place_name,
     address: input.address ?? null,
