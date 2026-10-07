@@ -100,7 +100,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       return
     }
     if (!aiConfigured()) {
-      toast.error('尚未配置 AI：请在 .env 中设置 VITE_AI_API_KEY')
+      toast.error('「AI 帮我写」还未开通：需要配置 AI 密钥后才能使用')
       return
     }
     setAiLoading(true)
@@ -165,7 +165,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       setPhotos((p) => [...p, ...uploaded])
       toast.success(`已上传 ${uploaded.length} 张照片`)
     } catch (e) {
-      toast.error('照片上传失败，可稍后重试')
+      toast.error(e instanceof Error ? e.message : '照片处理失败，请换一张试试')
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''

@@ -62,7 +62,8 @@ export async function generateCheckinText(args: GeneratePromptArgs): Promise<str
       model: MODEL,
       messages: buildMessages(args),
       temperature: 0.8,
-      max_tokens: 160,
+      // 豆包 seed 系列带思考过程（reasoning_content），上限放宽避免正文被截断
+      max_tokens: 600,
     }),
   })
 
