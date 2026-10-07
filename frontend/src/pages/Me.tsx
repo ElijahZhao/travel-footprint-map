@@ -4,9 +4,11 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins, useUpdateCheckin } from '@/lib/hooks'
 import EmptyState from '@/components/EmptyState'
+import TravelIllustration from '@/components/TravelIllustration'
 import CheckinCard from '@/components/CheckinCard'
 import { FadeIn, Stagger } from '@/components/MotionPrimitives'
-import { Surface, SectionTitle } from '@/components/Surface'
+import { SectionTitle } from '@/components/Surface'
+import { Stamp } from '@/components/TravelDecor'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -24,6 +26,48 @@ import {
   BadgeCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
+
+/** 行李牌行：左侧打孔 + 虚线分隔，用于设置列表 */
+function LuggageRow({
+  icon: Icon,
+  title,
+  desc,
+  onClick,
+  color,
+  disabled,
+  right,
+}: {
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+  title: string
+  desc: string
+  onClick?: () => void
+  color: string
+  disabled?: boolean
+  right?: React.ReactNode
+}) {
+  return (
+    <div
+      onClick={disabled ? undefined : onClick}
+      className={`luggage-tag flex w-full items-center gap-3 p-3.5 pl-11 text-left transition-transform active:scale-[0.985] ${
+        onClick && !disabled ? 'cursor-pointer' : ''
+      } ${disabled ? 'opacity-50' : ''}`}
+    >
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
+        style={{ background: `color-mix(in oklab, ${color} 14%, transparent)`, color }}
+      >
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          {desc}
+        </p>
+      </div>
+      {right ?? <span style={{ color: 'var(--muted-foreground)' }}>→</span>}
+    </div>
+  )
+}
 
 export default function Me() {
   const { user, guest, loading, signOut, enterGuest } = useAuth()
@@ -129,12 +173,14 @@ export default function Me() {
   return (
     <div className="page-bg paper-texture min-h-full px-4 pb-28 pt-5">
       <main className="relative z-10 space-y-5">
-        {/* 头像与身份 */}
+        {/* 头像与身份：渐变英雄卡，建立「我的」页面的第一眼锚点 */}
         <FadeIn>
-          <Surface pad="lg" className="card-paper">
-            <div className="flex items-center gap-4">
+          <div className="grad-vivid card-paper relative overflow-hidden rounded-3xl p-5 text-white">
+            <span className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-white/10" />
+            <span className="pointer-events-none absolute -bottom-10 -left-8 h-20 w-20 rounded-full bg-white/8" />
+            <div className="relative flex items-center gap-4">
               <motion.div
-                className="grad-vivid relative flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-xl font-bold text-white"
+                className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white/20 text-xl font-bold text-white backdrop-blur"
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 20 }}
@@ -142,17 +188,20 @@ export default function Me() {
                 {displayName.slice(0, 1).toUpperCase()}
                 <span
                   className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
-                  style={{ background: guest ? 'var(--accent)' : 'var(--primary)', border: '2px solid var(--card)' }}
+                  style={{
+                    background: guest ? 'var(--accent)' : 'oklch(0.46 0.13 158)',
+                    border: '2px solid rgba(255,255,255,0.9)',
+                  }}
                 >
                   {guest ? <UserRound className="h-3 w-3" /> : <BadgeCheck className="h-3.5 w-3.5" />}
                 </span>
               </motion.div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-bold">{displayName}</p>
-                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                <p className="mt-0.5 truncate text-xs opacity-80">
                   {guest ? '游客模式 · 数据保存于本设备' : user?.email}
                 </p>
-                <div className="mt-1.5 flex gap-3 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                <div className="mt-1.5 flex gap-3 text-[11px] opacity-85">
                   <span>足迹 {visitedCount}</span>
                   <span>心愿 {checkins.length - visitedCount}</span>
                   <span>照片 {photoCount}</span>
@@ -161,22 +210,20 @@ export default function Me() {
               {guest ? (
                 <button
                   onClick={exitGuest}
-                  className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-xs"
-                  style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
+                  className="flex shrink-0 items-center gap-1 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
                 >
                   <DoorOpen className="h-3.5 w-3.5" /> 退出
                 </button>
               ) : (
                 <button
                   onClick={() => signOut()}
-                  className="shrink-0 rounded-full px-2.5 py-1.5 text-xs"
-                  style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
+                  className="shrink-0 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
                 >
                   退出
                 </button>
               )}
             </div>
-          </Surface>
+          </div>
         </FadeIn>
 
         {/* 游客升级提示条 */}
@@ -214,9 +261,9 @@ export default function Me() {
           </FadeIn>
         )}
 
-        {/* 成就徽章 */}
+        {/* 成就邮票：把徽章做成一套「邮票集」 */}
         <FadeIn>
-          <Surface pad="lg" className="card-paper">
+          <div className="card-paper rounded-3xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <SectionTitle
               icon={Award}
               right={
@@ -224,24 +271,15 @@ export default function Me() {
                   {badges.filter((b) => b.got).length} / {badges.length}
                 </span>
               }
-              className="mb-3"
+              className="mb-4"
             >
-              成就徽章
+              成就邮票
             </SectionTitle>
             <Stagger className="grid grid-cols-3 gap-3" stagger={0.05}>
-              {badges.map((b) => {
+              {badges.map((b, i) => {
                 const Icon = b.icon
                 return (
-                  <motion.div
-                    key={b.key}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl py-3"
-                    style={{
-                      background: b.got ? 'color-mix(in oklab, var(--primary) 10%, var(--card))' : 'var(--secondary)',
-                      border: b.got ? '1px solid color-mix(in oklab, var(--primary) 24%, transparent)' : '1px dashed var(--border)',
-                    }}
-                    variants={{ hidden: { opacity: 0, scale: 0.88 }, visible: { opacity: 1, scale: 1 } }}
-                    title={b.hint}
-                  >
+                  <Stamp key={b.key} got={b.got} rotation={[-3, 2.5, -2, 3, -2.5, 2][i % 6]} title={b.hint}>
                     <span
                       className="flex h-10 w-10 items-center justify-center rounded-full"
                       style={{
@@ -252,76 +290,40 @@ export default function Me() {
                     >
                       <Icon className="h-5 w-5" />
                     </span>
-                    <span
-                      className="text-[11px] font-medium"
-                      style={{ color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)' }}
-                    >
+                    <span className="text-[11px] font-medium" style={{ color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)' }}>
                       {b.label}
                     </span>
-                  </motion.div>
+                  </Stamp>
                 )
               })}
             </Stagger>
-          </Surface>
+          </div>
         </FadeIn>
 
-        {/* 设置菜单 */}
+        {/* 设置菜单：行李牌隐喻 */}
         <FadeIn>
-          <Surface pad="none" className="card-paper divide-y" style={{ borderColor: 'var(--border)' }}>
+          <div className="space-y-3">
             {!guest && (
               <>
-                <div className="flex items-center gap-3 p-4">
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
-                    style={{ background: 'color-mix(in oklab, var(--primary) 14%, transparent)', color: 'var(--primary)' }}
-                  >
-                    <Globe2 className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">公开分享页</p>
-                    <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      开启后，精选打卡会出现在分享页（已选 {publicCount} 条）
-                    </p>
-                  </div>
-                  <Switch checked={shareOn} onCheckedChange={toggleShare} />
-                </div>
-                <button
+                <LuggageRow
+                  icon={Globe2}
+                  title="公开分享页"
+                  desc={`开启后精选打卡出现在分享页（已选 ${publicCount} 条）`}
+                  color="var(--primary)"
+                  right={<Switch checked={shareOn} onCheckedChange={toggleShare} />}
+                />
+                <LuggageRow
+                  icon={Share2}
+                  title="复制分享链接"
+                  desc="发给朋友，无需登录即可查看"
+                  color="var(--accent)"
                   onClick={copyShareLink}
                   disabled={!shareOn}
-                  className="flex w-full items-center gap-3 p-4 text-left disabled:opacity-50"
-                >
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
-                    style={{ background: 'color-mix(in oklab, var(--accent) 14%, transparent)', color: 'var(--accent)' }}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">复制分享链接</p>
-                    <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      发给朋友，无需登录即可查看
-                    </p>
-                  </div>
-                  <span style={{ color: 'var(--muted-foreground)' }}>→</span>
-                </button>
+                />
               </>
             )}
-            <button onClick={() => navigate('/')} className="flex w-full items-center gap-3 p-4 text-left">
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
-                style={{ background: 'color-mix(in oklab, var(--primary) 14%, transparent)', color: 'var(--primary)' }}
-              >
-                <Compass className="h-4 w-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">回到地图</p>
-                <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  查看完整足迹分布
-                </p>
-              </div>
-              <span style={{ color: 'var(--muted-foreground)' }}>→</span>
-            </button>
-          </Surface>
+            <LuggageRow icon={Compass} title="回到地图" desc="查看完整足迹分布" color="var(--primary)" onClick={() => navigate('/')} />
+          </div>
         </FadeIn>
 
         {/* 我的打卡 */}
@@ -344,7 +346,11 @@ export default function Me() {
         </FadeIn>
 
         {checkins.length === 0 ? (
-          <EmptyState icon={MapPin} title="还没有打卡" description="去地图页记录你的第一个足迹吧。" />
+          <EmptyState
+            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            title="还没有打卡"
+            description="去地图页记录你的第一个足迹吧。"
+          />
         ) : (
           <Stagger className="grid grid-cols-1 gap-4" stagger={0.06}>
             {checkins.map((c) => (

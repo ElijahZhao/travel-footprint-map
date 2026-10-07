@@ -15,8 +15,10 @@ export default function BottomNav() {
   const { pathname } = useLocation()
 
   return (
+    // 作为 flex 子项参与布局（不再 absolute）：
+    // 这样才能真实占据底部空间，让上方内容区正确避让，也不会被地图等全屏内容覆盖。
     <nav
-      className="absolute inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t pb-[env(safe-area-inset-bottom)]"
+      className="relative z-40 flex shrink-0 items-stretch justify-around border-t pb-[env(safe-area-inset-bottom)]"
       style={{
         background: 'color-mix(in oklab, var(--card) 92%, transparent)',
         borderColor: 'var(--border)',

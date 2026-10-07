@@ -5,7 +5,7 @@ import { useCheckin, useCreateCheckin, useUpdateCheckin } from '@/lib/hooks'
 import { CATEGORIES, categoryMeta } from '@/lib/categories'
 import { uploadPhoto } from '@/lib/storage'
 import { generateCheckinText, aiConfigured } from '@/lib/ai'
-import { createClient, LBSError, type POI } from '@/lib/tencent-lbs'
+import { createClient, LBSError, LBS_ERROR_CODES, type POI } from '@/lib/tencent-lbs'
 import type { CategoryKey, CheckinStatus, CheckinInput, PhotoItem } from '@/lib/types'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { Button } from '@/components/ui/button'
@@ -47,8 +47,11 @@ const EMPTY: FormState = {
   lat: null,
 }
 
-export default function CheckinForm() {
-  const { id } = useParams()
+export default function CheckinForm({ checkinId }: { checkinId?: string }) {
+  // 本表单由 AppShell 在路由体系外渲染，useParams 拿不到 :id，
+  // 因此优先使用 CheckinSheet 从地址栏解析出的 checkinId。
+  const { id: routeId } = useParams()
+  const id = checkinId ?? routeId
   const [params] = useSearchParams()
   const isEdit = !!id
   /** 从心愿卡「完成此心愿」进入：把该心愿原地转为已打卡 */
@@ -128,7 +131,14 @@ export default function CheckinForm() {
       })
       setResults(res.data ?? [])
     } catch (e) {
-      toast.error(e instanceof LBSError ? e.message : '地点搜索失败')
+      // 域名未授权是最常见的搜索失败场景：给出简短、指向真实解法的提示，
+      // 不把 SDK 的长报错原文（带 URL）直接甩给用户。
+      if (e instanceof LBSError && e.status === LBS_ERROR_CODES.UNAUTHORIZED_REFERER) {
+        console.warn('LBS referer unauthorized:', e.message)
+        toast.error('地点搜索暂不可用：需要把本站域名加入腾讯位置服务的授权名单')
+      } else {
+        toast.error(e instanceof LBSError ? e.getSolution() : '地点搜索失败，请稍后重试')
+      }
     } finally {
       setSearching(false)
     }

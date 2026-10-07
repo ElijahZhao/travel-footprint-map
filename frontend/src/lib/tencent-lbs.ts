@@ -25,7 +25,7 @@
 // ============ 常量配置 ============
 
 /** 硬编码的 Web 端 API Key（需要在控制台配置域名白名单） */
-const TENCENT_LBS_KEY = 'CRABZ-EOBK7-SS4XQ-P746J-CDYS6-O4F3O';
+const TENCENT_LBS_KEY = 'SLFBZ-TELYZ-FCEXY-ZSJNE-Z5FMF-ADBLT';
 
 /** WebService API 基础 URL */
 const BASE_URL = 'https://apis.map.qq.com';
@@ -444,6 +444,8 @@ interface TMapInstance {
   setZoom(zoom: number): void;
   setPitch(pitch: number): void;
   setRotation(rotation: number): void;
+  /** 移除默认控件（控件 ID 见 TMap.constants.DEFAULT_CONTROL_ID：scale/zoom/floor/rotation） */
+  removeControl(id: string): void;
   destroy(): void;
   on(event: string, handler: (evt: TMapEvent) => void): void;
   off(event: string, handler: (evt: TMapEvent) => void): void;

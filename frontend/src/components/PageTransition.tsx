@@ -45,8 +45,10 @@ export function PageTransition({ children, transition = "fade" }: PageTransition
   const v = variants[transition];
 
   return (
+    // 高度链条必须保持透明：包裹层自身不设高度，由子页面决定（如地图页用 flex-1 撑满）。
+    // 同时移除 layout 属性 —— 它对地图这类 Canvas 内容做 transform 会破坏内部点击命中。
     <motion.div
-      layout
+      className="h-full min-h-0"
       initial={v.initial}
       animate={v.animate}
       exit={v.exit}

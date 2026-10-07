@@ -6,6 +6,7 @@ import { useMyCheckins } from '@/lib/hooks'
 import { CATEGORIES, categoryMeta } from '@/lib/categories'
 import type { Checkin } from '@/lib/types'
 import EmptyState from '@/components/EmptyState'
+import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { Surface, SectionTitle, ProgressBar, CategoryTag } from '@/components/Surface'
 import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck } from 'lucide-react'
@@ -62,7 +63,7 @@ function WishCard({
             navigate(`/checkin/${item.id}`)
           }
         }}
-        className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-3xl p-2.5 text-left transition-transform active:scale-[0.985] ${lit ? 'lit-glow' : ''}`}
+        className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-3xl p-2.5 text-left transition-transform active:scale-[0.985] ${lit ? 'lit-glow match-strike' : ''}`}
         style={{
           background: lit ? 'var(--card)' : 'color-mix(in oklab, var(--secondary) 70%, var(--card))',
           border: lit ? '1px solid var(--border)' : '1.5px dashed color-mix(in oklab, var(--muted-foreground) 32%, transparent)',
@@ -100,6 +101,21 @@ function WishCard({
             >
               <Check className="h-3 w-3" strokeWidth={3} />
             </motion.span>
+          )}
+          {/* 未点亮：想去邮戳，强化「尚未抵达」的缺席感 */}
+          {!lit && (
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span
+                className="rounded-full border border-dashed px-2 py-0.5 text-[10px] font-medium"
+                style={{
+                  color: 'var(--muted-foreground)',
+                  borderColor: 'color-mix(in oklab, var(--muted-foreground) 45%, transparent)',
+                  transform: 'rotate(-8deg)',
+                }}
+              >
+                想去
+              </span>
+            </span>
           )}
         </div>
 
@@ -283,11 +299,14 @@ export default function Wishlist() {
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setActiveCat(null)}
-              className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-all"
-              style={{
-                background: activeCat === null ? 'var(--primary)' : 'var(--secondary)',
-                color: activeCat === null ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
-              }}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-all active:scale-95 ${
+                activeCat === null ? '' : 'glass'
+              }`}
+              style={
+                activeCat === null
+                  ? { background: 'var(--primary)', color: 'var(--primary-foreground)' }
+                  : { color: 'var(--foreground)' }
+              }
             >
               全部
             </button>
@@ -298,11 +317,10 @@ export default function Wishlist() {
                 <button
                   key={c.key}
                   onClick={() => setActiveCat(active ? null : c.key)}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all"
-                  style={{
-                    background: active ? c.hex : 'var(--secondary)',
-                    color: active ? 'white' : 'var(--muted-foreground)',
-                  }}
+                  className={`inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all active:scale-95 ${
+                    active ? '' : 'glass'
+                  }`}
+                  style={active ? { background: c.hex, color: 'white' } : { color: 'var(--foreground)' }}
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {c.label}
@@ -314,7 +332,7 @@ export default function Wishlist() {
 
         {shownGroups.length === 0 ? (
           <EmptyState
-            icon={Heart}
+            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
             title={wishes.length === 0 ? '心愿单还是空的' : '没有符合条件的心愿'}
             description={
               wishes.length === 0

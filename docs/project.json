@@ -1,8 +1,8 @@
 {
   "project_type": "web",
   "sub_project_type": "",
-  "name": "旅行打卡地图足迹",
+  "name": "旅行足迹地图",
   "app_slug": "travel-footprint-map",
-  "version_description": "清理未使用的后端服务与死文件，精简部署配置",
+  "version_description": "升级四页视觉与手账隐喻",
   "preview_type": "mobile"
 }

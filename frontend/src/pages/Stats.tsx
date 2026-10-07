@@ -4,10 +4,23 @@ import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins, useStats, computeStats } from '@/lib/hooks'
 import { CATEGORIES, categoryMeta } from '@/lib/categories'
 import EmptyState from '@/components/EmptyState'
+import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
-import { FadeIn, Stagger } from '@/components/MotionPrimitives'
+import { FadeIn } from '@/components/MotionPrimitives'
 import { Surface, SectionTitle, ProgressBar } from '@/components/Surface'
-import { MapPin, Globe2, CheckCircle2, Heart, Sparkles, BarChart3, Compass, CalendarRange } from 'lucide-react'
+import { FlightRoute } from '@/components/TravelDecor'
+import { MapPin, Globe2, Sparkles, BarChart3, CalendarRange } from 'lucide-react'
+
+/** 两点间距离（km），用于找出「走得最远的一次」 */
+function haversineKm(a: { lng: number; lat: number }, b: { lng: number; lat: number }) {
+  const R = 6371
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180
+  const la1 = (a.lat * Math.PI) / 180
+  const la2 = (b.lat * Math.PI) / 180
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
 
 const PROVINCES = [
   '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江', '上海', '江苏',
@@ -64,6 +77,33 @@ export default function Stats() {
     [visited],
   )
 
+  /** 找出离「足迹重心」最远的一次出行，作为编辑式英雄句的素材 */
+  const furthest = useMemo(() => {
+    const pts = visited.filter((c) => c.lng && c.lat && c.visit_date)
+    if (pts.length < 2) return null
+    const cx = pts.reduce((a, c) => a + c.lng, 0) / pts.length
+    const cy = pts.reduce((a, c) => a + c.lat, 0) / pts.length
+    let best = pts[0]
+    let bestD = -1
+    for (const p of pts) {
+      const d = haversineKm({ lng: cx, lat: cy }, { lng: p.lng, lat: p.lat })
+      if (d > bestD) {
+        bestD = d
+        best = p
+      }
+    }
+    if (bestD < 30) return null
+    const [y, m] = (best.visit_date || '').split('-')
+    return { place: best.place_name, year: y, month: Number(m), km: Math.round(bestD) }
+  }, [visited])
+
+  const litCatCount = byCategory.filter((c) => c.count > 0).length
+  const heroNum = furthest ? furthest.km : s.visited
+  const heroUnit = furthest ? '公里外的远方' : '段足迹'
+  const heroSentence = furthest
+    ? `这一年走得最远的一次，是 ${furthest.year} 年 ${furthest.month} 月的 ${furthest.place}。`
+    : `你已在 ${s.cities} 座城市，留下 ${s.visited} 段旅程。`
+
   const maxCat = Math.max(1, ...byCategory.map((c) => c.count))
   const maxYear = Math.max(1, ...byYear.map(([, n]) => n))
 
@@ -101,7 +141,11 @@ export default function Stats() {
           <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
             旅行统计
           </h1>
-          <EmptyState icon={Compass} title="还没有已打卡记录" description="在地图页记录你去过的地方，这里会生成你的足迹报告。" />
+          <EmptyState
+            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            title="还没有已打卡记录"
+            description="在地图页记录你去过的地方，这里会生成你的足迹报告。"
+          />
         </main>
       </div>
     )
@@ -119,13 +163,32 @@ export default function Stats() {
           </p>
         </FadeIn>
 
-        {/* 核心数字看板 */}
-        <Stagger className="grid grid-cols-2 gap-3" stagger={0.07}>
-          <StatCard label="打卡总数" value={s.total} icon={MapPin} color="var(--primary)" />
-          <StatCard label="已去" value={s.visited} icon={CheckCircle2} color="var(--success)" />
-          <StatCard label="心愿" value={s.wish} icon={Heart} color="var(--family)" />
-          <StatCard label="城市" value={s.cities} icon={Globe2} color="var(--accent)" />
-        </Stagger>
+        {/* 编辑式英雄句：用一句「有人的话」做主角，超大衬线数字建立第一眼锚点 */}
+        <motion.div
+          className="grad-vivid card-paper relative overflow-hidden rounded-[28px] p-6 text-white"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease }}
+        >
+          <FlightRoute className="pointer-events-none absolute -right-3 -top-1 h-14 w-44 opacity-70" />
+          <MapPin className="pointer-events-none absolute -right-6 -bottom-8 h-32 w-32 rotate-12 text-white opacity-10" />
+          <p className="relative text-[11px] font-medium tracking-[0.22em] opacity-75">我的旅行手帐</p>
+          <p className="relative mt-2 font-display text-[1.65rem] font-semibold leading-snug">
+            {heroSentence}
+          </p>
+          <div className="relative mt-3 flex items-end gap-2">
+            <span className="font-display text-7xl font-black leading-none tabular-nums">
+              <CountUp value={heroNum} />
+            </span>
+            <span className="mb-1.5 ml-1 text-sm font-medium opacity-85">{heroUnit}</span>
+          </div>
+          <div className="relative mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
+            <span>走过 {s.cities} 座城市</span>
+            <span>点亮 {litCatCount} 类风景</span>
+            <span>心愿 {s.wish} 个</span>
+            <span>共 {s.visited} 段旅程</span>
+          </div>
+        </motion.div>
 
         {/* 分类占比：环形图 + 图例 */}
         <FadeIn>
@@ -146,7 +209,7 @@ export default function Stats() {
                   className="absolute inset-[18px] flex flex-col items-center justify-center rounded-full"
                   style={{ background: 'var(--card)' }}
                 >
-                  <span className="font-bold leading-none" style={{ fontSize: 'var(--font-size-title)', color: 'var(--foreground)' }}>
+                  <span className="font-display font-black leading-none" style={{ fontSize: 'var(--font-size-title)', color: 'var(--foreground)' }}>
                     <CountUp value={visited.length} />
                   </span>
                   <span className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -326,44 +389,5 @@ export default function Stats() {
         )}
       </main>
     </div>
-  )
-}
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-}: {
-  label: string
-  value: number
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
-  color: string
-}) {
-  return (
-    <motion.div
-      className="card-paper relative overflow-hidden rounded-3xl p-4"
-      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-      variants={{ hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } }}
-      transition={{ duration: 0.5, ease }}
-    >
-      {/* 角落色晕 */}
-      <span
-        className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full"
-        style={{ background: `color-mix(in oklab, ${color} 16%, transparent)` }}
-      />
-      <span
-        className="relative flex h-8 w-8 items-center justify-center rounded-xl"
-        style={{ background: `color-mix(in oklab, ${color} 16%, transparent)`, color }}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-      <div className="relative mt-2 font-bold tabular-nums leading-none" style={{ fontSize: 'var(--font-size-headline)', color }}>
-        <CountUp value={value} />
-      </div>
-      <p className="relative mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-        {label}
-      </p>
-    </motion.div>
   )
 }

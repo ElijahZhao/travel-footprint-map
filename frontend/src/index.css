@@ -1,3 +1,7 @@
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/playfair-display/900.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -83,6 +87,8 @@
 
   /* === 字体排版 === */
   --font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  /* 衬线 display 字体：仅用于大标题 / 大数字，制造编辑式个性（iOS 走 Songti SC，跨平台走 Playfair 拉丁数字） */
+  --font-display: "Playfair Display", "Songti SC", "STSong", "Noto Serif SC", Georgia, "Times New Roman", serif;
   --font-size-display: 3.5rem;
   --font-size-headline: 2rem;
   --font-size-title: 1.5rem;
@@ -377,6 +383,34 @@
     0 6px 18px oklch(0.55 0.06 75 / 0.07);
 }
 
+/* 毛玻璃系统（去 AI 感的核心）：半透明 + 模糊 + 高光描边 + 柔和投影，
+   让浮层像一层通透玻璃压在地图/内容之上，而不是平贴的白板。 */
+.glass {
+  background: color-mix(in oklab, var(--card) 60%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid color-mix(in oklab, #fff 55%, transparent);
+  box-shadow:
+    0 8px 26px oklch(0.45 0.05 85 / 0.14),
+    inset 0 1px 0 oklch(1 0 0 / 0.55);
+}
+.glass-strong {
+  background: color-mix(in oklab, var(--card) 74%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid color-mix(in oklab, #fff 62%, transparent);
+  box-shadow:
+    0 12px 34px oklch(0.45 0.05 85 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.6);
+}
+.dark .glass,
+.dark .glass-strong {
+  border-color: color-mix(in oklab, #fff 14%, transparent);
+  box-shadow:
+    0 12px 34px oklch(0 0 0 / 0.42),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
 /* 点亮发光（心愿点亮态 —— 鲜活绿光） */
 .lit-glow {
   box-shadow:
@@ -392,6 +426,65 @@
 }
 .glow-pulse {
   animation: glow-pulse 2s ease-out infinite;
+}
+
+/* 衬线 display 工具类：套在大标题 / 大数字上即可获得编辑式个性 */
+.font-display {
+  font-family: var(--font-display);
+  font-feature-settings: "lnum" 1;
+}
+
+/* ================================================================
+   旅行手帐隐喻 —— 邮票 / 行李牌 / 火柴点亮
+   ================================================================ */
+
+/* 行李牌：左侧打孔 + 虚线分隔，用于「我的」页设置列表 */
+.luggage-tag {
+  position: relative;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--ds-shadow-sm);
+}
+.luggage-tag::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: var(--background);
+  box-shadow: inset 0 0 0 1.5px var(--border);
+}
+.luggage-tag::after {
+  content: '';
+  position: absolute;
+  left: 33px;
+  top: 11px;
+  bottom: 11px;
+  border-left: 1.5px dashed var(--border);
+}
+
+/* 火柴划过：心愿点亮瞬间的短促光扫（一次性），需父级 position:relative + overflow-hidden */
+@keyframes match-strike {
+  0% { transform: translateX(-130%) skewX(-16deg); opacity: 0; }
+  30% { opacity: 0.85; }
+  100% { transform: translateX(230%) skewX(-16deg); opacity: 0; }
+}
+.match-strike::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 60%, #fff), transparent);
+  pointer-events: none;
+  animation: match-strike 0.7s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-strike::after { animation: none; }
 }
 
 /* 打卡 FAB 弹性悬浮 */

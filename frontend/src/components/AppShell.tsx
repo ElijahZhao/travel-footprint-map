@@ -22,8 +22,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <MobileFrame>
+      {/* 手机框内的可用高度由这个 flex 容器独占，底部导航作为正常流布局参与占位，
+          这样内容区（flex-1）天然就是「导航以上」的剩余空间，页面无需再猜测视口高度。 */}
       <div className="relative flex h-full flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">{children}</div>
+        <div className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
+          {children}
+        </div>
         {showChrome && <BottomNav />}
       </div>
       {isWishSheet ? <WishSheet /> : isCheckinSheet && <CheckinSheet />}

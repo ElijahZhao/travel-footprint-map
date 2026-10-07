@@ -1,0 +1,11 @@
+{
+  "envId": "travel-footprint-d8em6aa6331d820",
+  "framework": {
+    "name": "travel-footprint-map",
+    "plugins": {}
+  },
+  "static": {
+    "public": "dist",
+    "ignore": [".gitkeep"]
+  }
+}

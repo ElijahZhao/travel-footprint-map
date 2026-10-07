@@ -6,9 +6,10 @@ import { useMyCheckins } from '@/lib/hooks'
 import { categoryMeta } from '@/lib/categories'
 import type { Checkin } from '@/lib/types'
 import EmptyState from '@/components/EmptyState'
+import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { Clock, MapPin, Heart, LogIn, CalendarDays, Search, SearchX, X } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Plane } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const
@@ -24,10 +25,8 @@ function groupByMonth(items: Checkin[]) {
   return Array.from(map.entries()).sort((a, b) => (a[0] < b[0] ? 1 : -1))
 }
 
-function monthLabel(key: string) {
-  if (key === '未标注日期') return key
-  const [y, m] = key.split('-')
-  return `${y} 年 ${Number(m)} 月`
+function isMonthKey(key: string) {
+  return /^\d{4}-\d{2}$/.test(key)
 }
 
 /** 单个时间线节点卡片 */
@@ -165,8 +164,8 @@ export default function Timeline() {
                 setSearchOpen((v) => !v)
                 if (searchOpen) setKeyword('')
               }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors active:scale-95"
-              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--primary)' }}
+              className="glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition active:scale-95"
+              style={{ color: 'var(--primary)' }}
             >
               <Search className="h-4.5 w-4.5" />
             </button>
@@ -217,36 +216,56 @@ export default function Timeline() {
 
         {searching && visited.length === 0 ? (
           <EmptyState
-            icon={SearchX}
+            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
             title="没有找到相关地点"
             description={`没有匹配「${keyword.trim()}」的旅程，换个关键词试试。`}
           />
         ) : visited.length === 0 && wishes.length === 0 ? (
-          <EmptyState icon={Clock} title="还没有记录" description="去地图页新增你的第一个打卡吧。" />
+          <EmptyState
+            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            title="还没有记录"
+            description="去地图页新增你的第一个打卡吧。"
+          />
         ) : (
           <>
             {groups.map(([month, items]) => (
               <section key={month} className="space-y-3">
-                {/* 年月分组标题 */}
-                <FadeIn duration={0.4}>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                      style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                    >
-                      <CalendarDays className="h-3 w-3" />
-                      {monthLabel(month)}
-                    </span>
-                    <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
+                {/* 年月分组标题：衬线大字 + 滚动吸顶，编辑式节奏 */}
+                <FadeIn duration={0.4} className="sticky top-1 z-20 -mx-4 px-4 pt-1">
+                  <div
+                    className="flex items-end justify-between rounded-2xl px-3 py-2 backdrop-blur-md"
+                    style={{ background: 'color-mix(in oklab, var(--background) 80%, transparent)' }}
+                  >
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-display text-5xl font-black leading-none text-grad-vivid">
+                        {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
+                      </span>
+                      {isMonthKey(month) && <span className="text-lg font-semibold">月</span>}
+                      {isMonthKey(month) && (
+                        <span className="ml-1.5 text-[11px] tracking-[0.2em]" style={{ color: 'var(--muted-foreground)' }}>
+                          {month.split('-')[0]}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {items.length} 个
+                      {items.length} 段旅程
                     </span>
                   </div>
                 </FadeIn>
 
-                {/* 时间轴主线 + 节点卡片 */}
+                {/* 时间轴主线（虚线航线）+ 起点小飞机 */}
                 <div className="relative space-y-3">
-                  <span className="absolute bottom-6 left-[12px] top-3 w-0.5 rounded-full" style={{ background: 'var(--border)' }} />
+                  <span
+                    className="absolute bottom-6 left-[12px] top-2 w-0.5 rounded-full"
+                    style={{
+                      background:
+                        'repeating-linear-gradient(180deg, color-mix(in oklab, var(--primary) 55%, transparent) 0 5px, transparent 5px 11px)',
+                    }}
+                  />
+                  <Plane
+                    className="absolute left-[6px] top-0 z-10 h-4 w-4 -rotate-[18deg]"
+                    style={{ color: 'var(--primary)' }}
+                  />
                   {items.map((c, i) => (
                     <TimelineItem key={c.id} item={c} index={i} />
                   ))}
@@ -271,7 +290,13 @@ export default function Timeline() {
                   </div>
                 </FadeIn>
                 <div className="relative space-y-3">
-                  <span className="absolute bottom-6 left-[12px] top-3 w-0.5 rounded-full" style={{ background: 'var(--border)' }} />
+                  <span
+                    className="absolute bottom-6 left-[12px] top-2 w-0.5 rounded-full"
+                    style={{
+                      background:
+                        'repeating-linear-gradient(180deg, color-mix(in oklab, var(--family) 50%, transparent) 0 5px, transparent 5px 11px)',
+                    }}
+                  />
                   {wishes.map((c, i) => (
                     <TimelineItem key={c.id} item={c} index={i} />
                   ))}

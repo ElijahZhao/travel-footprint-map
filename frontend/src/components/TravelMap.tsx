@@ -42,6 +42,29 @@ interface TravelMapProps {
 
 type LocState = 'idle' | 'locating' | 'ready' | 'denied' | 'unsupported' | 'error'
 
+/** 判断当前环境是否支持 WebGL —— 腾讯地图 GL 渲染的硬性前提。 */
+function hasWebGL(): boolean {
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+
+/** 把底层异常翻译成用户能看懂、且指向真实原因的提示。 */
+function describeMapError(e: unknown): string {
+  if (e instanceof LBSError) return e.message
+  const msg = e instanceof Error ? e.message : String(e ?? '')
+  if (/isWebGL2|webgl|createContext/i.test(msg) || !hasWebGL()) {
+    return '当前浏览器未启用 WebGL，无法渲染地图。请更换浏览器或开启硬件加速后重试'
+  }
+  if (/timeout|network|fetch/i.test(msg)) {
+    return '地图服务连接超时，请检查网络后重试'
+  }
+  return '地图加载失败，请重试'
+}
+
 export default function TravelMap({
   checkins,
   center,
@@ -113,12 +136,21 @@ export default function TravelMap({
           center: center_,
           zoom: checkins.length ? 5 : 4,
         })
+        // 收起 SDK 默认的方向罗盘与缩放按钮：手机端捏合缩放、双指旋转即可完成，
+        // 同时避免它们与页面右上/右侧浮层互相遮挡（root cause of control overlap）。
+        try {
+          const ids = (window as any).TMap?.constants?.DEFAULT_CONTROL_ID
+          if (ids) {
+            map.removeControl?.(ids.ROTATION)
+            map.removeControl?.(ids.ZOOM)
+          }
+        } catch {}
         mapRef.current = map
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
         setStatus('error')
-        setErrorMsg(e instanceof LBSError ? e.message : '地图加载失败，请检查网络')
+        setErrorMsg(describeMapError(e))
       }
     })()
     return () => {
@@ -242,19 +274,26 @@ export default function TravelMap({
           ? `absolute inset-0 overflow-hidden ${className ?? ''}`
           : `relative w-full overflow-hidden rounded-2xl ${className ?? ''}`
       }
-      style={fill ? undefined : { height, border: '1px solid var(--border)', background: 'var(--secondary)' }}
+      // isolation:isolate 建立独立层叠上下文，把腾讯地图 SDK 内部注入的高 z-index 图层
+      // （它自带 z-index:1000 的全屏空壳 div）关在本容器内，避免它拦截外层界面按钮的点击。
+      style={
+        fill
+          ? { isolation: 'isolate', zIndex: 0 }
+          : { height, border: '1px solid var(--border)', background: 'var(--secondary)', isolation: 'isolate' }
+      }
     >
       <div ref={containerRef} className="h-full w-full" />
 
-      {/* 定位按钮 */}
+      {/* 定位按钮：置于右下（底部入口卡之上），避开顶部浮层区 */}
       {showUserLocation && status === 'ready' && (
-        <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-1">
+        <div className="absolute bottom-[96px] right-3 z-[1010] flex flex-col items-end gap-1">
           <button
             type="button"
             onClick={handleLocateClick}
             title="定位我的位置"
             aria-label="定位我的位置"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white/95 shadow-md backdrop-blur transition hover:scale-105 hover:bg-white"
+            className="glass flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
+            style={{ color: '#2563eb' }}
           >
             {locState === 'locating' ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
