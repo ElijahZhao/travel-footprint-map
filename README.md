@@ -24,23 +24,21 @@
 ## 快速开始
 
 ```bash
-# 1. 安装依赖（monorepo：frontend + backend）
-pnpm install
+# 1. 安装依赖（前端为唯一应用层）
+cd frontend && pnpm install
 
 # 2. 配置环境变量
-cp frontend/.env.example frontend/.env   # 填入 CloudBase 环境标识等（见下）
-cp backend/.env.example  backend/.env
+cp .env.example .env   # 填入 CloudBase 环境标识等（见下）
 
-# 3. 启动前端（开发模式，:5173）
-pnpm --filter frontend dev
+# 3. 启动开发模式（:5173）
+pnpm dev
 
-# 4. 启动后端（:3000，目前仅系统自检模块）
-pnpm --filter backend dev
-
-# 生产构建 + 本地预览
-pnpm --filter frontend build
-pnpm --filter frontend preview --host 0.0.0.0 --port 4173
+# 生产构建 + 本地预览（:4173）
+pnpm build
+pnpm preview --host 0.0.0.0 --port 4173
 ```
+
+> 本项目**没有独立后端服务**：前端通过 CloudBase JS SDK 直连云端（PostgreSQL + RLS + 对象存储），业务逻辑全部在前端完成。
 
 ### 环境变量（前端 `frontend/.env`）
 
@@ -61,12 +59,9 @@ frontend/
     pages/      各页面（Index 地图主页、Timeline、Stats、Wishlist、Me、Checkin*、Login、SharePage）
     components/ 外壳（AppShell/MobileFrame/BottomNav/BottomSheet）+ UI 组件（shadcn/ui）
     lib/        cloudbase(云端SDK) / checkins(数据层) / guest(游客模式) / ai / tencent-lbs(地图) / auth
-backend/
-  src/          Express 服务，目前仅 system 自检模块（前端直连 CloudBase，后端非必需）
 docs/
   产品方案.md        历史方案文档（开发前推演，部分已过时，保留作过程记录）
   product/features.md 产品功能说明
-  design/           早期设计快照（已过时，保留）
 generated-images/   UI 概念图（10 张）
 ```
 
@@ -75,7 +70,6 @@ generated-images/   UI 概念图（10 张）
 - **前端**：React 19 + Vite 7 + TypeScript 5.9 + Tailwind v4 + shadcn/ui(Radix) + TanStack Query v5 + framer-motion v12
 - **数据**：腾讯云 CloudBase —— Auth v2 + PostgreSQL（RLS 行级安全）+ 对象存储
 - **地图**：腾讯位置服务 GL API
-- **后端**（可选）：Express + TypeScript，仅系统自检
 
 ## 常见问题
 
@@ -95,8 +89,7 @@ generated-images/   UI 概念图（10 张）
 |---|---|
 | 路由含 `/` `/timeline` `/stats` `/wishlist` `/me` `/checkin/new` `/checkin/:id` `/checkin/:id/edit` `/wish/new` `/login` `/share/:publicId` `/auth/callback` | `frontend/src/App.tsx` |
 | 游客模式用 `localStorage`，key `tf_guest_checkins` | `frontend/src/lib/guest.ts` |
-| 数据层前端直连 CloudBase（`db.from`/`rpc`） | `frontend/src/lib/checkins.ts`、`cloudbase.ts` |
-| 后端仅 system 模块、前端不调用 `/api` | `backend/src/modules/system.ts`；`grep '/api' frontend/src` 无业务调用 |
+| 数据层前端直连 CloudBase（`db.from`/`rpc`），无独立后端 | `frontend/src/lib/checkins.ts`、`cloudbase.ts` |
 | 设计令牌以 `frontend/src/index.css` 为准 | `frontend/src/index.css` |
 | 预览命令 `vite preview` 绑定 4173 | `frontend/package.json` `scripts.preview` + `.cloudstudio` |
 | 地图用腾讯位置服务 GL | `frontend/src/lib/tencent-lbs.ts` |
