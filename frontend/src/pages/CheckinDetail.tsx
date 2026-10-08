@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays } from 'lucide-react'
+import { Postmark } from '@/components/TravelDecor'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -79,7 +80,7 @@ export default function CheckinDetail() {
         </div>
         <FadeIn>
           {checkin.photos?.length > 0 && (
-            <div className="relative overflow-hidden rounded-3xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
+            <div className="relative overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
               <img src={checkin.photos[0].url} alt={checkin.place_name} className="max-h-80 w-full object-cover" />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20" style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.5))' }} />
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
@@ -121,26 +122,29 @@ export default function CheckinDetail() {
         </FadeIn>
 
         <FadeIn>
-          <div className="overflow-hidden rounded-3xl" style={{ border: '1px solid var(--border)' }}>
+          <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)' }}>
             <TravelMap checkins={[checkin]} height={220} showUserLocation={false} />
           </div>
         </FadeIn>
 
         <FadeIn>
-          <Card className="card-paper rounded-3xl" style={{ borderColor: 'var(--border)' }}>
+          <Card className="card-paper rounded-2xl" style={{ borderColor: 'var(--border)' }}>
             <CardContent className="space-y-4 p-5">
               {!isWish && checkin.visit_date && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span
-                    className="flex h-8 w-8 items-center justify-center rounded-xl"
-                    style={{ background: 'color-mix(in oklab, var(--primary) 14%, transparent)', color: 'var(--primary)' }}
-                  >
-                    <CalendarDays className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t('到访日期')}</p>
-                    <p className="font-medium">{checkin.visit_date}</p>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="flex h-8 w-8 items-center justify-center rounded-xl"
+                      style={{ background: 'color-mix(in oklab, var(--primary) 14%, transparent)', color: 'var(--primary)' }}
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t('到访日期')}</p>
+                      <p className="font-medium">{checkin.visit_date}</p>
+                    </div>
                   </div>
+                  <Postmark date={checkin.visit_date} />
                 </div>
               )}
               {checkin.rating > 0 && (

@@ -22,7 +22,7 @@ export default function SharePage() {
         <FadeIn>
           <div className="flex flex-col items-center gap-3 py-2 text-center">
             <motion.div
-              className="flex h-20 w-20 items-center justify-center rounded-3xl"
+              className="flex h-20 w-20 items-center justify-center rounded-2xl"
               style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', boxShadow: 'var(--ds-shadow-lg)' }}
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -60,7 +60,7 @@ export default function SharePage() {
         ) : (
           <>
             <FadeIn>
-              <div className="overflow-hidden rounded-3xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
+              <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
                 <TravelMap
                   checkins={checkins}
                   height={260}

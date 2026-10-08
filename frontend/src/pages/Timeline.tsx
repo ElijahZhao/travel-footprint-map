@@ -58,7 +58,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
 
       <button
         onClick={() => navigate(`/checkin/${item.id}`)}
-        className="card-paper flex w-full items-stretch gap-3 overflow-hidden rounded-3xl p-2.5 text-left transition-transform active:scale-[0.985]"
+        className="card-paper flex w-full items-stretch gap-3 overflow-hidden rounded-2xl p-2.5 text-left"
         style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
       >
         {/* 照片 / 分类占位 */}

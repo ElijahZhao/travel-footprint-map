@@ -51,7 +51,7 @@ function LuggageRow({
   return (
     <div
       onClick={disabled ? undefined : onClick}
-      className={`luggage-tag flex w-full items-center gap-3 p-3.5 pl-11 text-left transition-transform active:scale-[0.985] ${
+      className={`luggage-tag flex w-full items-center gap-3 p-3.5 pl-11 text-left ${
         onClick && !disabled ? 'cursor-pointer' : ''
       } ${disabled ? 'opacity-50' : ''}`}
     >
@@ -238,7 +238,7 @@ export default function Me() {
         {guest && (
           <FadeIn>
             <div
-              className="relative overflow-hidden rounded-3xl p-4"
+              className="relative overflow-hidden rounded-2xl p-4"
               style={{
                 background: 'linear-gradient(120deg, color-mix(in oklab, var(--accent) 22%, var(--card)), color-mix(in oklab, var(--accent) 8%, var(--card)))',
                 border: '1px solid color-mix(in oklab, var(--accent) 34%, transparent)',
@@ -271,7 +271,7 @@ export default function Me() {
 
         {/* 成就邮票：把徽章做成一套「邮票集」 */}
         <FadeIn>
-          <div className="card-paper rounded-3xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div className="card-paper rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <SectionTitle
               icon={Award}
               right={
@@ -286,19 +286,28 @@ export default function Me() {
             <Stagger className="grid grid-cols-3 gap-3" stagger={0.05}>
               {badges.map((b, i) => {
                 const Icon = b.icon
+                const isFirst = i === 0
                 return (
                   <Stamp key={b.key} got={b.got} rotation={[-3, 2.5, -2, 3, -2.5, 2][i % 6]} title={b.hint}>
                     <span
-                      className="flex h-10 w-10 items-center justify-center rounded-full"
+                      className="flex items-center justify-center rounded-full"
                       style={{
+                        width: isFirst ? 48 : 40,
+                        height: isFirst ? 48 : 40,
                         background: b.got ? 'var(--primary)' : 'transparent',
                         color: b.got ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
                         border: b.got ? 'none' : '1.5px dashed var(--border)',
                       }}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className={isFirst ? 'h-6 w-6' : 'h-5 w-5'} />
                     </span>
-                    <span className="text-[11px] font-medium" style={{ color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)' }}>
+                    <span
+                      className="font-medium"
+                      style={{
+                        fontSize: isFirst ? 12 : 11,
+                        color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)',
+                      }}
+                    >
                       {b.label}
                     </span>
                   </Stamp>

@@ -29,8 +29,8 @@ export function Surface({ children, className, pad = 'md', interactive, style, o
     <div
       onClick={onClick}
       className={cn(
-        'relative overflow-hidden rounded-3xl',
-        interactive && 'cursor-pointer transition-transform active:scale-[0.985]',
+        'relative overflow-hidden rounded-2xl',
+        interactive && 'cursor-pointer transition-transform active:scale-[0.99]',
         PAD[pad],
         className,
       )}
@@ -55,7 +55,7 @@ export function MotionSurface({
 }: HTMLMotionProps<'div'> & { children: ReactNode }) {
   return (
     <motion.div
-      className={cn('relative overflow-hidden rounded-3xl', className)}
+      className={cn('relative overflow-hidden rounded-2xl', className)}
       style={{
         background: 'var(--card)',
         border: '1px solid var(--border)',

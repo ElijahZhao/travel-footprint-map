@@ -60,16 +60,16 @@ function App() {
             <AppShell>
               <Suspense fallback={<RouteFallback />}>
                 <AnimatedRoutes>
-                  <Route path="/" data-genie-title="地图主页" data-genie-key="Home" element={<PageTransition transition="slide-up"><Index /></PageTransition>} />
+                  <Route path="/" data-genie-title="地图主页" data-genie-key="Home" element={<PageTransition transition="fade"><Index /></PageTransition>} />
                   {/* 打卡表单以全屏抽屉形式呈现，路由仅占位，真实内容由 AppShell 的 CheckinSheet 渲染 */}
                   <Route path="/checkin/new" data-genie-title="新增打卡" data-genie-key="CheckinNew" element={<PageTransition transition="slide-up"><div /></PageTransition>} />
                   <Route path="/checkin/:id" data-genie-title="打卡详情" data-genie-key="CheckinDetail" element={<PageTransition transition="slide-fade"><CheckinDetail /></PageTransition>} />
                   <Route path="/checkin/:id/edit" data-genie-title="编辑打卡" data-genie-key="CheckinEdit" element={<PageTransition transition="slide-up"><div /></PageTransition>} />
                   {/* 新增心愿表单同样走抽屉，路由仅占位，真实内容由 AppShell 的 WishSheet 渲染 */}
                   <Route path="/wish/new" data-genie-title="新增心愿" data-genie-key="WishNew" element={<PageTransition transition="slide-up"><div /></PageTransition>} />
-                  <Route path="/timeline" data-genie-title="时间线" data-genie-key="Timeline" element={<PageTransition transition="slide-up"><Timeline /></PageTransition>} />
-                  <Route path="/stats" data-genie-title="旅行统计" data-genie-key="Stats" element={<PageTransition transition="slide-up"><Stats /></PageTransition>} />
-                  <Route path="/wishlist" data-genie-title="心愿点亮" data-genie-key="Wishlist" element={<PageTransition transition="slide-up"><Wishlist /></PageTransition>} />
+                  <Route path="/timeline" data-genie-title="时间线" data-genie-key="Timeline" element={<PageTransition transition="slide-fade"><Timeline /></PageTransition>} />
+                  <Route path="/stats" data-genie-title="旅行统计" data-genie-key="Stats" element={<PageTransition transition="slide-fade"><Stats /></PageTransition>} />
+                  <Route path="/wishlist" data-genie-title="心愿点亮" data-genie-key="Wishlist" element={<PageTransition transition="slide-fade"><Wishlist /></PageTransition>} />
                   <Route path="/login" data-genie-title="登录" data-genie-key="Login" element={<PageTransition transition="fade"><Login /></PageTransition>} />
                   <Route path="/me" data-genie-title="我的" data-genie-key="Me" element={<PageTransition transition="fade"><Me /></PageTransition>} />
                   <Route path="/share/:publicId" data-genie-title="分享页" data-genie-key="Share" element={<PageTransition transition="fade"><SharePage /></PageTransition>} />

@@ -27,7 +27,7 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
     <HoverLift>
       <Link to={to ?? `/checkin/${checkin.id}`}>
         <div
-          className="card-paper relative overflow-hidden rounded-3xl transition-transform active:scale-[0.99]"
+          className="card-paper relative overflow-hidden rounded-2xl"
           style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
         >
           {/* 封面 / 分类色块 */}

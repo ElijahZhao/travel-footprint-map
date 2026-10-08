@@ -65,7 +65,7 @@ function WishCard({
             navigate(`/checkin/${item.id}`)
           }
         }}
-        className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-3xl p-2.5 text-left transition-transform active:scale-[0.985] ${lit ? 'lit-glow match-strike' : ''}`}
+        className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl p-2.5 text-left ${lit ? 'lit-glow match-strike' : ''}`}
         style={{
           background: lit ? 'var(--card)' : 'color-mix(in oklab, var(--secondary) 60%, var(--card))',
           border: lit ? '1px solid var(--border)' : '1px solid color-mix(in oklab, var(--muted-foreground) 22%, transparent)',

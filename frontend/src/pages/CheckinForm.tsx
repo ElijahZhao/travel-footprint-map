@@ -256,7 +256,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
         </FadeIn>
 
         <FadeIn duration={0.4}>
-          <Card className="card-paper rounded-3xl" style={{ borderColor: 'var(--border)' }}>
+          <Card className="card-paper rounded-2xl" style={{ borderColor: 'var(--border)' }}>
             <CardContent className="space-y-5 p-5">
               {/* 地点搜索 */}
               <div className="space-y-2">

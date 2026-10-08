@@ -96,8 +96,8 @@ export default function Login() {
       <main className="relative z-10 mx-auto max-w-md space-y-5 px-5 py-10">
         <FadeIn className="text-center">
           <div
-            className="glow-pulse grad-vivid mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl text-white"
-            style={{ boxShadow: 'var(--ds-shadow-lg)' }}
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', boxShadow: 'var(--ds-shadow-md)' }}
           >
             <MapPin className="h-8 w-8" />
           </div>
@@ -110,7 +110,7 @@ export default function Login() {
         </FadeIn>
 
         <FadeIn delay={0.05}>
-          <Card className="card-paper rounded-3xl" style={{ borderColor: 'var(--border)' }}>
+          <Card className="card-paper rounded-2xl" style={{ borderColor: 'var(--border)' }}>
             <CardContent className="space-y-4 p-5">
               {OAUTH_RELAY && (
                 <Button className="w-full gap-2" onClick={google} style={{ background: 'var(--foreground)', color: 'var(--background)' }}>
@@ -169,10 +169,10 @@ export default function Login() {
 
         <FadeIn delay={0.1}>
           <div
-            className="rounded-3xl p-3.5"
+            className="rounded-2xl p-3.5"
             style={{
-              background: 'color-mix(in oklab, var(--accent) 12%, var(--card))',
-              border: '1px dashed color-mix(in oklab, var(--accent) 40%, transparent)',
+              background: 'color-mix(in oklab, var(--accent) 10%, var(--card))',
+              border: '1px solid color-mix(in oklab, var(--accent) 25%, transparent)',
             }}
           >
             <Button
