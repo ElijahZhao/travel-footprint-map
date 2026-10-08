@@ -11,6 +11,7 @@ import { FadeIn } from '@/components/MotionPrimitives'
 import { Surface, SectionTitle, ProgressBar, CategoryTag } from '@/components/Surface'
 import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 /** 中国大陆省级行政区（含直辖市/自治区/特别行政区，用于点亮） */
 const PROVINCES = [
@@ -42,6 +43,7 @@ function WishCard({
   onComplete?: () => void
 }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const meta = categoryMeta(item.category)
   const Icon = meta.icon
 
@@ -113,7 +115,7 @@ function WishCard({
                   transform: 'rotate(-8deg)',
                 }}
               >
-                想去
+                {t('想去')}
               </span>
             </span>
           )}
@@ -127,7 +129,7 @@ function WishCard({
             {item.address || '想去的地方'}
           </p>
           <div className="mt-1 flex items-center gap-1.5">
-            <CategoryTag label={meta.label} icon={Icon} color={lit ? meta.hex : 'var(--muted-foreground)'} />
+            <CategoryTag label={t(meta.label)} icon={Icon} color={lit ? meta.hex : 'var(--muted-foreground)'} />
             {lit && item.visit_date && (
               <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                 {item.visit_date}
@@ -155,7 +157,7 @@ function WishCard({
           }}
         >
           <CalendarCheck className="h-3.5 w-3.5" />
-          完成此心愿
+          {t('完成此心愿')}
         </button>
       )}
     </motion.div>
@@ -163,6 +165,7 @@ function WishCard({
 }
 
 export default function Wishlist() {
+  const { t } = useTranslation()
   const { user, guest, loading, enterGuest } = useAuth()
   const { data: checkins = [] } = useMyCheckins()
   const [activeCat, setActiveCat] = useState<string | null>(null)
@@ -202,7 +205,7 @@ export default function Wishlist() {
   if (!loading && !user && !guest) {
     return (
       <div className="page-bg paper-texture flex min-h-full items-center justify-center px-6">
-        <EmptyState icon={Compass} title="登录后使用心愿清单" description="列出想去的地方，并点亮你去过的省份。" />
+        <EmptyState icon={Compass} title={t('登录后使用心愿清单')} description={t('列出想去的地方，并点亮你去过的省份。')} />
       </div>
     )
   }
@@ -218,10 +221,10 @@ export default function Wishlist() {
           <div className="space-y-3">
             <div>
               <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
-                心愿 & 点亮
+                {t('心愿 & 点亮')}
               </h1>
               <p className="mt-0.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                想去的地方，一个一个点亮
+                {t('想去的地方，一个一个点亮')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -231,7 +234,7 @@ export default function Wishlist() {
                 onClick={() => navigate('/checkin/new')}
                 style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
               >
-                <CalendarCheck className="h-4 w-4" /> 记录打卡
+                <CalendarCheck className="h-4 w-4" /> {t('记录打卡')}
               </Button>
               <Button
                 size="sm"
@@ -241,7 +244,7 @@ export default function Wishlist() {
                   background: 'linear-gradient(135deg, oklch(0.78 0.13 350), oklch(0.72 0.14 295))',
                 }}
               >
-                <Heart className="h-4 w-4" fill="currentColor" /> 添加心愿
+                <Heart className="h-4 w-4" fill="currentColor" /> {t('添加心愿')}
               </Button>
             </div>
           </div>
@@ -251,21 +254,21 @@ export default function Wishlist() {
         <FadeIn>
           <Surface pad="lg" className="card-paper">
             <div className="flex items-center justify-between">
-              <SectionTitle icon={Sparkles}>点亮进度</SectionTitle>
+              <SectionTitle icon={Sparkles}>{t('点亮进度')}</SectionTitle>
               <span className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
-                {totalLit} / {totalAll}
+                {t('{{n}} / {{m}}', { n: totalLit, m: totalAll })}
               </span>
             </div>
             <p className="mb-2 mt-1.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              已点亮 {totalLit} 个 · 还有 {wishes.length} 个心愿等你出发
+              已点亮 {t('{{lit}} 个 · 还有 {{rest}} 个心愿等你出发', { lit: totalLit, rest: wishes.length })}
             </p>
             <ProgressBar value={litPct} />
             {/* 省份点亮 */}
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">省份点亮</span>
+                <span className="font-medium">{t('省份点亮')}</span>
                 <span style={{ color: 'var(--muted-foreground)' }}>
-                  {litProvinces.size} / {PROVINCES.length}
+                  {t('{{n}} / {{m}}', { n: litProvinces.size, m: PROVINCES.length })}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -308,7 +311,7 @@ export default function Wishlist() {
                   : { color: 'var(--foreground)' }
               }
             >
-              全部
+              {t('全部')}
             </button>
             {CATEGORIES.map((c) => {
               const Icon = c.icon
@@ -323,7 +326,7 @@ export default function Wishlist() {
                   style={active ? { background: c.hex, color: 'white' } : { color: 'var(--foreground)' }}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {c.label}
+                  {t(c.label)}
                 </button>
               )
             })}
@@ -333,11 +336,11 @@ export default function Wishlist() {
         {shownGroups.length === 0 ? (
           <EmptyState
             illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-            title={wishes.length === 0 ? '心愿单还是空的' : '没有符合条件的心愿'}
+            title={wishes.length === 0 ? t('心愿单还是空的') : t('没有符合条件的心愿')}
             description={
               wishes.length === 0
-                ? '把想去的地方加进来，出发后点「完成此心愿」就能点亮它。'
-                : '试试切换分类筛选。'
+                ? t('把想去的地方加进来，出发后点「完成此心愿」就能点亮它。')
+                : t('试试切换分类筛选。')
             }
             action={
               wishes.length === 0 ? (
@@ -348,7 +351,7 @@ export default function Wishlist() {
                     background: 'linear-gradient(135deg, oklch(0.78 0.13 350), oklch(0.72 0.14 295))',
                   }}
                 >
-                  添加心愿
+                  {t('添加心愿')}
                 </Button>
               ) : undefined
             }
@@ -362,10 +365,10 @@ export default function Wishlist() {
                 <FadeIn duration={0.4}>
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Icon} color={cat.hex}>
-                      {cat.label}
+                      {t(cat.label)}
                     </SectionTitle>
                     <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      心愿 {wish.length} · 已点亮 {done.length}
+                      {t('心愿 {{wish}} · 已点亮 {{done}}', { wish: wish.length, done: done.length })}
                     </span>
                   </div>
                 </FadeIn>
@@ -386,7 +389,7 @@ export default function Wishlist() {
                 ))}
                 {wish.length === 0 && done.length === 0 && (
                   <p className="py-2 text-center text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    这个分类还没有记录
+                    {t('这个分类还没有记录')}
                   </p>
                 )}
               </section>

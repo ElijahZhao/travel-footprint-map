@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
 import { categoryMeta } from '@/lib/categories'
+import { useTranslation } from 'react-i18next'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */
 function pinSvg(hex: string): string {
@@ -74,6 +75,7 @@ export default function TravelMap({
   fill = false,
   className,
 }: TravelMapProps) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
   const markersRef = useRef<any>(null)
@@ -290,8 +292,8 @@ export default function TravelMap({
           <button
             type="button"
             onClick={handleLocateClick}
-            title="定位我的位置"
-            aria-label="定位我的位置"
+            title={t('定位我的位置')}
+            aria-label={t('定位我的位置')}
             className="glass flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
             style={{ color: '#2563eb' }}
           >
@@ -307,12 +309,12 @@ export default function TravelMap({
           </button>
           {locState === 'denied' && (
             <span className="rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
-              定位被拒绝，可重试
+              {t('定位被拒绝，可重试')}
             </span>
           )}
           {locState === 'unsupported' && (
             <span className="rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
-              当前环境不支持定位
+              {t('当前环境不支持定位')}
             </span>
           )}
         </div>
@@ -320,7 +322,7 @@ export default function TravelMap({
 
       {status === 'loading' && (
         <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          地图加载中…
+          {t('地图加载中…')}
         </div>
       )}
       {status === 'error' && (
@@ -329,7 +331,7 @@ export default function TravelMap({
             <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 8m0 9V8m0 0L9 7" />
           </svg>
           <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            {errorMsg}
+            {t(errorMsg)}
           </span>
           <button
             type="button"
@@ -337,10 +339,10 @@ export default function TravelMap({
             className="mt-1 rounded-full px-4 py-1.5 text-sm font-medium"
             style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
-            重新加载地图
+            {t('重新加载地图')}
           </button>
           <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            打卡列表与新增打卡不受影响
+            {t('打卡列表与新增打卡不受影响')}
           </span>
         </div>
       )}

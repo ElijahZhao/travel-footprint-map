@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent } from '@/components/ui/card'
 import { Star, MapPin, Upload, X, Search, Loader2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 const lbs = createClient()
 
@@ -48,6 +49,7 @@ const EMPTY: FormState = {
 }
 
 export default function CheckinForm({ checkinId }: { checkinId?: string }) {
+  const { t } = useTranslation()
   // 本表单由 AppShell 在路由体系外渲染，useParams 拿不到 :id，
   // 因此优先使用 CheckinSheet 从地址栏解析出的 checkinId。
   const { id: routeId } = useParams()
@@ -96,11 +98,11 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
   const handleAi = async () => {
     if (!form.place_name.trim()) {
-      toast.error('先填写或搜索地点，AI 才能写出贴合的文案')
+      toast.error(t('先填写或搜索地点，AI 才能写出贴合的文案'))
       return
     }
     if (!aiConfigured()) {
-      toast.error('「AI 帮我写」还未开通：需要配置 AI 密钥后才能使用')
+      toast.error(t('「AI 帮我写」还未开通：需要配置 AI 密钥后才能使用'))
       return
     }
     setAiLoading(true)
@@ -113,9 +115,9 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
         tags: form.tags ? form.tags.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [],
       })
       set('mood_text', text)
-      toast.success('AI 文案已生成')
+      toast.success(t('AI 文案已生成'))
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'AI 生成失败')
+      toast.error(e instanceof Error ? e.message : t('AI 生成失败'))
     } finally {
       setAiLoading(false)
     }
@@ -135,9 +137,9 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       // 不把 SDK 的长报错原文（带 URL）直接甩给用户。
       if (e instanceof LBSError && e.status === LBS_ERROR_CODES.UNAUTHORIZED_REFERER) {
         console.warn('LBS referer unauthorized:', e.message)
-        toast.error('地点搜索暂不可用：需要把本站域名加入腾讯位置服务的授权名单')
+        toast.error(t('地点搜索暂不可用：需要把本站域名加入腾讯位置服务的授权名单'))
       } else {
-        toast.error(e instanceof LBSError ? e.getSolution() : '地点搜索失败，请稍后重试')
+        toast.error(e instanceof LBSError ? t(e.getSolution()) : t('地点搜索失败，请稍后重试'))
       }
     } finally {
       setSearching(false)
@@ -163,9 +165,9 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
         uploaded.push({ url })
       }
       setPhotos((p) => [...p, ...uploaded])
-      toast.success(`已上传 ${uploaded.length} 张照片`)
+      toast.success(t('已上传 {{count}} 张照片', { count: uploaded.length }))
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : '照片处理失败，请换一张试试')
+      toast.error(e instanceof Error ? e.message : t('照片处理失败，请换一张试试'))
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -173,9 +175,9 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   }
 
   const submit = async () => {
-    if (!form.place_name.trim()) return toast.error('请填写地点名称')
+    if (!form.place_name.trim()) return toast.error(t('请填写地点名称'))
     if (form.lng == null || form.lat == null)
-      return toast.error('请先搜索并选择地点以获取坐标')
+      return toast.error(t('请先搜索并选择地点以获取坐标'))
 
     const input: CheckinInput = {
       place_name: form.place_name.trim(),
@@ -199,26 +201,26 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       if (isEdit) {
         await updateMut.mutateAsync({ id: Number(id), input })
         if (completeWish) {
-          toast.success(`已点亮：${input.place_name}`)
+          toast.success(t('已点亮：{{name}}', { name: input.place_name }))
           navigate('/timeline')
         } else {
-          toast.success('已更新打卡')
+          toast.success(t('已更新打卡'))
           navigate(`/checkin/${id}`)
         }
       } else {
         await createMut.mutateAsync(input)
-        toast.success('打卡成功')
+        toast.success(t('打卡成功'))
         navigate('/')
       }
     } catch (e: any) {
-      toast.error(e?.message || '保存失败')
+      toast.error(e?.message || t('保存失败'))
     }
   }
 
   if (isEdit && loadingExisting) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center" style={{ background: 'var(--background)' }}>
-        <p className="text-center" style={{ color: 'var(--muted-foreground)' }}>加载中…</p>
+        <p className="text-center" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
       </div>
     )
   }
@@ -239,14 +241,14 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
             </span>
             <div>
               <h1 className="font-bold leading-tight" style={{ fontSize: 'var(--font-size-title)' }}>
-                {completeWish ? '完成心愿' : isEdit ? '编辑打卡' : '新增打卡'}
+                {completeWish ? t('完成心愿') : isEdit ? t('编辑打卡') : t('新增打卡')}
               </h1>
               <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                 {completeWish
-                  ? `「${form.place_name || '这个地方'}」去过啦？记下这次出发吧`
+                  ? t('「{{place}}」去过啦？记下这次出发吧', { place: form.place_name || t('这个地方') })
                   : isEdit
-                    ? '修改后保存即可更新'
-                    : '记录这一刻，点亮你的足迹'}
+                    ? t('修改后保存即可更新')
+                    : t('记录这一刻，点亮你的足迹')}
               </p>
             </div>
           </div>
@@ -257,11 +259,11 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
             <CardContent className="space-y-5 p-5">
               {/* 地点搜索 */}
               <div className="space-y-2">
-                <Label>地点名称 *</Label>
+                <Label>{t('地点名称 *')}</Label>
                 <div className="flex gap-2">
                   <Input
                     value={query}
-                    placeholder="搜索地点，如：西湖"
+                    placeholder={t('搜索地点，如：西湖')}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && searchPlace()}
                   />
@@ -288,25 +290,25 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                 )}
                 <Input
                   value={form.place_name}
-                  placeholder="或手动填写地点名称"
+                  placeholder={t('或手动填写地点名称')}
                   onChange={(e) => set('place_name', e.target.value)}
                 />
                 {form.lng != null && (
                   <p className="text-xs" style={{ color: 'var(--success)' }}>
-                    已定位坐标：{form.lat!.toFixed(4)}, {form.lng.toFixed(4)}
+                    {t('已定位坐标：')}{form.lat!.toFixed(4)}, {form.lng.toFixed(4)}
                   </p>
                 )}
               </div>
 
               {/* 地址 */}
               <div className="space-y-2">
-                <Label>详细地址</Label>
+                <Label>{t('详细地址')}</Label>
                 <Input value={form.address} onChange={(e) => set('address', e.target.value)} />
               </div>
 
               {/* 分类（chip 选择，对齐概念图） */}
               <div className="space-y-2">
-                <Label>分类</Label>
+                <Label>{t('分类')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.map((c) => {
                     const Icon = c.icon
@@ -324,7 +326,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                         }}
                       >
                         <Icon className="h-3.5 w-3.5" />
-                        {c.label}
+                        {t(c.label)}
                       </button>
                     )
                   })}
@@ -334,7 +336,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               {/* 状态：已去 / 心愿 */}
               <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--secondary)' }}>
                 <span className="text-sm font-medium">
-                  {form.status === 'wish' ? '加入心愿单' : '已打卡'}
+                  {form.status === 'wish' ? t('加入心愿单') : t('已打卡')}
                 </span>
                 <Switch
                   checked={form.status === 'visited'}
@@ -345,14 +347,14 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               {/* 日期（仅已打卡显示） */}
               {form.status === 'visited' && (
                 <div className="space-y-2">
-                  <Label>到访日期</Label>
+                  <Label>{t('到访日期')}</Label>
                   <Input type="date" value={form.visit_date} onChange={(e) => set('visit_date', e.target.value)} />
                 </div>
               )}
 
               {/* 评分 */}
               <div className="space-y-2">
-                <Label>评分</Label>
+                <Label>{t('评分')}</Label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button key={n} onClick={() => set('rating', n === form.rating ? 0 : n)} type="button">
@@ -369,7 +371,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               {/* 心情文字 */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>旅行心情</Label>
+                  <Label>{t('旅行心情')}</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -380,12 +382,12 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                     style={{ color: 'var(--primary)' }}
                   >
                     {aiLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                    AI 帮我写
+                    {t('AI 帮我写')}
                   </Button>
                 </div>
                 <Textarea
                   value={form.mood_text}
-                  placeholder="写点什么吧，比如：夕阳下的湖面格外温柔…"
+                  placeholder={t('写点什么吧，比如：夕阳下的湖面格外温柔…')}
                   onChange={(e) => set('mood_text', e.target.value)}
                   rows={3}
                 />
@@ -393,13 +395,13 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
               {/* 标签 */}
               <div className="space-y-2">
-                <Label>标签（用逗号分隔）</Label>
-                <Input value={form.tags} placeholder="日落, 亲子, 必去" onChange={(e) => set('tags', e.target.value)} />
+                <Label>{t('标签（用逗号分隔）')}</Label>
+                <Input value={form.tags} placeholder={t('日落, 亲子, 必去')} onChange={(e) => set('tags', e.target.value)} />
               </div>
 
               {/* 照片 */}
               <div className="space-y-2">
-                <Label>照片</Label>
+                <Label>{t('照片')}</Label>
                 <input
                   ref={fileRef}
                   type="file"
@@ -429,7 +431,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                     disabled={uploading}
                   >
                     {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
-                    上传
+                    {t('上传')}
                   </button>
                 </div>
               </div>
@@ -437,15 +439,15 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               {/* 公开 */}
               <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--secondary)' }}>
                 <div>
-                  <p className="text-sm font-medium">精选公开</p>
-                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>开启后会出现在你的分享页</p>
+                  <p className="text-sm font-medium">{t('精选公开')}</p>
+                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t('开启后会出现在你的分享页')}</p>
                 </div>
                 <Switch checked={form.is_public} onCheckedChange={(v) => set('is_public', v)} />
               </div>
 
               <div className="flex gap-2 pt-2">
                 <Button variant="ghost" onClick={() => navigate(-1)} className="h-11 flex-1 rounded-full">
-                  取消
+                  {t('取消')}
                 </Button>
                 <Button
                   onClick={submit}
@@ -454,7 +456,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                   style={{ background: 'var(--accent)', color: 'var(--accent-foreground)', boxShadow: 'var(--ds-shadow-md)' }}
                 >
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {completeWish ? '完成打卡' : isEdit ? '保存修改' : '保存打卡'}
+                  {completeWish ? t('完成打卡') : isEdit ? t('保存修改') : t('保存打卡')}
                 </Button>
               </div>
             </CardContent>

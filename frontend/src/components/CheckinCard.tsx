@@ -4,6 +4,7 @@ import type { Checkin } from '@/lib/types'
 import { categoryMeta } from '@/lib/categories'
 import { HoverLift } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
+import { useTranslation } from 'react-i18next'
 
 function Stars({ n }: { n: number }) {
   if (!n) return null
@@ -19,6 +20,7 @@ function Stars({ n }: { n: number }) {
 export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: string }) {
   const meta = categoryMeta(checkin.category)
   const Icon = meta.icon
+  const { t } = useTranslation()
   const isWish = checkin.status === 'wish'
 
   return (
@@ -37,16 +39,16 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
                 style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.45))' }}
               />
               <span className="absolute bottom-2 left-3">
-                <CategoryTag label={meta.label} icon={Icon} color="white" className="backdrop-blur" />
+                <CategoryTag label={t(meta.label)} icon={Icon} color="white" className="backdrop-blur" />
               </span>
               <span className="absolute right-3 top-3">
                 {isWish ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow" style={{ color: 'var(--family)' }}>
-                    <Heart className="h-3 w-3" fill="currentColor" /> 心愿
+                    <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow" style={{ color: 'var(--success)' }}>
-                    <CheckCircle2 className="h-3 w-3" /> 已去
+                    <CheckCircle2 className="h-3 w-3" /> {t('已去')}
                   </span>
                 )}
               </span>
@@ -76,11 +78,11 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
               {!checkin.photos?.length &&
                 (isWish ? (
                   <span className="shrink-0 text-[11px] font-medium" style={{ color: 'var(--family)' }}>
-                    心愿
+                    {t('心愿')}
                   </span>
                 ) : (
                   <span className="shrink-0 text-[11px] font-medium" style={{ color: 'var(--success)' }}>
-                    已去
+                    {t('已去')}
                   </span>
                 ))}
             </div>
@@ -101,7 +103,7 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
             <div className="flex items-center justify-between pt-0.5">
               <span className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                 {checkin.visit_date && !isWish && <span>{checkin.visit_date}</span>}
-                {checkin.photos?.length > 0 && <span>· {meta.label}</span>}
+                {checkin.photos?.length > 0 && <span>· {t(meta.label)}</span>}
               </span>
               <Stars n={checkin.rating} />
             </div>

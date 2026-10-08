@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface BottomSheetProps {
   open: boolean
@@ -21,6 +22,7 @@ export default function BottomSheet({
   title,
   heightClass = 'h-[90%]',
 }: BottomSheetProps) {
+  const { t } = useTranslation()
   return (
     <AnimatePresence>
       {open && (
@@ -45,7 +47,7 @@ export default function BottomSheet({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="关闭"
+                aria-label={t('关闭')}
                 className="absolute right-3 top-0.5 flex h-8 w-8 items-center justify-center rounded-full"
                 style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
               >

@@ -24,8 +24,11 @@ import {
   Camera,
   CalendarCheck,
   BadgeCheck,
+  Languages,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
+import { setLanguage, getLanguage } from '@/lib/i18n'
 
 /** 行李牌行：左侧打孔 + 虚线分隔，用于设置列表 */
 function LuggageRow({
@@ -71,6 +74,8 @@ function LuggageRow({
 
 export default function Me() {
   const { user, guest, loading, signOut, enterGuest } = useAuth()
+  const { t } = useTranslation()
+  const lang = getLanguage()
   const { data: checkins = [] } = useMyCheckins()
   const updateMut = useUpdateCheckin()
   const navigate = useNavigate()
@@ -90,16 +95,16 @@ export default function Me() {
   const photoCount = useMemo(() => checkins.reduce((a, c) => a + (c.photos?.length ?? 0), 0), [checkins])
 
   /** 成就徽章：按数据达成情况自动点亮 */
-  const badges = useMemo(
+      const badges = useMemo(
     () => [
-      { key: 'first', label: '初次出发', icon: Sparkles, got: visitedCount >= 1, hint: '记录第 1 个足迹' },
-      { key: 'five', label: '五处打卡', icon: MapPin, got: visitedCount >= 5, hint: '累计 5 个足迹' },
-      { key: 'photo', label: '影像记录', icon: Camera, got: photoCount >= 3, hint: '上传 3 张照片' },
-      { key: 'year', label: '跨年旅行', icon: CalendarCheck, got: new Set(checkins.map((c) => (c.visit_date || '').slice(0, 4)).filter(Boolean)).size >= 2, hint: '跨越 2 个年度' },
-      { key: 'explorer', label: '探索者', icon: Mountain, got: visitedCount >= 10, hint: '累计 10 个足迹' },
-      { key: 'curator', label: '精选策展', icon: BadgeCheck, got: publicCount >= 1, hint: '公开 1 条精选' },
+      { key: 'first', label: t('初次出发'), icon: Sparkles, got: visitedCount >= 1, hint: t('记录第 1 个足迹') },
+      { key: 'five', label: t('五处打卡'), icon: MapPin, got: visitedCount >= 5, hint: t('累计 5 个足迹') },
+      { key: 'photo', label: t('影像记录'), icon: Camera, got: photoCount >= 3, hint: t('上传 3 张照片') },
+      { key: 'year', label: t('跨年旅行'), icon: CalendarCheck, got: new Set(checkins.map((c) => (c.visit_date || '').slice(0, 4)).filter(Boolean)).size >= 2, hint: t('跨越 2 个年度') },
+      { key: 'explorer', label: t('探索者'), icon: Mountain, got: visitedCount >= 10, hint: t('累计 10 个足迹') },
+      { key: 'curator', label: t('精选策展'), icon: BadgeCheck, got: publicCount >= 1, hint: t('公开 1 条精选') },
     ],
-    [visitedCount, photoCount, checkins, publicCount],
+    [visitedCount, photoCount, checkins, publicCount, t],
   )
 
   if (!loading && !user && !guest) {
@@ -107,11 +112,11 @@ export default function Me() {
       <div className="page-bg paper-texture flex min-h-full items-center justify-center px-6">
         <EmptyState
           icon={UserRound}
-          title="请先登录"
-          description="登录后管理你的打卡与分享设置。"
+          title={t('请先登录')}
+          description={t('登录后管理你的打卡与分享设置。')}
           action={
             <Button onClick={() => navigate('/login')} style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
-              去登录
+              {t('去登录')}
             </Button>
           }
         />
@@ -147,9 +152,9 @@ export default function Me() {
       )
       const failed = results.filter((r) => r.status === 'rejected').length
       if (failed > 0) {
-        toast.error(`${failed} 条更新失败，请重试`)
+        toast.error(t('{{n}} 条更新失败，请重试', { n: failed }))
       } else {
-        toast.success(on ? '已开启分享' : '已关闭分享')
+        toast.success(on ? t('已开启分享') : t('已关闭分享'))
       }
     } catch (e: any) {
       toast.error(e?.message || '操作失败')
@@ -160,7 +165,7 @@ export default function Me() {
     if (!user) return
     const url = `${window.location.origin}/share/${user.uid}`
     navigator.clipboard?.writeText(url)
-    toast.success('分享链接已复制')
+    toast.success(t('分享链接已复制'))
   }
 
   const exitGuest = () => {
@@ -168,7 +173,7 @@ export default function Me() {
     navigate('/login')
   }
 
-  const displayName = user?.name || user?.email?.split('@')[0] || (guest ? '游客' : '旅行者')
+  const displayName = user?.name || user?.email?.split('@')[0] || (guest ? t('游客') : t('旅行者'))
 
   return (
     <div className="page-bg paper-texture min-h-full px-4 pb-28 pt-5">
@@ -199,12 +204,12 @@ export default function Me() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-bold">{displayName}</p>
                 <p className="mt-0.5 truncate text-xs opacity-80">
-                  {guest ? '游客模式 · 数据保存于本设备' : user?.email}
+                  {guest ? t('游客模式 · 数据保存于本设备') : user?.email}
                 </p>
                 <div className="mt-1.5 flex gap-3 text-[11px] opacity-85">
-                  <span>足迹 {visitedCount}</span>
-                  <span>心愿 {checkins.length - visitedCount}</span>
-                  <span>照片 {photoCount}</span>
+                  <span>{t('足迹 {{n}}', { n: visitedCount })}</span>
+                  <span>{t('心愿 {{n}}', { n: checkins.length - visitedCount })}</span>
+                  <span>{t('照片 {{n}}', { n: photoCount })}</span>
                 </div>
               </div>
               {guest ? (
@@ -212,14 +217,14 @@ export default function Me() {
                   onClick={exitGuest}
                   className="flex shrink-0 items-center gap-1 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
                 >
-                  <DoorOpen className="h-3.5 w-3.5" /> 退出
+                  <DoorOpen className="h-3.5 w-3.5" /> {t('退出')}
                 </button>
               ) : (
                 <button
                   onClick={() => signOut()}
                   className="shrink-0 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
                 >
-                  退出
+                  {t('退出')}
                 </button>
               )}
             </div>
@@ -244,9 +249,9 @@ export default function Me() {
                   <Sparkles className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">升级为正式账号</p>
+                  <p className="text-sm font-semibold">{t('升级为正式账号')}</p>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    打卡数据现已保存到本设备，换设备或清除浏览器缓存会丢失。用邮箱注册即可永久保存并开启分享页。
+                    {t('打卡数据现已保存到本设备，换设备或清除浏览器缓存会丢失。用邮箱注册即可永久保存并开启分享页。')}
                   </p>
                 </div>
               </div>
@@ -255,7 +260,7 @@ export default function Me() {
                 onClick={() => navigate('/login')}
                 style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
               >
-                立即升级
+                {t('立即升级')}
               </Button>
             </div>
           </FadeIn>
@@ -268,12 +273,12 @@ export default function Me() {
               icon={Award}
               right={
                 <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  {badges.filter((b) => b.got).length} / {badges.length}
+                  {t('{{got}} / {{total}}', { got: badges.filter((b) => b.got).length, total: badges.length })}
                 </span>
               }
               className="mb-4"
             >
-              成就邮票
+              {t('成就邮票')}
             </SectionTitle>
             <Stagger className="grid grid-cols-3 gap-3" stagger={0.05}>
               {badges.map((b, i) => {
@@ -303,26 +308,33 @@ export default function Me() {
         {/* 设置菜单：行李牌隐喻 */}
         <FadeIn>
           <div className="space-y-3">
+            <LuggageRow
+              icon={Languages}
+              title={t('语言')}
+              desc={lang === 'zh' ? 'Switch to English' : '切换到中文'}
+              color="var(--primary)"
+              onClick={() => setLanguage(lang === 'zh' ? 'en' : 'zh')}
+            />
             {!guest && (
               <>
                 <LuggageRow
                   icon={Globe2}
-                  title="公开分享页"
-                  desc={`开启后精选打卡出现在分享页（已选 ${publicCount} 条）`}
+                  title={t('公开分享页')}
+                  desc={t('开启后精选打卡出现在分享页（已选 {{n}} 条）', { n: publicCount })}
                   color="var(--primary)"
                   right={<Switch checked={shareOn} onCheckedChange={toggleShare} />}
                 />
                 <LuggageRow
                   icon={Share2}
-                  title="复制分享链接"
-                  desc="发给朋友，无需登录即可查看"
+                  title={t('复制分享链接')}
+                  desc={t('发给朋友，无需登录即可查看')}
                   color="var(--accent)"
                   onClick={copyShareLink}
                   disabled={!shareOn}
                 />
               </>
             )}
-            <LuggageRow icon={Compass} title="回到地图" desc="查看完整足迹分布" color="var(--primary)" onClick={() => navigate('/')} />
+            <LuggageRow icon={Compass} title={t('回到地图')} desc={t('查看完整足迹分布')} color="var(--primary)" onClick={() => navigate('/')} />
           </div>
         </FadeIn>
 
@@ -337,19 +349,19 @@ export default function Me() {
                 onClick={() => navigate('/checkin/new')}
                 style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
               >
-                <MapPin className="h-3.5 w-3.5" /> 新增
+                <MapPin className="h-3.5 w-3.5" /> {t('新增')}
               </Button>
             }
           >
-            我的打卡（{checkins.length}）
+            {t('我的打卡（{{n}}）', { n: checkins.length })}
           </SectionTitle>
         </FadeIn>
 
         {checkins.length === 0 ? (
           <EmptyState
             illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-            title="还没有打卡"
-            description="去地图页记录你的第一个足迹吧。"
+            title={t('还没有打卡')}
+            description={t('去地图页记录你的第一个足迹吧。')}
           />
         ) : (
           <Stagger className="grid grid-cols-1 gap-4" stagger={0.06}>

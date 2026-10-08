@@ -1,8 +1,8 @@
 {
   "project_type": "web",
   "sub_project_type": "",
-  "name": "旅行足迹地图",
+  "name": "旅行打卡地图",
   "app_slug": "travel-footprint-map",
-  "version_description": "开通AI帮我写火山引擎",
+  "version_description": "新增中英文界面切换",
   "preview_type": "mobile"
 }

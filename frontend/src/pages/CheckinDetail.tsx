@@ -10,8 +10,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export default function CheckinDetail() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, guest } = useAuth()
@@ -21,7 +23,7 @@ export default function CheckinDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-        <p className="py-20 text-center" style={{ color: 'var(--muted-foreground)' }}>加载中…</p>
+        <p className="py-20 text-center" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
       </div>
     )
   }
@@ -30,8 +32,8 @@ export default function CheckinDetail() {
     return (
       <div className="min-h-screen" style={{ background: 'var(--background)' }}>
         <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-          <p style={{ color: 'var(--muted-foreground)' }}>未找到该打卡记录</p>
-          <Button className="mt-4" onClick={() => navigate('/')}>返回地图</Button>
+          <p style={{ color: 'var(--muted-foreground)' }}>{t('未找到该打卡记录')}</p>
+          <Button className="mt-4" onClick={() => navigate('/')}>{t('返回地图')}</Button>
         </div>
       </div>
     )
@@ -43,13 +45,13 @@ export default function CheckinDetail() {
   const isOwner = guest || (user?.uid && checkin.user_id === user.uid)
 
   const onDelete = async () => {
-    if (!confirm('确定删除这条打卡记录吗？')) return
+    if (!confirm(t('确定删除这条打卡记录吗？'))) return
     try {
       await delMut.mutateAsync(checkin.id)
-      toast.success('已删除')
+      toast.success(t('已删除'))
       navigate('/')
     } catch (e: any) {
-      toast.error(e?.message || '删除失败')
+      toast.error(e?.message || t('删除失败'))
     }
   }
 
@@ -57,7 +59,7 @@ export default function CheckinDetail() {
     if (!user) return
     const url = `${window.location.origin}/share/${user.uid}`
     navigator.clipboard?.writeText(url)
-    toast.success('分享链接已复制')
+    toast.success(t('分享链接已复制'))
   }
 
   return (
@@ -73,7 +75,7 @@ export default function CheckinDetail() {
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
-          <span className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>打卡详情</span>
+          <span className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>{t('打卡详情')}</span>
         </div>
         <FadeIn>
           {checkin.photos?.length > 0 && (
@@ -88,7 +90,7 @@ export default function CheckinDetail() {
                   <Icon className="h-4 w-4" />
                 </span>
                 <span className="rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
-                  {meta.label}
+                  {t(meta.label)}
                 </span>
               </div>
             </div>
@@ -108,11 +110,11 @@ export default function CheckinDetail() {
             </div>
             {isWish ? (
               <Badge variant="outline" className="shrink-0 gap-1" style={{ color: 'var(--family)', borderColor: 'var(--family)' }}>
-                <Heart className="h-3 w-3" fill="currentColor" /> 心愿单
+                <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿单')}
               </Badge>
             ) : (
               <Badge variant="outline" className="shrink-0 gap-1" style={{ color: 'var(--success)', borderColor: 'var(--success)' }}>
-                <CheckCircle2 className="h-3 w-3" /> 已打卡
+                <CheckCircle2 className="h-3 w-3" /> {t('已打卡')}
               </Badge>
             )}
           </div>
@@ -136,7 +138,7 @@ export default function CheckinDetail() {
                     <CalendarDays className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>到访日期</p>
+                    <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t('到访日期')}</p>
                     <p className="font-medium">{checkin.visit_date}</p>
                   </div>
                 </div>
@@ -169,7 +171,7 @@ export default function CheckinDetail() {
           <div className="flex gap-2 pb-2">
             {checkin.is_public && (
               <Button variant="outline" className="h-11 flex-1 gap-1 rounded-full" onClick={onShare}>
-                <Share2 className="h-4 w-4" /> 分享
+                <Share2 className="h-4 w-4" /> {t('分享')}
               </Button>
             )}
             <Button
@@ -177,7 +179,7 @@ export default function CheckinDetail() {
               className="h-11 flex-1 gap-1 rounded-full"
               onClick={() => navigate(`/checkin/${checkin.id}/edit`)}
             >
-              <Pencil className="h-4 w-4" /> 编辑
+              <Pencil className="h-4 w-4" /> {t('编辑')}
             </Button>
             <Button
               variant="ghost"
@@ -185,7 +187,7 @@ export default function CheckinDetail() {
               style={{ color: 'var(--destructive)' }}
               onClick={onDelete}
             >
-              <Trash2 className="h-4 w-4" /> 删除
+              <Trash2 className="h-4 w-4" /> {t('删除')}
             </Button>
           </div>
         )}

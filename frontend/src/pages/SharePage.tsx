@@ -6,9 +6,11 @@ import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import { FadeIn, Stagger } from '@/components/MotionPrimitives'
 import { Surface } from '@/components/Surface'
+import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, ArrowRight, UserRound } from 'lucide-react'
 
 export default function SharePage() {
+  const { t } = useTranslation()
   const { publicId } = useParams()
   const { data: checkins = [], isLoading } = usePublicCheckins(publicId ?? '')
   const navigate = useNavigate()
@@ -30,17 +32,17 @@ export default function SharePage() {
             </motion.div>
             <div>
               <h1 className="font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
-                旅行精选
+                {t('旅行精选')}
               </h1>
               <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                来自一位旅行者的公开足迹 · 共 {checkins.length} 个精选地点
+                {t('来自一位旅行者的公开足迹 · 共 {{n}} 个精选地点', { n: checkins.length })}
               </p>
             </div>
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium"
               style={{ background: 'color-mix(in oklab, var(--primary) 12%, transparent)', color: 'var(--primary)' }}
             >
-              <Globe2 className="h-3 w-3" /> 公开分享页
+              <Globe2 className="h-3 w-3" /> {t('公开分享页')}
             </span>
           </div>
         </FadeIn>
@@ -52,8 +54,8 @@ export default function SharePage() {
         ) : checkins.length === 0 ? (
           <EmptyState
             icon={MapPin}
-            title="还没有公开的精选"
-            description="这位旅行者尚未开启公开分享，或暂未标记精选打卡。"
+            title={t('还没有公开的精选')}
+            description={t('这位旅行者尚未开启公开分享，或暂未标记精选打卡。')}
           />
         ) : (
           <>
@@ -91,9 +93,9 @@ export default function SharePage() {
               <MapPin className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">在 App 中查看</p>
+              <p className="text-sm font-semibold">{t('在 App 中查看')}</p>
               <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                记录你自己的旅行足迹，点亮想去的地方
+                {t('记录你自己的旅行足迹，点亮想去的地方')}
               </p>
             </div>
             <ArrowRight className="h-4 w-4 shrink-0" style={{ color: 'var(--primary)' }} />

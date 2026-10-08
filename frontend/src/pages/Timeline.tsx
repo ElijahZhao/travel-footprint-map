@@ -11,6 +11,7 @@ import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
 import { MapPin, Heart, LogIn, Search, X, Plane } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from 'react-i18next'
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const
 
@@ -32,6 +33,7 @@ function isMonthKey(key: string) {
 /** 单个时间线节点卡片 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const meta = categoryMeta(item.category)
   const Icon = meta.icon
   const isWish = item.status === 'wish'
@@ -97,7 +99,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
             </p>
           )}
           <div className="mt-0.5 flex items-center gap-2">
-            <CategoryTag label={meta.label} icon={Icon} color={meta.hex} />
+            <CategoryTag label={t(meta.label)} icon={Icon} color={meta.hex} />
             {item.visit_date && (
               <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                 {item.visit_date.slice(5)}
@@ -111,6 +113,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
 }
 
 export default function Timeline() {
+  const { t } = useTranslation()
   const { user, guest, loading, enterGuest } = useAuth()
   const { data: checkins = [] } = useMyCheckins()
   const [searchOpen, setSearchOpen] = useState(false)
@@ -139,7 +142,7 @@ export default function Timeline() {
   if (!loading && !user && !guest) {
     return (
       <div className="page-bg paper-texture flex min-h-full items-center justify-center px-6">
-        <EmptyState icon={LogIn} title="登录后查看时间线" description="按时间回顾你的每一次出发。" />
+        <EmptyState icon={LogIn} title={t('登录后查看时间线')} description={t('按时间回顾你的每一次出发。')} />
       </div>
     )
   }
@@ -151,15 +154,15 @@ export default function Timeline() {
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
-                时间线
+                {t('时间线')}
               </h1>
               <p className="mt-0.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                {searching ? `找到 ${visited.length} 段旅程` : `共 ${visited.length} 段旅程，慢慢回看`}
+                {searching ? t('找到 {{n}} 段旅程', { n: visited.length }) : t('共 {{n}} 段旅程，慢慢回看', { n: visited.length })}
               </p>
             </div>
             <button
               type="button"
-              aria-label="搜索足迹"
+              aria-label={t('搜索足迹')}
               onClick={() => {
                 setSearchOpen((v) => !v)
                 if (searchOpen) setKeyword('')
@@ -192,13 +195,13 @@ export default function Timeline() {
                   autoFocus
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="搜索地点或地址，如「大理」"
+                  placeholder={t('搜索地点或地址，如「大理」')}
                   className="rounded-full pl-9 pr-9"
                 />
                 {searching && (
                   <button
                     type="button"
-                    aria-label="清空搜索"
+                    aria-label={t('清空搜索')}
                     onClick={() => {
                       setKeyword('')
                       inputRef.current?.focus()
@@ -217,14 +220,14 @@ export default function Timeline() {
         {searching && visited.length === 0 ? (
           <EmptyState
             illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-            title="没有找到相关地点"
-            description={`没有匹配「${keyword.trim()}」的旅程，换个关键词试试。`}
+            title={t('没有找到相关地点')}
+            description={t('没有匹配「{{kw}}」的旅程，换个关键词试试。', { kw: keyword.trim() })}
           />
         ) : visited.length === 0 && wishes.length === 0 ? (
           <EmptyState
             illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-            title="还没有记录"
-            description="去地图页新增你的第一个打卡吧。"
+            title={t('还没有记录')}
+            description={t('去地图页新增你的第一个打卡吧。')}
           />
         ) : (
           <>
@@ -240,7 +243,7 @@ export default function Timeline() {
                       <span className="font-display text-5xl font-black leading-none text-grad-vivid">
                         {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
                       </span>
-                      {isMonthKey(month) && <span className="text-lg font-semibold">月</span>}
+                      {isMonthKey(month) && <span className="text-lg font-semibold">{t('月')}</span>}
                       {isMonthKey(month) && (
                         <span className="ml-1.5 text-[11px] tracking-[0.2em]" style={{ color: 'var(--muted-foreground)' }}>
                           {month.split('-')[0]}
@@ -248,7 +251,7 @@ export default function Timeline() {
                       )}
                     </div>
                     <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {items.length} 段旅程
+                      {t('{{n}} 段旅程', { n: items.length })}
                     </span>
                   </div>
                 </FadeIn>
@@ -281,11 +284,11 @@ export default function Timeline() {
                       className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white"
                       style={{ background: 'var(--family)' }}
                     >
-                      <Heart className="h-3 w-3" fill="currentColor" /> 心愿单
+                      <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿单')}
                     </span>
                     <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
                     <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {wishes.length} 个
+                      {t('{{n}} 个', { n: wishes.length })}
                     </span>
                   </div>
                 </FadeIn>

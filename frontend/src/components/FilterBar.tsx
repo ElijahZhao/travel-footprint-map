@@ -1,6 +1,7 @@
 import { CATEGORIES } from '@/lib/categories'
 import type { CategoryKey, CheckinStatus } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export interface FilterValue {
   /** 选中的分类（null = 全部） */
@@ -17,6 +18,7 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ value, onChange, showStatus = true }: FilterBarProps) {
+  const { t } = useTranslation()
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -24,7 +26,7 @@ export default function FilterBar({ value, onChange, showStatus = true }: Filter
           active={value.category === null}
           onClick={() => onChange({ ...value, category: null })}
         >
-          全部
+          {t('全部')}
         </Chip>
         {CATEGORIES.map((c) => {
           const Icon = c.icon
@@ -47,9 +49,9 @@ export default function FilterBar({ value, onChange, showStatus = true }: Filter
       {showStatus && (
         <div className="flex gap-2">
           {([
-            { v: null, label: '全部' },
-            { v: 'visited', label: '已打卡' },
-            { v: 'wish', label: '心愿单' },
+            { v: null, label: t('全部') },
+            { v: 'visited', label: t('已打卡') },
+            { v: 'wish', label: t('心愿单') },
           ] as const).map((opt) => (
             <Chip
               key={opt.label}

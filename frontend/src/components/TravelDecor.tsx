@@ -1,9 +1,11 @@
 import { type ReactNode } from 'react'
 import { Plane } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /** 邮戳：把日期做成印章质感（轻微旋转 + 虚线环 + 褪色墨色），是「旅行手帐」的签名细节之一。 */
 export function Postmark({ date, className = '' }: { date?: string | null; className?: string }) {
-  const text = date ? date.replace(/-/g, '·') : '未标注'
+  const { t } = useTranslation()
+  const text = date ? date.replace(/-/g, '·') : t('未标注')
   return (
     <span
       className={`inline-flex select-none items-center justify-center rounded-full border border-dashed px-2.5 py-0.5 text-[10px] font-medium tracking-wider ${className}`}

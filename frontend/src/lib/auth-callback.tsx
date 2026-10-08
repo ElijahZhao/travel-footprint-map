@@ -4,10 +4,12 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../lib/AuthContext'
 import app from '../lib/cloudbase'
 import { MapPin, Loader2, TriangleAlert } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
   const { applySession } = useAuth()
+  const { t } = useTranslation()
   const handled = useRef(false)
   const [error, setError] = useState('')
 
@@ -34,7 +36,7 @@ export default function AuthCallback() {
 
         const result = res.result as any
         if (!result || result.status !== 'success') {
-          setError(result?.message || '登录失败，请重试')
+          setError(result?.message || t('登录失败，请重试'))
           setTimeout(() => navigate('/'), 2000)
           return
         }
@@ -52,7 +54,7 @@ export default function AuthCallback() {
           navigate('/me')
         }
       } catch (err) {
-        setError('登录失败，请重试')
+        setError(t('登录失败，请重试'))
         setTimeout(() => navigate('/'), 2000)
       }
     }
@@ -83,11 +85,11 @@ export default function AuthCallback() {
 
         <div className="text-center">
           <p className="font-semibold" style={{ fontSize: 'var(--font-size-title)' }}>
-            {error ? '登录未完成' : '正在登录…'}
+            {error ? t('登录未完成') : t('正在登录…')}
           </p>
           <p className="mt-1 flex items-center justify-center gap-1.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
             {!error && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {error || '登录成功后将自动跳转'}
+            {error || t('登录成功后将自动跳转')}
           </p>
         </div>
       </div>

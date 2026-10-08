@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { MapPin, Clock, Heart, BarChart3, User, type LucideIcon } from 'lucide-react'
 
 const TABS: { to: string; label: string; icon: LucideIcon }[] = [
@@ -13,6 +14,7 @@ const TABS: { to: string; label: string; icon: LucideIcon }[] = [
 /** 底部 5 模块导航栏，激活项用 framer-motion 共享布局做滑动高亮。 */
 export default function BottomNav() {
   const { pathname } = useLocation()
+  const { t } = useTranslation()
 
   return (
     // 作为 flex 子项参与布局（不再 absolute）：
@@ -26,13 +28,13 @@ export default function BottomNav() {
         boxShadow: '0 -4px 18px oklch(0.30 0.02 85 / 0.06)',
       }}
     >
-      {TABS.map((t) => {
-        const active = pathname === t.to
-        const Icon = t.icon
+      {TABS.map((item) => {
+        const active = pathname === item.to
+        const Icon = item.icon
         return (
           <Link
-            key={t.to}
-            to={t.to}
+            key={item.to}
+            to={item.to}
             className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2.5"
             aria-current={active ? 'page' : undefined}
           >
@@ -66,7 +68,7 @@ export default function BottomNav() {
                   fontWeight: active ? 700 : 500,
                 }}
               >
-                {t.label}
+                {t(item.label)}
               </span>
             </motion.span>
           </Link>

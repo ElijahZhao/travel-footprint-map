@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, ImagePlus, Loader2, MapPin, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { FadeIn } from '@/components/MotionPrimitives'
@@ -39,6 +40,7 @@ const WISH_GRAD = 'linear-gradient(135deg, oklch(0.78 0.13 350), oklch(0.72 0.14
 const lbs = createClient()
 
 export default function WishForm() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const createMut = useCreateCheckin()
@@ -55,7 +57,7 @@ export default function WishForm() {
     setForm((f) => ({ ...f, [k]: v }))
 
   useEffect(() => {
-    document.title = '新增心愿'
+    document.title = t('新增心愿')
   }, [])
 
   const doSearch = async () => {
@@ -70,7 +72,7 @@ export default function WishForm() {
       })
       const list = res.data ?? []
       setResults(list)
-      if (list.length === 0) toast.message('没有找到这个地点，试试更完整的名称')
+      if (list.length === 0) toast.message(t('没有找到这个地点，试试更完整的名称'))
     } catch (e) {
       toast.error(e instanceof LBSError ? e.message : '搜索失败，请稍后重试')
     } finally {
@@ -102,7 +104,7 @@ export default function WishForm() {
       setPhotos((p) => [...p, ...uploaded])
       toast.success(`已上传 ${uploaded.length} 张照片`)
     } catch {
-      toast.error('照片上传失败')
+      toast.error(t('照片上传失败'))
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -111,11 +113,11 @@ export default function WishForm() {
 
   const submit = async () => {
     if (!form.place_name.trim()) {
-      toast.error('请先写下或搜索一个想去的地方')
+      toast.error(t('请先写下或搜索一个想去的地方'))
       return
     }
     if (form.lng == null || form.lat == null) {
-      toast.error('请先搜索选择地点，这样它才能出现在你的地图上')
+      toast.error(t('请先搜索选择地点，这样它才能出现在你的地图上'))
       return
     }
     const input: CheckinInput = {
@@ -134,10 +136,10 @@ export default function WishForm() {
     }
     try {
       await createMut.mutateAsync(input)
-      toast.success('心愿已收藏')
+      toast.success(t('心愿已收藏'))
       navigate('/wishlist')
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : '保存失败')
+      toast.error(e instanceof Error ? e.message : t('保存失败'))
     }
   }
 
@@ -159,10 +161,10 @@ export default function WishForm() {
                 className="font-bold tracking-tight"
                 style={{ fontSize: 'var(--font-size-title)' }}
               >
-                新增心愿
+                {t('新增心愿')}
               </h1>
               <p className="mt-0.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                把想去的地方，先放进愿望清单
+                {t('把想去的地方，先放进愿望清单')}
               </p>
             </div>
           </div>
@@ -172,7 +174,7 @@ export default function WishForm() {
         <FadeIn delay={0.04}>
           <Surface pad="lg" className="card-paper space-y-3">
             <label className="text-sm font-medium" htmlFor="wish-place">
-              想去哪里
+              {t('想去哪里')}
             </label>
             <div className="flex gap-2">
               <Input
@@ -185,7 +187,7 @@ export default function WishForm() {
                     void doSearch()
                   }
                 }}
-                placeholder="搜索城市或景点，如「大理」「西湖」"
+                placeholder={t('搜索城市或景点，如「大理」「西湖」')}
               />
               <Button
                 type="button"
@@ -230,13 +232,13 @@ export default function WishForm() {
             <Input
               value={form.place_name}
               onChange={(e) => set('place_name', e.target.value)}
-              placeholder="地点名称"
+              placeholder={t('地点名称')}
             />
 
             <Input
               value={form.address}
               onChange={(e) => set('address', e.target.value)}
-              placeholder="详细地址（选填）"
+              placeholder={t('详细地址（选填）')}
             />
 
             <p
@@ -245,8 +247,8 @@ export default function WishForm() {
             >
               <MapPin className="h-3.5 w-3.5" />
               {form.lng != null
-                ? '已记在地图上，之后可以点亮它'
-                : '搜索选择地点后，它才会出现在你的足迹地图上'}
+                ? t('已记在地图上，之后可以点亮它')
+                : t('搜索选择地点后，它才会出现在你的足迹地图上')}
             </p>
           </Surface>
         </FadeIn>
@@ -254,7 +256,7 @@ export default function WishForm() {
         {/* 分类 */}
         <FadeIn delay={0.08}>
           <Surface pad="lg" className="card-paper space-y-3">
-            <label className="text-sm font-medium">这是哪一类</label>
+            <label className="text-sm font-medium">{t('这是哪一类')}</label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => {
                 const active = form.category === c.key
@@ -270,7 +272,7 @@ export default function WishForm() {
                       boxShadow: active ? `0 4px 12px ${c.hex}55` : 'none',
                     }}
                   >
-                    {c.label}
+                    {t(c.label)}
                   </button>
                 )
               })}
@@ -282,14 +284,14 @@ export default function WishForm() {
         <FadeIn delay={0.12}>
           <Surface pad="lg" className="card-paper space-y-3">
             <label className="text-sm font-medium" htmlFor="wish-mood">
-              记一句期待
+              {t('记一句期待')}
             </label>
             <Textarea
               id="wish-mood"
               rows={3}
               value={form.mood_text}
               onChange={(e) => set('mood_text', e.target.value)}
-              placeholder="为什么想去这里？先记下一句心里的期待…"
+              placeholder={t('为什么想去这里？先记下一句心里的期待…')}
             />
           </Surface>
         </FadeIn>
@@ -297,7 +299,7 @@ export default function WishForm() {
         {/* 照片 */}
         <FadeIn delay={0.16}>
           <Surface pad="lg" className="card-paper space-y-3">
-            <label className="text-sm font-medium">存几张图片（选填）</label>
+            <label className="text-sm font-medium">{t('存几张图片（选填）')}</label>
             <div className="flex flex-wrap gap-2">
               {photos.map((p, i) => (
                 <div key={`${p.url}-${i}`} className="group relative h-20 w-20 overflow-hidden rounded-xl">
@@ -320,7 +322,7 @@ export default function WishForm() {
                 style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
               >
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-                {uploading ? '上传中' : '添加'}
+                {uploading ? t('上传中') : t('添加')}
               </button>
             </div>
             <input
@@ -339,16 +341,16 @@ export default function WishForm() {
         className="flex shrink-0 gap-2 border-t px-4 py-3"
         style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
       >
-        <Button variant="ghost" className="h-11 rounded-full" onClick={() => navigate(-1)}>
-          取消
-        </Button>
+                <Button variant="ghost" className="h-11 rounded-full" onClick={() => navigate(-1)}>
+                  {t('取消')}
+                </Button>
         <Button
           className="h-11 flex-1 rounded-full"
           onClick={() => void submit()}
           disabled={busy}
           style={{ background: 'oklch(0.72 0.14 295)', color: 'white' }}
         >
-          {busy ? '保存中…' : '保存心愿'}
+          {busy ? t('保存中…') : t('保存心愿')}
         </Button>
       </div>
     </div>

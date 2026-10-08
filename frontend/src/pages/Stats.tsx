@@ -9,6 +9,7 @@ import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { Surface, SectionTitle, ProgressBar } from '@/components/Surface'
 import { FlightRoute } from '@/components/TravelDecor'
+import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, Sparkles, BarChart3, CalendarRange } from 'lucide-react'
 
 /** 两点间距离（km），用于找出「走得最远的一次」 */
@@ -37,6 +38,7 @@ function provinceOf(address?: string | null): string | null {
 const ease = [0.25, 0.46, 0.45, 0.94] as const
 
 export default function Stats() {
+  const { t } = useTranslation()
   const { user, guest, loading, enterGuest } = useAuth()
   const { data: checkins = [] } = useMyCheckins()
   const { data: stats } = useStats(user?.uid ?? '')
@@ -99,10 +101,10 @@ export default function Stats() {
 
   const litCatCount = byCategory.filter((c) => c.count > 0).length
   const heroNum = furthest ? furthest.km : s.visited
-  const heroUnit = furthest ? '公里外的远方' : '段足迹'
+  const heroUnit = furthest ? t('公里外的远方') : t('段足迹')
   const heroSentence = furthest
-    ? `这一年走得最远的一次，是 ${furthest.year} 年 ${furthest.month} 月的 ${furthest.place}。`
-    : `你已在 ${s.cities} 座城市，留下 ${s.visited} 段旅程。`
+    ? t('这一年走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。', { year: furthest.year, month: furthest.month, place: furthest.place })
+    : t('你已在 {{cities}} 座城市，留下 {{visited}} 段旅程。', { cities: s.cities, visited: s.visited })
 
   const maxCat = Math.max(1, ...byCategory.map((c) => c.count))
   const maxYear = Math.max(1, ...byYear.map(([, n]) => n))
@@ -129,7 +131,7 @@ export default function Stats() {
   if (!loading && !user && !guest) {
     return (
       <div className="page-bg paper-texture flex min-h-full items-center justify-center px-6">
-        <EmptyState icon={Globe2} title="登录后查看统计" description="看看你走过多少城市、点亮多少分类。" />
+        <EmptyState icon={Globe2} title={t('登录后查看统计')} description={t('看看你走过多少城市、点亮多少分类。')} />
       </div>
     )
   }
@@ -139,12 +141,12 @@ export default function Stats() {
       <div className="page-bg paper-texture min-h-full px-4 pb-28 pt-5">
         <main className="relative z-10 space-y-6">
           <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
-            旅行统计
+            {t('旅行统计')}
           </h1>
           <EmptyState
             illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-            title="还没有已打卡记录"
-            description="在地图页记录你去过的地方，这里会生成你的足迹报告。"
+            title={t('还没有已打卡记录')}
+            description={t('在地图页记录你去过的地方，这里会生成你的足迹报告。')}
           />
         </main>
       </div>
@@ -156,10 +158,10 @@ export default function Stats() {
       <main className="relative z-10 space-y-5">
         <FadeIn>
           <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
-            旅行统计
+            {t('旅行统计')}
           </h1>
           <p className="mt-0.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            你的足迹数据报告
+            {t('你的足迹数据报告')}
           </p>
         </FadeIn>
 
@@ -172,7 +174,7 @@ export default function Stats() {
         >
           <FlightRoute className="pointer-events-none absolute -right-3 -top-1 h-14 w-44 opacity-70" />
           <MapPin className="pointer-events-none absolute -right-6 -bottom-8 h-32 w-32 rotate-12 text-white opacity-10" />
-          <p className="relative text-[11px] font-medium tracking-[0.22em] opacity-75">我的旅行手帐</p>
+          <p className="relative text-[11px] font-medium tracking-[0.22em] opacity-75">{t('我的旅行手帐')}</p>
           <p className="relative mt-2 font-display text-[1.65rem] font-semibold leading-snug">
             {heroSentence}
           </p>
@@ -183,19 +185,19 @@ export default function Stats() {
             <span className="mb-1.5 ml-1 text-sm font-medium opacity-85">{heroUnit}</span>
           </div>
           <div className="relative mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
-            <span>走过 {s.cities} 座城市</span>
-            <span>点亮 {litCatCount} 类风景</span>
-            <span>心愿 {s.wish} 个</span>
-            <span>共 {s.visited} 段旅程</span>
+            <span>{t('走过 {{cities}} 座城市', { cities: s.cities })}</span>
+            <span>{t('点亮 {{cats}} 类风景', { cats: litCatCount })}</span>
+            <span>{t('心愿 {{wish}} 个', { wish: s.wish })}</span>
+            <span>{t('共 {{visited}} 段旅程', { visited: s.visited })}</span>
           </div>
         </motion.div>
 
         {/* 分类占比：环形图 + 图例 */}
         <FadeIn>
           <Surface pad="lg" className="card-paper">
-            <SectionTitle icon={Sparkles} className="mb-4">
-              分类占比
-            </SectionTitle>
+          <SectionTitle icon={Sparkles} className="mb-4">
+            {t('分类占比')}
+          </SectionTitle>
             <div className="flex items-center gap-5">
               <motion.div
                 className="relative h-36 w-36 shrink-0 rounded-full"
@@ -213,7 +215,7 @@ export default function Stats() {
                     <CountUp value={visited.length} />
                   </span>
                   <span className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    个足迹
+                    {t('个足迹')}
                   </span>
                 </div>
               </motion.div>
@@ -231,7 +233,7 @@ export default function Stats() {
                     >
                       <span className="flex min-w-0 items-center gap-2">
                         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: c.hex }} />
-                        <span className="truncate">{c.label}</span>
+                        <span className="truncate">{t(c.label)}</span>
                       </span>
                       <span className="shrink-0 tabular-nums" style={{ color: 'var(--muted-foreground)' }}>
                         {c.count}
@@ -248,9 +250,9 @@ export default function Stats() {
         {/* 分类分布条 */}
         <FadeIn>
           <Surface pad="lg" className="card-paper">
-            <SectionTitle icon={BarChart3} className="mb-4">
-              分类分布
-            </SectionTitle>
+          <SectionTitle icon={BarChart3} className="mb-4">
+            {t('分类分布')}
+          </SectionTitle>
             <div className="space-y-3.5">
               {byCategory.map((c, i) => {
                 const Icon = c.icon
@@ -260,7 +262,7 @@ export default function Stats() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-1.5">
                         <Icon className="h-3.5 w-3.5" style={{ color: c.hex }} />
-                        {c.label}
+                        {t(c.label)}
                       </span>
                       <span className="tabular-nums" style={{ color: 'var(--muted-foreground)' }}>
                         {c.count}
@@ -278,9 +280,9 @@ export default function Stats() {
         {byYear.length > 0 && (
           <FadeIn>
             <Surface pad="lg" className="card-paper">
-              <SectionTitle icon={CalendarRange} className="mb-4">
-                年度足迹
-              </SectionTitle>
+          <SectionTitle icon={CalendarRange} className="mb-4">
+            {t('年度足迹')}
+          </SectionTitle>
               <div className="flex h-36 items-end justify-between gap-2">
                 {byYear.map(([year, n], i) => (
                   <div key={year} className="flex flex-1 flex-col items-center gap-1">
@@ -318,9 +320,9 @@ export default function Stats() {
         <FadeIn>
           <Surface pad="lg" className="card-paper">
             <div className="mb-3 flex items-center justify-between">
-              <SectionTitle icon={Globe2}>省份点亮</SectionTitle>
+              <SectionTitle icon={Globe2}>{t('省份点亮')}</SectionTitle>
               <span className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
-                {litProvinces.size} / {PROVINCES.length}
+                {t('{{n}} / {{m}}', { n: litProvinces.size, m: PROVINCES.length })}
               </span>
             </div>
             <ProgressBar value={(litProvinces.size / PROVINCES.length) * 100} />
@@ -349,9 +351,9 @@ export default function Stats() {
         {recent.length > 0 && (
           <FadeIn>
             <Surface pad="lg" className="card-paper">
-              <SectionTitle icon={MapPin} className="mb-3">
-                最近打卡
-              </SectionTitle>
+          <SectionTitle icon={MapPin} className="mb-3">
+            {t('最近打卡')}
+          </SectionTitle>
               <div className="space-y-2">
                 {recent.map((c, i) => {
                   const meta = categoryMeta(c.category)
@@ -374,7 +376,7 @@ export default function Stats() {
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{c.place_name}</p>
                         <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                          {c.address || meta.label}
+                          {c.address || t(meta.label)}
                         </p>
                       </div>
                       <span className="shrink-0 text-xs" style={{ color: 'var(--muted-foreground)' }}>
