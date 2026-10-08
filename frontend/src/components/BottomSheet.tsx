@@ -35,15 +35,18 @@ export default function BottomSheet({
             onClick={onClose}
           />
           <motion.div
-            className={`absolute inset-x-0 bottom-0 flex flex-col rounded-t-3xl bg-[var(--card)] shadow-2xl ${heightClass}`}
+            className={`absolute inset-x-0 bottom-0 flex flex-col rounded-t-2xl bg-[var(--card)] ${heightClass}`}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={spring}
-            style={{ borderTop: '1px solid var(--border)' }}
+            style={{
+              borderTop: '1px solid var(--border)',
+              boxShadow: '0 -8px 32px oklch(0.3 0.02 80 / 0.15)',
+            }}
           >
             <div className="relative shrink-0 px-4 pt-2">
-              <div className="mx-auto h-1.5 w-10 rounded-full" style={{ background: 'var(--border)' }} />
+              <div className="mx-auto h-1 w-10 rounded-full" style={{ background: 'color-mix(in oklab, var(--muted-foreground) 25%, transparent)' }} />
               <button
                 type="button"
                 onClick={onClose}
@@ -56,7 +59,7 @@ export default function BottomSheet({
             </div>
             {title && (
               <div className="shrink-0 px-4 pb-2 pt-1">
-                <h2 className="font-semibold" style={{ fontSize: 'var(--font-size-title)' }}>{title}</h2>
+                <h2 className="font-display font-semibold" style={{ fontSize: 'var(--font-size-title)' }}>{title}</h2>
               </div>
             )}
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-28">{children}</div>

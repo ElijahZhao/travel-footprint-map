@@ -295,13 +295,13 @@ export default function TravelMap({
             title={t('定位我的位置')}
             aria-label={t('定位我的位置')}
             className="glass flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
-            style={{ color: '#2563eb' }}
+            style={{ color: 'var(--primary)' }}
           >
             {locState === 'locating' ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" fill="#2563eb" stroke="none" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" fill="var(--primary)" stroke="none" />
                 <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
                 <circle cx="12" cy="12" r="8" />
               </svg>
