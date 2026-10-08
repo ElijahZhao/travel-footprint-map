@@ -19,7 +19,7 @@ export default function EmptyState({
   return (
     <div
       className="flex flex-col items-center justify-center rounded-2xl px-6 py-14 text-center"
-      style={{ background: 'var(--card)', border: '1px dashed var(--border)' }}
+      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
       {illustration ? (
         <div className="mb-3">{illustration}</div>

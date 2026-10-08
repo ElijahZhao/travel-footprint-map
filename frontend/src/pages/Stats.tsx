@@ -8,7 +8,6 @@ import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { Surface, SectionTitle, ProgressBar } from '@/components/Surface'
-import { FlightRoute } from '@/components/TravelDecor'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, Sparkles, BarChart3, CalendarRange } from 'lucide-react'
 
@@ -99,7 +98,6 @@ export default function Stats() {
     return { place: best.place_name, year: y, month: Number(m), km: Math.round(bestD) }
   }, [visited])
 
-  const litCatCount = byCategory.filter((c) => c.count > 0).length
   const heroNum = furthest ? furthest.km : s.visited
   const heroUnit = furthest ? t('公里外的远方') : t('段足迹')
   const heroSentence = furthest
@@ -144,7 +142,7 @@ export default function Stats() {
             {t('旅行统计')}
           </h1>
           <EmptyState
-            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            illustration={<TravelIllustration scene="stats" className="h-24 w-24" />}
             title={t('还没有已打卡记录')}
             description={t('在地图页记录你去过的地方，这里会生成你的足迹报告。')}
           />
@@ -165,32 +163,37 @@ export default function Stats() {
           </p>
         </FadeIn>
 
-        {/* 编辑式英雄句：用一句「有人的话」做主角，超大衬线数字建立第一眼锚点 */}
-        <motion.div
-          className="grad-vivid card-paper relative overflow-hidden rounded-[28px] p-6 text-white"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-        >
-          <FlightRoute className="pointer-events-none absolute -right-3 -top-1 h-14 w-44 opacity-70" />
-          <MapPin className="pointer-events-none absolute -right-6 -bottom-8 h-32 w-32 rotate-12 text-white opacity-10" />
-          <p className="relative text-[11px] font-medium tracking-[0.22em] opacity-75">{t('我的旅行手帐')}</p>
-          <p className="relative mt-2 font-display text-[1.65rem] font-semibold leading-snug">
+        {/* 引导句：一句有人的话，宋体，不做渐变背景 */}
+        <FadeIn>
+          <p className="font-display text-lg leading-relaxed" style={{ color: 'var(--foreground)' }}>
             {heroSentence}
           </p>
-          <div className="relative mt-3 flex items-end gap-2">
-            <span className="font-display text-7xl font-black leading-none tabular-nums">
-              <CountUp value={heroNum} />
-            </span>
-            <span className="mb-1.5 ml-1 text-sm font-medium opacity-85">{heroUnit}</span>
+        </FadeIn>
+
+        {/* 4 个数据小卡横排：白底、大宋体数字，不做渐变 hero */}
+        <FadeIn>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { n: s.visited, label: t('段足迹') },
+              { n: s.cities, label: t('座城市') },
+              { n: litProvinces.size, label: t('个省份') },
+              { n: heroNum, label: heroUnit },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="card-paper rounded-2xl p-4 text-center"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+              >
+                <div className="font-display text-3xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
+                  <CountUp value={stat.n} />
+                </div>
+                <div className="mt-1.5 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="relative mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
-            <span>{t('走过 {{cities}} 座城市', { cities: s.cities })}</span>
-            <span>{t('点亮 {{cats}} 类风景', { cats: litCatCount })}</span>
-            <span>{t('心愿 {{wish}} 个', { wish: s.wish })}</span>
-            <span>{t('共 {{visited}} 段旅程', { visited: s.visited })}</span>
-          </div>
-        </motion.div>
+        </FadeIn>
 
         {/* 分类占比：环形图 + 图例 */}
         <FadeIn>
@@ -297,9 +300,9 @@ export default function Stats() {
                       {n}
                     </motion.span>
                     <motion.div
-                      className="w-full rounded-t-lg"
+                      className="w-full rounded-t-md"
                       style={{
-                        background: 'linear-gradient(var(--primary), color-mix(in oklab, var(--primary) 55%, var(--accent)))',
+                        background: 'var(--accent)',
                       }}
                       initial={{ height: 0 }}
                       whileInView={{ height: `${(n / maxYear) * 100}%` }}

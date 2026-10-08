@@ -22,7 +22,7 @@ export default function CheckinDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <div className="min-h-full" style={{ background: 'var(--background)' }}>
         <p className="py-20 text-center" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
       </div>
     )
@@ -30,7 +30,7 @@ export default function CheckinDetail() {
 
   if (!checkin) {
     return (
-      <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <div className="min-h-full" style={{ background: 'var(--background)' }}>
         <div className="mx-auto max-w-2xl px-4 py-20 text-center">
           <p style={{ color: 'var(--muted-foreground)' }}>{t('未找到该打卡记录')}</p>
           <Button className="mt-4" onClick={() => navigate('/')}>{t('返回地图')}</Button>

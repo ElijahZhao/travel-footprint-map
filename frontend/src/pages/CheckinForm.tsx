@@ -226,6 +226,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   }
 
   const meta = categoryMeta(form.category)
+  const MetaIcon = meta.icon
   const busy = createMut.isPending || updateMut.isPending || uploading
 
   return (
@@ -237,7 +238,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               className="flex h-9 w-9 items-center justify-center rounded-2xl"
               style={{ background: meta.color, color: 'white' }}
             >
-              <meta.icon className="h-4.5 w-4.5" />
+              <MetaIcon className="h-4.5 w-4.5" />
             </span>
             <div>
               <h1 className="font-bold leading-tight" style={{ fontSize: 'var(--font-size-title)' }}>

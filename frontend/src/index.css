@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap");
 @import "@fontsource/playfair-display/400.css";
 @import "@fontsource/playfair-display/600.css";
 @import "@fontsource/playfair-display/700.css";
@@ -87,8 +88,8 @@
 
   /* === 字体排版 === */
   --font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  /* 衬线 display 字体：仅用于大标题 / 大数字，制造编辑式个性（iOS 走 Songti SC，跨平台走 Playfair 拉丁数字） */
-  --font-display: "Playfair Display", "Songti SC", "STSong", "Noto Serif SC", Georgia, "Times New Roman", serif;
+  /* 衬线 display 字体：中文标题/大数字用 Noto Serif SC（宋体），拉丁数字用 Playfair */
+  --font-display: "Noto Serif SC", "Songti SC", "STSong", "Playfair Display", Georgia, "Times New Roman", serif;
   --font-size-display: 3.5rem;
   --font-size-headline: 2rem;
   --font-size-title: 1.5rem;
@@ -143,9 +144,9 @@
   --popover: oklch(0.995 0.008 90);
   --popover-foreground: oklch(0.28 0.035 60);
 
-  /* === 主色调 (旅人绿 —— 鲜活有生命力) === */
-  --primary: oklch(0.58 0.145 158);
-  --primary-foreground: oklch(0.99 0.008 90);
+  /* === 主色调 (旅人深苔绿 —— 沉稳，像植物标本卡) === */
+  --primary: oklch(0.45 0.10 155);
+  --primary-foreground: oklch(0.98 0.01 90);
 
   /* === 次要色 === */
   --secondary: oklch(0.955 0.022 88);
@@ -155,8 +156,8 @@
   --muted: oklch(0.945 0.02 88);
   --muted-foreground: oklch(0.52 0.035 65);
 
-  /* === 强调色 (落日暖橙 —— 明亮抓眼) === */
-  --accent: oklch(0.72 0.185 48);
+  /* === 强调色 (落日暖橙 —— 沉稳不跳) === */
+  --accent: oklch(0.62 0.15 50);
   --accent-foreground: oklch(0.99 0.008 90);
 
   /* === 危险/错误色 === */
@@ -181,13 +182,13 @@
   --theme-gold: oklch(0.78 0.17 65);
   --theme-blue: oklch(0.62 0.17 245);
 
-  /* === 分类颜色 (6 类 —— 缤纷旅行色) === */
-  --scenery: oklch(0.68 0.16 155);
-  --food: oklch(0.76 0.17 52);
-  --culture: oklch(0.64 0.18 305);
-  --city: oklch(0.66 0.16 240);
-  --family: oklch(0.70 0.18 15);
-  --outdoor: oklch(0.68 0.15 200);
+  /* === 分类颜色 (6 类 —— 降饱和，只做标签着色) === */
+  --scenery: oklch(0.60 0.08 155);
+  --food: oklch(0.68 0.10 60);
+  --culture: oklch(0.58 0.10 305);
+  --city: oklch(0.58 0.08 240);
+  --family: oklch(0.60 0.10 15);
+  --outdoor: oklch(0.60 0.08 200);
 
   /* === 图表颜色 === */
   --chart-1: var(--scenery);
@@ -304,7 +305,8 @@
 }
 
 .dark .text-grad-vivid {
-  background-image: linear-gradient(100deg, oklch(0.78 0.14 158), oklch(0.80 0.16 55) 75%);
+  color: var(--foreground);
+  background-image: none;
 }
 
 @layer base {
@@ -356,7 +358,7 @@
     radial-gradient(68% 28% at 50% 105%, color-mix(in oklab, var(--warning) 9%, transparent), transparent 76%);
 }
 .page-bg.paper-texture::before {
-  opacity: 0.28;
+  opacity: 0.12;
   z-index: 1;
 }
 
@@ -367,20 +369,16 @@
 .grad-sunset {
   background-image: linear-gradient(120deg, var(--accent), color-mix(in oklab, var(--accent) 45%, var(--family)));
 }
-/* 鲜亮文字渐变（深绿→暖橙，保证浅底上的可读性） */
+/* 标题文字：从绿橙渐变改成纯色深棕（更克制，杂志感） */
 .text-grad-vivid {
-  background-image: linear-gradient(100deg, oklch(0.46 0.13 158), oklch(0.56 0.17 48) 75%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--foreground);
+  -webkit-background-clip: initial;
+  background-clip: initial;
 }
 
-/* 卡片纸感（内高光 + 暖调柔影，让卡片鲜活浮起） */
+/* 卡片纸感（只留一层淡影，不再 inset 高光） */
 .card-paper {
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.85),
-    0 1px 3px oklch(0.55 0.06 75 / 0.09),
-    0 6px 18px oklch(0.55 0.06 75 / 0.07);
+  box-shadow: 0 2px 8px oklch(0.4 0.03 80 / 0.06);
 }
 
 /* 毛玻璃系统（去 AI 感的核心）：半透明 + 模糊 + 高光描边 + 柔和投影，

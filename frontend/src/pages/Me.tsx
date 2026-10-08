@@ -180,12 +180,13 @@ export default function Me() {
       <main className="relative z-10 space-y-5">
         {/* 头像与身份：渐变英雄卡，建立「我的」页面的第一眼锚点 */}
         <FadeIn>
-          <div className="grad-vivid card-paper relative overflow-hidden rounded-3xl p-5 text-white">
-            <span className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-white/10" />
-            <span className="pointer-events-none absolute -bottom-10 -left-8 h-20 w-20 rounded-full bg-white/8" />
+          <div className="card-paper relative overflow-hidden rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <span className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full" style={{ background: 'color-mix(in oklab, var(--primary) 8%, transparent)' }} />
+            <span className="pointer-events-none absolute -bottom-10 -left-8 h-20 w-20 rounded-full" style={{ background: 'color-mix(in oklab, var(--accent) 8%, transparent)' }} />
             <div className="relative flex items-center gap-4">
               <motion.div
-                className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white/20 text-xl font-bold text-white backdrop-blur"
+                className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white"
+                style={{ background: 'var(--primary)' }}
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 20 }}
@@ -194,8 +195,8 @@ export default function Me() {
                 <span
                   className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
                   style={{
-                    background: guest ? 'var(--accent)' : 'oklch(0.46 0.13 158)',
-                    border: '2px solid rgba(255,255,255,0.9)',
+                    background: guest ? 'var(--accent)' : 'var(--primary)',
+                    border: '2px solid var(--card)',
                   }}
                 >
                   {guest ? <UserRound className="h-3 w-3" /> : <BadgeCheck className="h-3.5 w-3.5" />}
@@ -203,10 +204,10 @@ export default function Me() {
               </motion.div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-bold">{displayName}</p>
-                <p className="mt-0.5 truncate text-xs opacity-80">
+                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
                   {guest ? t('游客模式 · 数据保存于本设备') : user?.email}
                 </p>
-                <div className="mt-1.5 flex gap-3 text-[11px] opacity-85">
+                <div className="mt-1.5 flex gap-3 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                   <span>{t('足迹 {{n}}', { n: visitedCount })}</span>
                   <span>{t('心愿 {{n}}', { n: checkins.length - visitedCount })}</span>
                   <span>{t('照片 {{n}}', { n: photoCount })}</span>
@@ -215,14 +216,16 @@ export default function Me() {
               {guest ? (
                 <button
                   onClick={exitGuest}
-                  className="flex shrink-0 items-center gap-1 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
+                  className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-xs"
+                  style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
                 >
                   <DoorOpen className="h-3.5 w-3.5" /> {t('退出')}
                 </button>
               ) : (
                 <button
                   onClick={() => signOut()}
-                  className="shrink-0 rounded-full bg-white/20 px-2.5 py-1.5 text-xs backdrop-blur transition active:scale-95"
+                  className="shrink-0 rounded-full px-2.5 py-1.5 text-xs"
+                  style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
                 >
                   {t('退出')}
                 </button>
@@ -359,7 +362,7 @@ export default function Me() {
 
         {checkins.length === 0 ? (
           <EmptyState
-            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            illustration={<TravelIllustration scene="me" className="h-24 w-24" />}
             title={t('还没有打卡')}
             description={t('去地图页记录你的第一个足迹吧。')}
           />

@@ -219,13 +219,13 @@ export default function Timeline() {
 
         {searching && visited.length === 0 ? (
           <EmptyState
-            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            illustration={<TravelIllustration scene="timeline" className="h-24 w-24" />}
             title={t('没有找到相关地点')}
             description={t('没有匹配「{{kw}}」的旅程，换个关键词试试。', { kw: keyword.trim() })}
           />
         ) : visited.length === 0 && wishes.length === 0 ? (
           <EmptyState
-            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            illustration={<TravelIllustration scene="timeline" className="h-24 w-24" />}
             title={t('还没有记录')}
             description={t('去地图页新增你的第一个打卡吧。')}
           />
@@ -256,14 +256,11 @@ export default function Timeline() {
                   </div>
                 </FadeIn>
 
-                {/* 时间轴主线（虚线航线）+ 起点小飞机 */}
+                {/* 时间轴主线（实线）+ 起点小飞机 */}
                 <div className="relative space-y-3">
                   <span
-                    className="absolute bottom-6 left-[12px] top-2 w-0.5 rounded-full"
-                    style={{
-                      background:
-                        'repeating-linear-gradient(180deg, color-mix(in oklab, var(--primary) 55%, transparent) 0 5px, transparent 5px 11px)',
-                    }}
+                    className="absolute bottom-6 left-[12px] top-2 w-px rounded-full"
+                    style={{ background: 'color-mix(in oklab, var(--primary) 45%, transparent)' }}
                   />
                   <Plane
                     className="absolute left-[6px] top-0 z-10 h-4 w-4 -rotate-[18deg]"
@@ -294,10 +291,9 @@ export default function Timeline() {
                 </FadeIn>
                 <div className="relative space-y-3">
                   <span
-                    className="absolute bottom-6 left-[12px] top-2 w-0.5 rounded-full"
+                    className="absolute bottom-6 left-[12px] top-2 w-px rounded-full"
                     style={{
-                      background:
-                        'repeating-linear-gradient(180deg, color-mix(in oklab, var(--family) 50%, transparent) 0 5px, transparent 5px 11px)',
+                      background: 'color-mix(in oklab, var(--family) 40%, transparent)',
                     }}
                   />
                   {wishes.map((c, i) => (

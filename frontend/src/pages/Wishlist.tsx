@@ -67,8 +67,8 @@ function WishCard({
         }}
         className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-3xl p-2.5 text-left transition-transform active:scale-[0.985] ${lit ? 'lit-glow match-strike' : ''}`}
         style={{
-          background: lit ? 'var(--card)' : 'color-mix(in oklab, var(--secondary) 70%, var(--card))',
-          border: lit ? '1px solid var(--border)' : '1.5px dashed color-mix(in oklab, var(--muted-foreground) 32%, transparent)',
+          background: lit ? 'var(--card)' : 'color-mix(in oklab, var(--secondary) 60%, var(--card))',
+          border: lit ? '1px solid var(--border)' : '1px solid color-mix(in oklab, var(--muted-foreground) 22%, transparent)',
         }}
       >
         {/* 缩略图：点亮=彩色，未点亮=灰调 */}
@@ -241,7 +241,7 @@ export default function Wishlist() {
                 className="h-10 flex-1 gap-1.5 rounded-full text-white"
                 onClick={() => navigate('/wish/new')}
                 style={{
-                  background: 'linear-gradient(135deg, oklch(0.78 0.13 350), oklch(0.72 0.14 295))',
+                  background: 'var(--culture)',
                 }}
               >
                 <Heart className="h-4 w-4" fill="currentColor" /> {t('添加心愿')}
@@ -335,7 +335,7 @@ export default function Wishlist() {
 
         {shownGroups.length === 0 ? (
           <EmptyState
-            illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+            illustration={<TravelIllustration scene="wishlist" className="h-24 w-24" />}
             title={wishes.length === 0 ? t('心愿单还是空的') : t('没有符合条件的心愿')}
             description={
               wishes.length === 0
@@ -348,7 +348,7 @@ export default function Wishlist() {
                   onClick={() => navigate('/wish/new')}
                   className="text-white"
                   style={{
-                    background: 'linear-gradient(135deg, oklch(0.78 0.13 350), oklch(0.72 0.14 295))',
+                    background: 'var(--culture)',
                   }}
                 >
                   {t('添加心愿')}

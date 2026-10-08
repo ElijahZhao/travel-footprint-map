@@ -17,11 +17,11 @@ function pinSvg(hex: string): string {
 /** 生成「我的位置」蓝色脉冲圆点（SVG data URI，带呼吸动画） */
 function userDotSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-    <circle cx="24" cy="24" r="20" fill="rgba(37,99,235,0.20)">
+    <circle cx="24" cy="24" r="20" fill="oklch(0.45 0.10 155 / 0.20)">
       <animate attributeName="r" values="13;22;13" dur="2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.45;0.10;0.45" dur="2s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="24" cy="24" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"/>
+    <circle cx="24" cy="24" r="7" fill="oklch(0.45 0.10 155)" stroke="#ffffff" stroke-width="3"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }

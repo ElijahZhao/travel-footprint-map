@@ -32,15 +32,8 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
         >
           {/* 封面 / 分类色块 */}
           {checkin.photos?.length > 0 ? (
-            <div className="relative h-40 w-full overflow-hidden">
-              <img src={checkin.photos[0].url} alt={checkin.place_name} className="h-full w-full object-cover" />
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
-                style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.45))' }}
-              />
-              <span className="absolute bottom-2 left-3">
-                <CategoryTag label={t(meta.label)} icon={Icon} color="white" className="backdrop-blur" />
-              </span>
+            <div className="relative bg-white p-2 pb-8" style={{ transform: 'rotate(-0.6deg)' }}>
+              <img src={checkin.photos[0].url} alt={checkin.place_name} className="h-40 w-full object-cover" />
               <span className="absolute right-3 top-3">
                 {isWish ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow" style={{ color: 'var(--family)' }}>
@@ -51,6 +44,9 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
                     <CheckCircle2 className="h-3 w-3" /> {t('已去')}
                   </span>
                 )}
+              </span>
+              <span className="absolute bottom-2 left-3">
+                <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
               </span>
             </div>
           ) : (
