@@ -20,7 +20,15 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'zh',
   returnNull: false,
   interpolation: { escapeValue: false },
-  parseMissingKeyHandler: (key) => key,
+  // 中文模式下缺失 key 直接回退为中文原文（key 本身）。
+  // 注意：i18next 对「缺失 key 回退」不做插值替换，这里手动补上 {{var}} 替换，
+  // 否则形如 "{{count}} 个足迹" 的词条会原样显示花括号。
+  parseMissingKeyHandler: (key, _fallbackNs, options) => {
+    if (!options) return key
+    return key.replace(/\{\{(\w+)\}\}/g, (m, name) =>
+      name in options ? String(options[name]) : m,
+    )
+  },
 })
 
 export type Lang = 'zh' | 'en'
