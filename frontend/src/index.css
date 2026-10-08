@@ -384,22 +384,18 @@
 /* 毛玻璃系统（去 AI 感的核心）：半透明 + 模糊 + 高光描边 + 柔和投影，
    让浮层像一层通透玻璃压在地图/内容之上，而不是平贴的白板。 */
 .glass {
-  background: color-mix(in oklab, var(--card) 60%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid color-mix(in oklab, #fff 55%, transparent);
-  box-shadow:
-    0 8px 26px oklch(0.45 0.05 85 / 0.14),
-    inset 0 1px 0 oklch(1 0 0 / 0.55);
+  background: color-mix(in oklab, var(--card) 78%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  box-shadow: 0 4px 16px oklch(0.45 0.05 85 / 0.10);
 }
 .glass-strong {
-  background: color-mix(in oklab, var(--card) 74%, transparent);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  backdrop-filter: blur(20px) saturate(170%);
-  border: 1px solid color-mix(in oklab, #fff 62%, transparent);
-  box-shadow:
-    0 12px 34px oklch(0.45 0.05 85 / 0.18),
-    inset 0 1px 0 oklch(1 0 0 / 0.6);
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  box-shadow: 0 8px 28px oklch(0.45 0.05 85 / 0.14);
 }
 .dark .glass,
 .dark .glass-strong {

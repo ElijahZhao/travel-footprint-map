@@ -7,11 +7,16 @@ import { type ReactNode } from 'react'
 export default function MobileFrame({ children }: { children: ReactNode }) {
   return (
     <div
-      className="flex min-h-[100dvh] w-full justify-center"
-      style={{ background: 'linear-gradient(160deg, oklch(0.92 0.02 85), oklch(0.95 0.015 85))' }}
+      className="flex min-h-[100dvh] w-full justify-center paper-texture"
+      style={{
+        background: 'linear-gradient(160deg, oklch(0.88 0.025 85), oklch(0.92 0.02 85))',
+      }}
     >
       {/* shrink-0 防止在 flex 父级中被压缩，保证真机视图高度稳定 */}
-      <div className="relative h-[100dvh] w-full max-w-[440px] shrink-0 overflow-hidden bg-[var(--background)] md:my-6 md:h-[860px] md:rounded-[2.6rem] md:border-[10px] md:border-zinc-900/90 md:shadow-2xl">
+      <div
+        className="relative h-[100dvh] w-full max-w-[440px] shrink-0 overflow-hidden bg-[var(--background)] md:my-6 md:h-[860px] md:rounded-[2.6rem] md:border-[10px] md:border-zinc-900/90"
+        style={{ boxShadow: '0 24px 60px -12px oklch(0.3 0.02 80 / 0.35), 0 0 0 1px oklch(0.7 0.02 80 / 0.2)' }}
+      >
         {children}
       </div>
     </div>

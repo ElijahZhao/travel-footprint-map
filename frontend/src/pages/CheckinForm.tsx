@@ -241,7 +241,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
               <MetaIcon className="h-4.5 w-4.5" />
             </span>
             <div>
-              <h1 className="font-bold leading-tight" style={{ fontSize: 'var(--font-size-title)' }}>
+              <h1 className="font-display font-bold leading-tight" style={{ fontSize: 'var(--font-size-title)' }}>
                 {completeWish ? t('完成心愿') : isEdit ? t('编辑打卡') : t('新增打卡')}
               </h1>
               <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -323,7 +323,6 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                         style={{
                           background: active ? c.hex : 'var(--secondary)',
                           color: active ? 'white' : 'var(--muted-foreground)',
-                          boxShadow: active ? `0 4px 12px color-mix(in oklab, ${c.hex} 32%, transparent)` : 'none',
                         }}
                       >
                         <Icon className="h-3.5 w-3.5" />
