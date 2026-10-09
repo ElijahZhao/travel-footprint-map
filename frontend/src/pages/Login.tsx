@@ -101,7 +101,7 @@ export default function Login() {
           >
             <MapPin className="h-8 w-8" />
           </div>
-          <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
+          <h1 className="font-display font-bold tracking-tight" style={{ fontSize: "var(--font-size-headline)", color: "var(--foreground)" }}>
             {t('脚印地图')}
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>

@@ -8,7 +8,6 @@ import { FadeIn, Stagger } from '@/components/MotionPrimitives'
 import { Surface } from '@/components/Surface'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, ArrowRight, UserRound } from 'lucide-react'
-import { Postmark } from '@/components/TravelDecor'
 
 export default function SharePage() {
   const { t } = useTranslation()
@@ -31,17 +30,12 @@ export default function SharePage() {
             >
               <UserRound className="h-9 w-9" />
             </motion.div>
-            <div className="relative">
-              <h1 className="font-display font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
+              <h1 className="font-display font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)', color: 'var(--foreground)' }}>
                 {t('旅行精选')}
               </h1>
-              <span className="absolute -right-12 -top-1">
-                <Postmark date={new Date().toISOString().slice(0, 10)} />
-              </span>
               <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                 {t('来自一位旅行者的公开足迹 · 共 {{n}} 个精选地点', { n: checkins.length })}
               </p>
-            </div>
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium"
               style={{ background: 'color-mix(in oklab, var(--primary) 12%, transparent)', color: 'var(--primary)' }}

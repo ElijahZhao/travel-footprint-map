@@ -71,11 +71,10 @@ export default function BottomNav() {
         type="button"
         aria-label={t('记录打卡')}
         onClick={() => navigate('/checkin/new')}
-        className="fab-float absolute left-1/2 top-0 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white"
+        className="absolute left-1/2 top-0 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white"
         style={{
           background: 'var(--accent)',
-          boxShadow:
-            '0 6px 18px oklch(0.5 0.12 50 / 0.35), inset 0 1px 0 oklch(1 0 0 / 0.25)',
+          boxShadow: '0 4px 12px rgba(196,106,61,0.3)',
         }}
         whileTap={{ scale: 0.92 }}
         initial={{ scale: 0, opacity: 0 }}

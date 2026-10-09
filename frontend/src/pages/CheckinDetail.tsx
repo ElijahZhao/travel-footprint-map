@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays } from 'lucide-react'
-import { Postmark } from '@/components/TravelDecor'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -110,7 +109,7 @@ export default function CheckinDetail() {
               )}
             </div>
             {isWish ? (
-              <Badge variant="outline" className="shrink-0 gap-1" style={{ color: 'var(--family)', borderColor: 'var(--family)' }}>
+              <Badge variant="outline" className="shrink-0 gap-1" style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}>
                 <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿单')}
               </Badge>
             ) : (
@@ -144,7 +143,6 @@ export default function CheckinDetail() {
                       <p className="font-medium">{checkin.visit_date}</p>
                     </div>
                   </div>
-                  <Postmark date={checkin.visit_date} />
                 </div>
               )}
               {checkin.rating > 0 && (

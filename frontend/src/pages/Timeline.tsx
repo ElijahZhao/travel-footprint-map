@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Plane } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
 
@@ -30,7 +30,18 @@ function isMonthKey(key: string) {
   return /^\d{4}-\d{2}$/.test(key)
 }
 
-/** 单个时间线节点卡片 */
+function Stars({ n }: { n: number }) {
+  if (!n) return null
+  return (
+    <span className="flex items-center gap-0.5" style={{ color: 'var(--accent)' }}>
+      {Array.from({ length: n }).map((_, i) => (
+        <Star key={i} className="h-3 w-3" fill="currentColor" />
+      ))}
+    </span>
+  )
+}
+
+/** 单个时间线节点 — 大照片 + 文字 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -40,69 +51,64 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
 
   return (
     <motion.div
-      className="relative pl-8"
-      initial={{ opacity: 0, x: -18 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.4), ease }}
+      className="relative"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease }}
     >
-      {/* 时间轴节点 */}
-      <motion.span
-        className="absolute left-[7px] top-6 h-3 w-3 rounded-full ring-4"
-        style={{ background: meta.hex, boxShadow: `0 0 0 3px color-mix(in oklab, ${meta.hex} 22%, transparent)` }}
-        initial={{ scale: 0 }}
-        whileInView={{ scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ type: 'spring', stiffness: 400, damping: 18, delay: Math.min(index * 0.06, 0.4) }}
-      />
-
       <button
         onClick={() => navigate(`/checkin/${item.id}`)}
-        className="card-paper flex w-full items-stretch gap-3 overflow-hidden rounded-2xl p-2.5 text-left"
+        className="block w-full overflow-hidden rounded-xl text-left"
         style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
       >
-        {/* 照片 / 分类占位 */}
-        <div className="relative h-[74px] w-[74px] shrink-0 overflow-hidden rounded-2xl">
-          {item.photos?.length > 0 ? (
-            <img src={item.photos[0].url} alt={item.place_name} className="h-full w-full object-cover" />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center"
-              style={{ background: `color-mix(in oklab, ${meta.hex} 18%, var(--secondary))`, color: meta.hex }}
-            >
-              <Icon className="h-7 w-7" />
-            </div>
-          )}
-          {!isWish && item.rating > 0 && (
-            <span className="absolute bottom-1 right-1 rounded-full bg-black/55 px-1 text-[10px] font-semibold text-white">
-              {item.rating}.0
-            </span>
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate font-semibold">{item.place_name}</p>
+        {/* 大照片 — 占满宽度 */}
+        {item.photos?.length > 0 ? (
+          <div className="relative">
+            <img
+              src={item.photos[0].url}
+              alt={item.place_name}
+              className="h-48 w-full object-cover"
+            />
             {isWish && (
-              <Heart className="h-3 w-3 shrink-0" style={{ color: 'var(--family)' }} fill="currentColor" />
+              <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
+                <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿')}
+              </span>
             )}
           </div>
+        ) : (
+          <div
+            className="flex h-32 w-full items-center justify-center"
+            style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
+          >
+            <Icon className="h-12 w-12" />
+          </div>
+        )}
+
+        <div className="space-y-1.5 p-4">
+          <div className="flex items-start justify-between gap-2">
+            <p className="truncate font-semibold text-base">{item.place_name}</p>
+            <Stars n={item.rating} />
+          </div>
+
           {item.address && (
-            <p className="flex items-center gap-1 truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="flex items-center gap-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">{item.address}</span>
             </p>
           )}
+
           {item.mood_text && (
-            <p className="line-clamp-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="line-clamp-2 text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
               {item.mood_text}
             </p>
           )}
-          <div className="mt-0.5 flex items-center gap-2">
-            <CategoryTag label={t(meta.label)} icon={Icon} color={meta.hex} />
+
+          <div className="flex items-center gap-2 pt-1">
+            <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
             {item.visit_date && (
               <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                {item.visit_date.slice(5)}
+                {item.visit_date}
               </span>
             )}
           </div>
@@ -125,7 +131,6 @@ export default function Timeline() {
   }, [loading, user, guest, enterGuest])
 
   const kw = keyword.trim().toLowerCase()
-
   const visited = useMemo(() => {
     const base = checkins
       .filter((c) => c.status === 'visited')
@@ -135,28 +140,30 @@ export default function Timeline() {
       (c) => c.place_name.toLowerCase().includes(kw) || (c.address ?? '').toLowerCase().includes(kw),
     )
   }, [checkins, kw])
+
   const wishes = useMemo(() => checkins.filter((c) => c.status === 'wish'), [checkins])
   const groups = useMemo(() => groupByMonth(visited), [visited])
   const searching = kw.length > 0
 
   if (!loading && !user && !guest) {
     return (
-      <div className="page-bg paper-texture flex min-h-full items-center justify-center px-6">
+      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'var(--background)' }}>
         <EmptyState icon={LogIn} title={t('登录后查看时间线')} description={t('按时间回顾你的每一次出发。')} />
       </div>
     )
   }
 
   return (
-    <div className="page-bg paper-texture min-h-full px-4 pb-28 pt-5">
-      <main className="relative z-10 space-y-6">
+    <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+      <main className="space-y-8">
+        {/* 页面标题 */}
         <FadeIn>
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="text-grad-vivid font-bold tracking-tight" style={{ fontSize: 'var(--font-size-headline)' }}>
+              <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
                 {t('时间线')}
               </h1>
-              <p className="mt-0.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+              <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                 {searching ? t('找到 {{n}} 段旅程', { n: visited.length }) : t('共 {{n}} 段旅程，慢慢回看', { n: visited.length })}
               </p>
             </div>
@@ -167,14 +174,15 @@ export default function Timeline() {
                 setSearchOpen((v) => !v)
                 if (searchOpen) setKeyword('')
               }}
-              className="glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition active:scale-95"
-              style={{ color: 'var(--primary)' }}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--primary)' }}
             >
-              <Search className="h-4.5 w-4.5" />
+              <Search className="h-4 w-4" />
             </button>
           </div>
         </FadeIn>
 
+        {/* 搜索框 */}
         <AnimatePresence initial={false}>
           {searchOpen && (
             <motion.div
@@ -182,10 +190,10 @@ export default function Timeline() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22, ease }}
+              transition={{ duration: 0.2, ease }}
               className="overflow-hidden"
             >
-              <div className="relative pt-1">
+              <div className="relative">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
                   style={{ color: 'var(--muted-foreground)' }}
@@ -217,6 +225,7 @@ export default function Timeline() {
           )}
         </AnimatePresence>
 
+        {/* 空状态 */}
         {searching && visited.length === 0 ? (
           <EmptyState
             illustration={<TravelIllustration scene="timeline" className="h-24 w-24" />}
@@ -231,21 +240,19 @@ export default function Timeline() {
           />
         ) : (
           <>
+            {/* 按月份分组 */}
             {groups.map(([month, items]) => (
-              <section key={month} className="space-y-3">
-                {/* 年月分组标题：衬线大字 + 滚动吸顶，编辑式节奏 */}
-                <FadeIn duration={0.4} className="sticky top-1 z-20 -mx-4 px-4 pt-1">
-                  <div
-                    className="flex items-end justify-between rounded-2xl px-3 py-2 backdrop-blur-md"
-                    style={{ background: 'color-mix(in oklab, var(--background) 80%, transparent)' }}
-                  >
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-display text-5xl font-black leading-none text-grad-vivid">
+              <section key={month} className="space-y-4">
+                {/* 月份大标题 — 杂志期号感 */}
+                <FadeIn duration={0.4}>
+                  <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-5xl font-black leading-none" style={{ color: 'var(--primary)' }}>
                         {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
                       </span>
-                      {isMonthKey(month) && <span className="text-lg font-semibold">{t('月')}</span>}
+                      {isMonthKey(month) && <span className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{t('月')}</span>}
                       {isMonthKey(month) && (
-                        <span className="ml-1.5 text-[11px] tracking-[0.2em]" style={{ color: 'var(--muted-foreground)' }}>
+                        <span className="ml-2 text-xs tracking-[0.15em]" style={{ color: 'var(--muted-foreground)' }}>
                           {month.split('-')[0]}
                         </span>
                       )}
@@ -256,16 +263,8 @@ export default function Timeline() {
                   </div>
                 </FadeIn>
 
-                {/* 时间轴主线（实线）+ 起点小飞机 */}
-                <div className="relative space-y-3">
-                  <span
-                    className="absolute bottom-6 left-[12px] top-2 w-px rounded-full"
-                    style={{ background: 'color-mix(in oklab, var(--primary) 45%, transparent)' }}
-                  />
-                  <Plane
-                    className="absolute left-[6px] top-0 z-10 h-4 w-4 -rotate-[18deg]"
-                    style={{ color: 'var(--primary)' }}
-                  />
+                {/* 打卡列表 — 大照片卡片 */}
+                <div className="space-y-4">
                   {items.map((c, i) => (
                     <TimelineItem key={c.id} item={c} index={i} />
                   ))}
@@ -273,29 +272,19 @@ export default function Timeline() {
               </section>
             ))}
 
+            {/* 心愿单 */}
             {wishes.length > 0 && (
-              <section className="space-y-3">
+              <section className="space-y-4">
                 <FadeIn duration={0.4}>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white"
-                      style={{ background: 'var(--family)' }}
-                    >
-                      <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿单')}
-                    </span>
-                    <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
-                    <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+                    <Heart className="h-4 w-4" style={{ color: 'var(--accent)' }} fill="currentColor" />
+                    <span className="font-display text-xl font-bold" style={{ color: 'var(--foreground)' }}>{t('心愿单')}</span>
+                    <span className="ml-auto text-xs" style={{ color: 'var(--muted-foreground)' }}>
                       {t('{{n}} 个', { n: wishes.length })}
                     </span>
                   </div>
                 </FadeIn>
-                <div className="relative space-y-3">
-                  <span
-                    className="absolute bottom-6 left-[12px] top-2 w-px rounded-full"
-                    style={{
-                      background: 'color-mix(in oklab, var(--family) 40%, transparent)',
-                    }}
-                  />
+                <div className="space-y-4">
                   {wishes.map((c, i) => (
                     <TimelineItem key={c.id} item={c} index={i} />
                   ))}
