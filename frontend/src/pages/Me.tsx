@@ -208,32 +208,16 @@ export default function Me() {
           </div>
         </FadeIn>
 
-        {/* 游客升级提示 */}
+        {/* 游客升级提示——一行小字 */}
         {guest && (
           <FadeIn>
-            <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-              <div className="flex items-start gap-3">
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
-                >
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">{t('升级为正式账号')}</p>
-                  <p className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    {t('打卡数据现已保存到本设备，换设备或清除浏览器缓存会丢失。')}
-                  </p>
-                </div>
-              </div>
-              <Button
-                className="mt-3 w-full rounded-lg"
-                onClick={() => navigate('/login')}
-                style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
-              >
-                {t('立即升级')}
-              </Button>
-            </div>
+            <button
+              onClick={() => navigate('/login')}
+              className="flex w-full items-center justify-center gap-1 py-1 text-xs"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {t('游客模式 · 登录后数据跨设备同步')} <span style={{ color: 'var(--primary)' }}>{t('去登录 →')}</span>
+            </button>
           </FadeIn>
         )}
 

@@ -167,18 +167,29 @@ export default function Timeline() {
                 {searching ? t('找到 {{n}} 段旅程', { n: visited.length }) : t('共 {{n}} 段旅程，慢慢回看', { n: visited.length })}
               </p>
             </div>
-            <button
-              type="button"
-              aria-label={t('搜索足迹')}
-              onClick={() => {
-                setSearchOpen((v) => !v)
-                if (searchOpen) setKeyword('')
-              }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--primary)' }}
-            >
-              <Search className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                aria-label={t('心愿清单')}
+                onClick={() => navigate('/wishlist')}
+                className="flex h-10 w-10 items-center justify-center rounded-full"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--accent)' }}
+              >
+                <Heart className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                aria-label={t('搜索足迹')}
+                onClick={() => {
+                  setSearchOpen((v) => !v)
+                  if (searchOpen) setKeyword('')
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-full"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--primary)' }}
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </FadeIn>
 

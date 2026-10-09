@@ -196,18 +196,20 @@ export default function TravelMap({
       const geometries: any[] = []
 
       checkins.forEach((c) => {
-        const meta = categoryMeta(c.category)
-        if (!styles[meta.key]) {
-          styles[meta.key] = new (window as any).TMap.MarkerStyle({
+        const isWish = c.status === 'wish'
+        const color = isWish ? '#C46A3D' : '#2D5A3D'
+        const styleKey = isWish ? 'wish' : 'visited'
+        if (!styles[styleKey]) {
+          styles[styleKey] = new (window as any).TMap.MarkerStyle({
             width: 32,
             height: 40,
-            src: pinSvg(meta.hex),
+            src: pinSvg(color),
             anchor: { x: 16, y: 40 },
           })
         }
         geometries.push({
           id: String(c.id),
-          styleId: meta.key,
+          styleId: styleKey,
           position: new (window as any).TMap.LatLng(c.lat, c.lng),
           properties: { id: c.id },
         })

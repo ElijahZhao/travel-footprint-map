@@ -63,23 +63,8 @@ export default function Index() {
       <div className="relative min-h-0 flex-1">
         <TravelMap checkins={filtered} fill />
 
-        {/* 顶部浮层：简洁标签 + 筛选按钮 */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start gap-2 p-3">
-          <div
-            className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"
-            style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--foreground)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
-          >
-            <MapPin className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} /> {t('我的旅行地图')}
-          </div>
-          {guest && (
-            <span
-              className="pointer-events-auto flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium"
-              style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--accent)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
-            >
-              <UserRound className="h-3 w-3" /> {t('游客体验')}
-            </span>
-          )}
-          <span className="flex-1" />
+        {/* 顶部浮层：只保留筛选按钮 */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-end p-3">
           <button
             type="button"
             onClick={() => setFilterOpen((v) => !v)}

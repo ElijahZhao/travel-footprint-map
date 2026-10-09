@@ -1,18 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Clock, Heart, BarChart3, User, Plus, type LucideIcon } from 'lucide-react'
+import { MapPin, Clock, BarChart3, User, Plus, type LucideIcon } from 'lucide-react'
 
 const TABS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/', label: '地图', icon: MapPin },
   { to: '/timeline', label: '时间线', icon: Clock },
-  // 中间 FAB 占位，不渲染 tab
-  { to: '/wishlist', label: '心愿', icon: Heart },
+  // 中间位置留给 FAB
   { to: '/stats', label: '统计', icon: BarChart3 },
   { to: '/me', label: '我的', icon: User },
 ]
 
-/** 底部导航：5 tab + 中央橙色 FAB（记录打卡）。选中态用图标变色 + 底部短横线，不再用渐变圆角块。 */
+/** 底部导航：4 tab + 中央 FAB。心愿页从时间线页进入。 */
 export default function BottomNav() {
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -52,7 +51,6 @@ export default function BottomNav() {
             >
               {t(item.label)}
             </span>
-            {/* 底部短横线指示器（只在选中时显示） */}
             {active && (
               <motion.span
                 layoutId="nav-underline"
@@ -65,23 +63,26 @@ export default function BottomNav() {
         )
       })}
 
-      {/* 中央 FAB：悬浮在导航顶部边缘，主行动点——记录打卡 */}
-      <motion.button
-        type="button"
-        aria-label={t('记录打卡')}
-        onClick={() => navigate('/checkin/new')}
-        className="absolute left-1/2 top-0 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white"
-        style={{
-          background: 'var(--accent)',
-          boxShadow: '0 2px 8px rgba(43,36,32,0.15)',
-        }}
-        whileTap={{ scale: 0.92 }}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      >
-        <Plus className="h-6 w-6" strokeWidth={2.5} />
-      </motion.button>
+      {/* 中央 FAB：占据导航中间位置，主行动点——记录打卡 */}
+      <div className="relative flex flex-1 items-center justify-center">
+        <motion.button
+          type="button"
+          aria-label={t('记录打卡')}
+          onClick={() => navigate('/checkin/new')}
+          className="flex h-12 w-12 items-center justify-center rounded-full text-white"
+          style={{
+            background: 'var(--accent)',
+            boxShadow: '0 2px 8px rgba(43,36,32,0.15)',
+            marginTop: '-20px',
+          }}
+          whileTap={{ scale: 0.92 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+          <Plus className="h-5 w-5" strokeWidth={2.5} />
+        </motion.button>
+      </div>
     </nav>
   )
 }
