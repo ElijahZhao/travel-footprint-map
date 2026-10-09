@@ -22,9 +22,8 @@ export default function BottomNav() {
     <nav
       className="relative z-40 flex shrink-0 items-stretch border-t pb-[env(safe-area-inset-bottom)]"
       style={{
-        background: 'color-mix(in oklab, var(--card) 94%, transparent)',
+        background: 'var(--card)',
         borderColor: 'var(--border)',
-        backdropFilter: 'blur(14px)',
       }}
     >
       {TABS.map((item) => {
@@ -74,7 +73,7 @@ export default function BottomNav() {
         className="absolute left-1/2 top-0 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white"
         style={{
           background: 'var(--accent)',
-          boxShadow: '0 4px 12px rgba(196,106,61,0.3)',
+          boxShadow: '0 2px 8px rgba(43,36,32,0.15)',
         }}
         whileTap={{ scale: 0.92 }}
         initial={{ scale: 0, opacity: 0 }}

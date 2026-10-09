@@ -25,8 +25,8 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
   return (
     <Link to={to ?? `/checkin/${checkin.id}`} className="block">
       <div
-        className="overflow-hidden rounded-xl"
-        style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+        className="overflow-hidden rounded-2xl"
+        style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.04)' }}
       >
         {/* 封面照片 — 占满宽度，无白边 */}
         {checkin.photos?.length > 0 ? (

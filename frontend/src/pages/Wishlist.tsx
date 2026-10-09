@@ -44,10 +44,11 @@ function WishCard({ item, lit, index, onComplete }: { item: Checkin; lit: boolea
         role="button"
         tabIndex={0}
         onClick={() => navigate(`/checkin/${item.id}`)}
-        className="flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-xl p-3 text-left"
+        className="flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl p-3 text-left"
         style={{
-          background: lit ? 'var(--card)' : 'var(--card)',
-          border: `1px solid ${lit ? 'var(--border)' : 'var(--border)'}`,
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 1px 3px rgba(43,36,32,0.04)',
           opacity: lit ? 1 : 0.85,
         }}
       >
@@ -196,7 +197,7 @@ export default function Wishlist() {
 
         {/* 点亮进度 + 省份 */}
         <FadeIn>
-          <div className="rounded-xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.04)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" style={{ color: 'var(--primary)' }} />
