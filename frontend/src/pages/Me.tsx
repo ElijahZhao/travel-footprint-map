@@ -47,7 +47,7 @@ function SettingRow({
     <div
       onClick={onClick}
       className={`flex w-full items-center gap-3 p-3.5 ${onClick ? 'cursor-pointer' : ''}`}
-      style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+      style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '16px' }}
     >
       <span
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
@@ -169,7 +169,7 @@ export default function Me() {
       <main className="space-y-6">
         {/* 头像与身份 */}
         <FadeIn>
-          <div className="overflow-hidden rounded-xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div className="overflow-hidden rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-4">
               <motion.div
                 className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-xl font-bold text-white"
@@ -211,7 +211,7 @@ export default function Me() {
         {/* 游客升级提示 */}
         {guest && (
           <FadeIn>
-            <div className="rounded-xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
               <div className="flex items-start gap-3">
                 <span
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
@@ -239,7 +239,7 @@ export default function Me() {
 
         {/* 成就徽章 */}
         <FadeIn>
-          <div className="rounded-xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div className="rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Award className="h-4 w-4" style={{ color: 'var(--primary)' }} />

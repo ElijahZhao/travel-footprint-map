@@ -163,7 +163,7 @@ export default function Stats() {
               { n: furthest ? furthest.km : s.visited, label: furthest ? t('公里外的远方') : t('段足迹') },
             ].map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="font-display text-4xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
+                <div className="font-display text-5xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
                   <CountUp value={stat.n} />
                 </div>
                 <div className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -280,7 +280,7 @@ export default function Stats() {
                 return (
                   <span
                     key={p}
-                    className="rounded-md px-2 py-0.5 text-[11px] font-medium"
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
                     style={{
                       background: lit ? 'var(--primary)' : 'var(--secondary)',
                       color: lit ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
@@ -309,7 +309,7 @@ export default function Stats() {
                   return (
                     <motion.div
                       key={c.id}
-                      className="overflow-hidden rounded-xl"
+                      className="overflow-hidden rounded-2xl"
                       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
                       initial={{ opacity: 0, y: 12 }}
                       whileInView={{ opacity: 1, y: 0 }}

@@ -234,7 +234,7 @@ export default function Wishlist() {
                   return (
                     <span
                       key={p}
-                      className="rounded-md px-2 py-0.5 text-[11px] font-medium"
+                      className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
                       style={{
                         background: lit ? 'var(--primary)' : 'var(--secondary)',
                         color: lit ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
