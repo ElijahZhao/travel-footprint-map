@@ -220,7 +220,7 @@ export default function Wishlist() {
                 transition={{ duration: 0.8, ease: 'easeOut' }}
               />
             </div>
-            {/* 省份点亮 */}
+            {/* 省份点亮——只显示已点亮的 */}
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium">{t('省份点亮')}</span>
@@ -229,21 +229,18 @@ export default function Wishlist() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {PROVINCES.map((p) => {
-                  const lit = litProvinces.has(p)
-                  return (
-                    <span
-                      key={p}
-                      className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
-                      style={{
-                        background: lit ? 'var(--primary)' : 'var(--secondary)',
-                        color: lit ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
-                      }}
-                    >
-                      {p}
-                    </span>
-                  )
-                })}
+                {PROVINCES.filter(p => litProvinces.has(p)).map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                    style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+                  >
+                    {p}
+                  </span>
+                ))}
+                {litProvinces.size === 0 && (
+                  <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>{t('还没有点亮省份')}</span>
+                )}
               </div>
             </div>
           </div>

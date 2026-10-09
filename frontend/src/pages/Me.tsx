@@ -172,7 +172,7 @@ export default function Me() {
           <div className="overflow-hidden rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-4">
               <motion.div
-                className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-xl font-bold text-white"
+                className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
                 style={{ background: 'var(--primary)' }}
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}

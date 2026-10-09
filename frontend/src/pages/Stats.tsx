@@ -155,18 +155,18 @@ export default function Stats() {
 
         {/* 核心数字 — 大数字横排，不用卡片 */}
         <FadeIn>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
+          <div className="flex justify-between gap-2">
             {[
               { n: s.visited, label: t('段足迹') },
               { n: s.cities, label: t('座城市') },
               { n: litProvinces.size, label: t('个省份') },
-              { n: furthest ? furthest.km : s.visited, label: furthest ? t('公里外的远方') : t('段足迹') },
+              { n: furthest ? furthest.km : s.visited, label: furthest ? t('公里远方') : t('段足迹') },
             ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="font-display text-5xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
+              <div key={i} className="flex-1 text-center">
+                <div className="font-display text-4xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
                   <CountUp value={stat.n} />
                 </div>
-                <div className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                <div className="mt-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                   {stat.label}
                 </div>
               </div>

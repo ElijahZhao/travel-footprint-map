@@ -62,7 +62,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
         className="block w-full overflow-hidden rounded-2xl text-left"
         style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.04)' }}
       >
-        {/* 大照片 — 占满宽度 */}
+        {/* 大照片 — 占满宽度；无照片时直接文字卡片 */}
         {item.photos?.length > 0 ? (
           <div className="relative">
             <img
@@ -76,18 +76,16 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
               </span>
             )}
           </div>
-        ) : (
-          <div
-            className="flex h-32 w-full items-center justify-center"
-            style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
-          >
-            <Icon className="h-12 w-12" />
-          </div>
-        )}
+        ) : null}
 
         <div className="space-y-1.5 p-4">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate font-semibold text-base">{item.place_name}</p>
+            <div className="flex min-w-0 items-center gap-2">
+              {!item.photos?.length && (
+                <Icon className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
+              )}
+              <p className="truncate font-semibold text-base">{item.place_name}</p>
+            </div>
             <Stars n={item.rating} />
           </div>
 
