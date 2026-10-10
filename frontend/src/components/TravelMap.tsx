@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
-import { categoryMeta } from '@/lib/categories'
 import { useTranslation } from 'react-i18next'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */

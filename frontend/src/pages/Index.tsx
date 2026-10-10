@@ -8,7 +8,7 @@ import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import BottomSheet from '@/components/BottomSheet'
-import { MapPin, Plus, UserRound, List, SlidersHorizontal, X } from 'lucide-react'
+import { Plus, UserRound, List, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -126,7 +126,7 @@ export default function Index() {
 
         <BottomSheet open={listOpen} onClose={() => setListOpen(false)} title="我的足迹">
           {isLoading ? (
-            <p className="py-10 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>加载中…</p>
+            <p className="py-10 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
           ) : filtered.length === 0 ? (
             <EmptyState
               illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}

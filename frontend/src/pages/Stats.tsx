@@ -8,7 +8,7 @@ import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Globe2, Sparkles, BarChart3, CalendarRange } from 'lucide-react'
+import { MapPin, Globe2, BarChart3, CalendarRange } from 'lucide-react'
 
 /** 两点间距离（km） */
 function haversineKm(a: { lng: number; lat: number }, b: { lng: number; lat: number }) {
@@ -33,8 +33,6 @@ function provinceOf(address?: string | null): string | null {
   for (const p of PROVINCES) if (address.startsWith(p)) return p
   return null
 }
-
-const ease = [0.25, 0.46, 0.45, 0.94] as const
 
 export default function Stats() {
   const { t } = useTranslation()
@@ -95,6 +93,9 @@ export default function Stats() {
     return { place: best.place_name, year: y, month: Number(m), km: Math.round(bestD) }
   }, [visited])
 
+  const fourthStat = furthest
+    ? { n: furthest.km, label: t('公里外的远方') }
+    : { n: byCategory.filter((c) => c.count > 0).length, label: t('类足迹') }
   const heroSentence = furthest
     ? t('这一年走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。', { year: furthest.year, month: furthest.month, place: furthest.place })
     : t('你已在 {{cities}} 座城市，留下 {{visited}} 段旅程。', { cities: s.cities, visited: s.visited })
@@ -160,7 +161,7 @@ export default function Stats() {
               { n: s.visited, label: t('段足迹') },
               { n: s.cities, label: t('座城市') },
               { n: litProvinces.size, label: t('个省份') },
-              { n: furthest ? furthest.km : s.visited, label: furthest ? t('公里远方') : t('段足迹') },
+              { ...fourthStat },
             ].map((stat, i) => (
               <div key={i} className="flex-1 text-center">
                 <div className="font-display text-4xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>

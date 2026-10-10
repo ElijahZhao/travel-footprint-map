@@ -271,7 +271,7 @@ export default function Me() {
             <SettingRow
               icon={Languages}
               title={t('语言')}
-              desc={lang === 'zh' ? 'Switch to English' : '切换到中文'}
+              desc={lang === 'zh' ? 'Switch to English' : t('切换到中文')}
               onClick={() => setLanguage(lang === 'zh' ? 'en' : 'zh')}
             />
             {!guest && (

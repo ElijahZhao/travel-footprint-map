@@ -47,7 +47,7 @@ export default function SharePage() {
 
         {isLoading ? (
           <p className="py-16 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            加载中…
+            {t('加载中…')}
           </p>
         ) : checkins.length === 0 ? (
           <EmptyState

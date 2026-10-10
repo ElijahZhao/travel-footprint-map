@@ -117,6 +117,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
 }
 
 export default function Timeline() {
+  const navigate = useNavigate()
   const { t } = useTranslation()
   const { user, guest, loading, enterGuest } = useAuth()
   const { data: checkins = [] } = useMyCheckins()

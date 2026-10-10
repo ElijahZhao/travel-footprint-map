@@ -277,6 +277,11 @@ const en = {
   '正在登录…': 'Signing in…',
   '登录成功后将自动跳转': 'You will be redirected after signing in',
   '登录失败，请重试': 'Sign-in failed, please retry',
+
+  // ===== misc / leaks =====
+  '切换到中文': 'Switch to Chinese',
+  '类足迹': 'Categories',
+  '删除打卡': 'Delete check-in',
 }
 
 export default en

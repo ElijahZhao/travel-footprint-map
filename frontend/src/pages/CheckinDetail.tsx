@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/lib/AuthContext'
 import { useCheckin, useDeleteCheckin } from '@/lib/hooks'
@@ -8,6 +9,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -19,6 +31,7 @@ export default function CheckinDetail() {
   const { user, guest } = useAuth()
   const { data: checkin, isLoading } = useCheckin(id ? Number(id) : null)
   const delMut = useDeleteCheckin()
+  const [delOpen, setDelOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -45,7 +58,6 @@ export default function CheckinDetail() {
   const isOwner = guest || (user?.uid && checkin.user_id === user.uid)
 
   const onDelete = async () => {
-    if (!confirm(t('确定删除这条打卡记录吗？'))) return
     try {
       await delMut.mutateAsync(checkin.id)
       toast.success(t('已删除'))
@@ -183,14 +195,32 @@ export default function CheckinDetail() {
             >
               <Pencil className="h-4 w-4" /> {t('编辑')}
             </Button>
-            <Button
-              variant="ghost"
-              className="h-11 flex-1 gap-1 rounded-full"
-              style={{ color: 'var(--destructive)' }}
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4" /> {t('删除')}
-            </Button>
+            <AlertDialog open={delOpen} onOpenChange={setDelOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-11 flex-1 gap-1 rounded-full"
+                  style={{ color: 'var(--destructive)' }}
+                >
+                  <Trash2 className="h-4 w-4" /> {t('删除')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="card-paper" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('删除打卡')}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('确定删除这条打卡记录吗？')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('取消')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={onDelete}
+                    style={{ background: 'var(--destructive)', color: 'white' }}
+                  >
+                    {t('删除')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </main>
