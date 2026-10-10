@@ -84,6 +84,43 @@ export default function TravelMap({
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [locState, setLocState] = useState<LocState>('idle')
   const navigate = useNavigate()
+  /** 已框进视野的足迹数量，仅在新增时重新缩放到全部标记，避免浏览时镜头乱跳 */
+  const fittedCountRef = useRef(0)
+
+  /** 把所有足迹缩放进视野；只有单点时给个合适缩放 */
+  const fitToCheckins = useCallback((list: Checkin[]) => {
+    const map = mapRef.current
+    if (!map || list.length === 0) return
+    const TMap = (window as any).TMap
+    try {
+      if (list.length === 1) {
+        const c = list[0]
+        map.setCenter(new TMap.LatLng(c.lat, c.lng))
+        map.setZoom(12)
+        return
+      }
+      let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180
+      list.forEach((c) => {
+        minLat = Math.min(minLat, c.lat)
+        maxLat = Math.max(maxLat, c.lat)
+        minLng = Math.min(minLng, c.lng)
+        maxLng = Math.max(maxLng, c.lng)
+      })
+      const sw = new TMap.LatLng(minLat, minLng)
+      const ne = new TMap.LatLng(maxLat, maxLng)
+      if (TMap.LatLngBounds) {
+        map.fitBounds(new TMap.LatLngBounds(sw, ne), { padding: 80 })
+      } else {
+        throw new Error('no LatLngBounds')
+      }
+    } catch {
+      // 兜底：居中到所有点的几何中心
+      if (list.length) {
+        const c = list[Math.floor(list.length / 2)]
+        map.setCenter(new TMap.LatLng(c.lat, c.lng))
+      }
+    }
+  }, [])
 
   const recenterToUser = useCallback((lat?: number, lng?: number) => {
     const map = mapRef.current
@@ -224,6 +261,12 @@ export default function TravelMap({
         if (id != null) navigate(`${linkPrefix}${id}`)
       })
       markersRef.current = markerLayer
+
+      // 新增打卡时自动缩放到包含所有足迹
+      if (checkins.length > fittedCountRef.current) {
+        fitToCheckins(checkins)
+      }
+      fittedCountRef.current = checkins.length
     } catch (e) {
       // 标记渲染失败不应阻塞地图
       console.warn('marker render failed', e)

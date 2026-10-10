@@ -74,6 +74,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   const [aiLoading, setAiLoading] = useState(false)
   const [resolving, setResolving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const searchSeq = useRef(0)
 
   useEffect(() => {
     if (existing) {
@@ -105,6 +106,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       setResults([])
       return
     }
+    const my = ++searchSeq.current
     const timer = window.setTimeout(async () => {
       setSearching(true)
       try {
@@ -113,12 +115,12 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
           pageSize: 10,
           pageIndex: 1,
         })
+        if (my !== searchSeq.current) return // 已有更新的输入，丢弃旧结果
         setResults(res.data ?? [])
       } catch {
-        // 自动搜索失败不打扰用户，用户点按钮/回车时会给出完整提示
-        setResults([])
+        if (my === searchSeq.current) setResults([])
       } finally {
-        setSearching(false)
+        if (my === searchSeq.current) setSearching(false)
       }
     }, 400)
     return () => window.clearTimeout(timer)
