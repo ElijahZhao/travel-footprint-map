@@ -20,7 +20,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays } from 'lucide-react'
+import { Star, MapPin, Pencil, Trash2, Heart, CheckCircle2, Share2, CalendarDays, Repeat2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -215,6 +215,13 @@ export default function CheckinDetail() {
 
         {isOwner && (
           <div className="flex gap-2 pb-2">
+            <Button
+              className="h-11 flex-1 gap-1 rounded-full"
+              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              onClick={() => navigate(`/checkin/new?from=${checkin.id}`)}
+            >
+              <Repeat2 className="h-4 w-4" /> {t('又来了')}
+            </Button>
             {checkin.is_public && (
               <Button variant="outline" className="h-11 flex-1 gap-1 rounded-full" onClick={onShare}>
                 <Share2 className="h-4 w-4" /> {t('分享')}

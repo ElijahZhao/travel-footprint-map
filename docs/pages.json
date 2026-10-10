@@ -5,6 +5,11 @@
     "url": "/"
   },
   {
+    "pageKey": "Album",
+    "title": "足迹相册",
+    "url": "/album"
+  },
+  {
     "pageKey": "AuthCallback",
     "title": "登录回调",
     "url": "/auth/callback"
@@ -33,6 +38,11 @@
     "pageKey": "Me",
     "title": "我的",
     "url": "/me"
+  },
+  {
+    "pageKey": "Report",
+    "title": "年度旅行报告",
+    "url": "/report"
   },
   {
     "pageKey": "Share",

@@ -169,6 +169,17 @@ const en = {
   '共 {{n}} 段旅程，慢慢回看': '{{n}} trips in total, revisit them slowly',
   '搜索地点或地址，如「大理」': 'Search a place or address, e.g. Dali',
   '清空搜索': 'Clear search',
+  // 搜索直达打卡
+  '搜索打卡': 'Search check-ins',
+  '搜索': 'Search',
+  '搜索地点、地址或标签': 'Search places, addresses or tags',
+  '没有匹配的打卡': 'No matching check-ins',
+  '查看详情': 'View details',
+  // 又来了
+  '又来了': 'Been here again',
+  // 相册水印保存
+  '保存图片': 'Save photo',
+  '照片跨域受限，已打开原图': 'Photo is cross-origin restricted; opened the original instead',
   '没有找到相关地点': 'No matching places found',
   '没有匹配「{{kw}}」的旅程，换个关键词试试。': 'No trips match “{{kw}}”, try another keyword.',
   '还没有记录': 'No records yet',

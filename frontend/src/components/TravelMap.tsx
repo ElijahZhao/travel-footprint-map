@@ -139,6 +139,8 @@ interface TravelMapProps {
   fill?: boolean
   /** 附加 className（覆盖默认布局样式） */
   className?: string
+  /** 外部定位请求（如搜索直达）：nonce 变化时平移到该点 */
+  focus?: { lat: number; lng: number; nonce: number } | null
 }
 
 type LocState = 'idle' | 'locating' | 'ready' | 'denied' | 'unsupported' | 'error'
@@ -174,6 +176,7 @@ export default function TravelMap({
   showUserLocation = true,
   fill = false,
   className,
+  focus,
 }: TravelMapProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -384,6 +387,17 @@ export default function TravelMap({
       locateOnly()
     }
   }, [status, showUserLocation, locState, locateOnly])
+
+  // 外部定位请求（搜索直达）：平移到目标点并放大
+  useEffect(() => {
+    const map = mapRef.current
+    const TMap = (window as any).TMap
+    if (!map || !TMap || status !== 'ready' || !focus) return
+    try {
+      map.setCenter(new TMap.LatLng(focus.lat, focus.lng))
+      map.setZoom(Math.max(map.getZoom?.() ?? 4, 13))
+    } catch {}
+  }, [focus?.nonce, status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 同步标记点（含聚合）
   useEffect(() => {

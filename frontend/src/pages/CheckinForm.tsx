@@ -64,6 +64,9 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: existing, isLoading: loadingExisting } = useCheckin(isEdit ? Number(id) : null)
+  /** 「又来了」：从详情页带 id 进入，预填上次的地点信息，只写新心情 */
+  const fromId = !isEdit && params.get('from') ? Number(params.get('from')) : null
+  const { data: prefill } = useCheckin(fromId)
   const createMut = useCreateCheckin()
   const updateMut = useUpdateCheckin()
 
@@ -99,6 +102,24 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       setPhotos(existing.photos ?? [])
     }
   }, [existing, completeWish])
+
+  // 「又来了」预填：地点/分类/标签沿用上次，心情与照片清空，日期为今天
+  useEffect(() => {
+    if (!prefill || form.place_name) return
+    const today = new Date().toISOString().slice(0, 10)
+    setForm((f) => ({
+      ...f,
+      place_name: prefill.place_name,
+      address: prefill.address ?? '',
+      category: prefill.category,
+      status: 'visited',
+      visit_date: today,
+      tags: (prefill.tags ?? []).join(', '),
+      nation: prefill.nation ?? null,
+      lng: prefill.lng,
+      lat: prefill.lat,
+    }))
+  }, [prefill]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }))

@@ -7,13 +7,73 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import WavyUnderline from '@/components/WavyUnderline'
 import { FadeIn } from '@/components/MotionPrimitives'
-import { LogIn } from 'lucide-react'
+import { LogIn, Download } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
 
 interface PhotoItem {
   url: string
   checkin: Checkin
+}
+
+/** 把「地名 · 日期 · 小徽标」烙进照片，再触发下载；跨域失败时退化为打开原图 */
+async function downloadWatermarked(url: string, place: string, date: string, fallbackMsg: string) {
+  try {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.src = url
+    await img.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('no 2d context')
+    ctx.drawImage(img, 0, 0)
+    // 尺寸随图片缩放（以 800px 宽为基准）
+    const s = Math.max(0.7, canvas.width / 800)
+    const pad = 14 * s
+    const r = 9 * s // 圆形徽标半径
+    ctx.font = `600 ${15 * s}px Inter, system-ui, sans-serif`
+    const label = `${place}${date ? ` · ${date}` : ''}`
+    const tw = ctx.measureText(label).width
+    const barW = tw + pad * 2 + r * 2 + 6 * s
+    const barH = r * 2 + pad * 0.9
+    const x = pad
+    const y = canvas.height - barH - pad
+    // 半透明白底圆角条
+    ctx.fillStyle = 'rgba(255,255,255,0.82)'
+    ctx.beginPath()
+    ctx.roundRect(x, y, barW, barH, barH / 2)
+    ctx.fill()
+    // 苹果绿小圆徽标 + 白色纸飞机（简化为三角）
+    const cx = x + pad + r
+    const cy = y + barH / 2
+    ctx.fillStyle = '#38A05F'
+    ctx.beginPath()
+    ctx.arc(cx, cy, r, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = '#ffffff'
+    ctx.beginPath()
+    ctx.moveTo(cx - r * 0.45, cy + r * 0.35)
+    ctx.lineTo(cx + r * 0.55, cy - r * 0.05)
+    ctx.lineTo(cx - r * 0.45, cy - r * 0.25)
+    ctx.closePath()
+    ctx.fill()
+    // 文字
+    ctx.fillStyle = '#2B2420'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(label, cx + r + 6 * s, cy + 1)
+    const dataUrl = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = `${place}${date ? `-${date}` : ''}.png`
+    a.click()
+  } catch {
+    // 画布被跨域污染等场景：退化为直接打开原图
+    toast.error(fallbackMsg)
+    window.open(url, '_blank')
+  }
 }
 
 /** 足迹相册：所有打卡照片按时间流排成瀑布照片墙，点开进详情 */
@@ -72,7 +132,7 @@ export default function Album() {
                 key={`${ph.checkin.id}-${i}`}
                 type="button"
                 onClick={() => navigate(`/checkin/${ph.checkin.id}`)}
-                className="mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl text-left"
+                className="relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl text-left"
                 style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.05)' }}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -80,6 +140,20 @@ export default function Album() {
                 transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.25) }}
               >
                 <img src={ph.url} alt={ph.checkin.place_name} loading="lazy" className="w-full object-cover" />
+                {/* 保存带水印的图片（地名+日期+小徽标） */}
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('保存图片')}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    downloadWatermarked(ph.url, ph.checkin.place_name, ph.checkin.visit_date ?? '', t('照片跨域受限，已打开原图'))
+                  }}
+                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+                  style={{ background: 'rgba(255,255,255,0.9)', color: 'var(--primary)' }}
+                >
+                  <Download className="h-4 w-4" />
+                </span>
                 <div className="px-2.5 py-2">
                   <p className="truncate text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
                     {ph.checkin.place_name}

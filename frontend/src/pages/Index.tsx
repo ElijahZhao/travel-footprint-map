@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins } from '@/lib/hooks'
+import type { Checkin } from '@/lib/types'
 import FilterBar, { type FilterValue } from '@/components/FilterBar'
 import TravelMap from '@/components/TravelMap'
 import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import BottomSheet from '@/components/BottomSheet'
-import { Plus, UserRound, List, SlidersHorizontal, X, Sparkles } from 'lucide-react'
+import { Plus, UserRound, List, SlidersHorizontal, X, Sparkles, Search, MapPin, ChevronRight } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -65,6 +67,30 @@ export default function Index() {
   }
   const annivYears = anniversary ? new Date().getFullYear() - Number((anniversary.visit_date || '').slice(0, 4)) : 0
 
+  /** 搜索直达打卡 */
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [keyword, setKeyword] = useState('')
+  const [searchHit, setSearchHit] = useState<Checkin | null>(null)
+  const [focus, setFocus] = useState<{ lat: number; lng: number; nonce: number } | null>(null)
+  const kw = keyword.trim().toLowerCase()
+  const searchResults = useMemo(() => {
+    if (!kw) return []
+    return filtered
+      .filter(
+        (c) =>
+          c.place_name.toLowerCase().includes(kw) ||
+          (c.address ?? '').toLowerCase().includes(kw) ||
+          (c.tags ?? []).some((tg) => tg.toLowerCase().includes(kw)),
+      )
+      .slice(0, 8)
+  }, [filtered, kw])
+  const goHit = (c: Checkin) => {
+    setSearchHit(c)
+    setSearchOpen(false)
+    setKeyword('')
+    setFocus({ lat: c.lat, lng: c.lng, nonce: Date.now() })
+  }
+
   if (!loading && !user && !guest) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center px-6" style={{ background: 'transparent' }}>
@@ -90,10 +116,21 @@ export default function Index() {
   return (
     <div className="relative flex h-full min-h-0 flex-col">
       <div className="relative min-h-0 flex-1">
-        <TravelMap checkins={filtered} fill />
+        <TravelMap checkins={filtered} fill focus={focus} />
 
-        {/* 顶部浮层：只保留筛选按钮 */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-end p-3">
+        {/* 顶部浮层：搜索 + 筛选 */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-end gap-2 p-3">
+          <button
+            type="button"
+            onClick={() => setSearchOpen((v) => !v)}
+            aria-label={t('搜索打卡')}
+            aria-expanded={searchOpen}
+            className="pointer-events-auto relative flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold"
+            style={{ background: 'rgba(255,255,255,0.92)', color: searchOpen ? 'var(--primary)' : 'var(--foreground)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+          >
+            <Search className="h-3.5 w-3.5" />
+            {t('搜索')}
+          </button>
           <button
             type="button"
             onClick={() => setFilterOpen((v) => !v)}
@@ -114,6 +151,107 @@ export default function Index() {
             )}
           </button>
         </div>
+
+        {/* 搜索面板：输入即搜，点结果地图直达 */}
+        {searchOpen && (
+          <div
+            className={`absolute inset-x-3 ${panelTop} z-30 max-h-[min(46dvh,300px)] overflow-y-auto overscroll-contain rounded-xl p-3`}
+            style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
+          >
+            <div className="relative mb-2">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--muted-foreground)' }} />
+              <Input
+                autoFocus
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder={t('搜索地点、地址或标签')}
+                className="rounded-full pl-9 pr-9"
+              />
+              {kw && (
+                <button
+                  type="button"
+                  aria-label={t('清空搜索')}
+                  onClick={() => setKeyword('')}
+                  className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full"
+                  style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            {kw && searchResults.length === 0 && (
+              <p className="py-4 text-center text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                {t('没有匹配的打卡')}
+              </p>
+            )}
+            {searchResults.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => goHit(c)}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-[var(--secondary)]"
+              >
+                <MapPin className="h-4 w-4 shrink-0" style={{ color: c.status === 'wish' ? 'var(--accent)' : 'var(--primary)' }} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                    {c.place_name}
+                  </span>
+                  {c.visit_date && (
+                    <span className="block text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                      {c.visit_date}
+                    </span>
+                  )}
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 搜索直达的结果卡：地图已平移到该点 */}
+        {searchHit && !searchOpen && (
+          <div className="pointer-events-none absolute inset-x-3 top-14 z-[1005] flex justify-center">
+            <div className="glass-strong pointer-events-auto flex w-full max-w-[340px] items-center gap-3 rounded-2xl p-3">
+              {searchHit.photos?.length > 0 ? (
+                <img src={searchHit.photos[0].url} alt={searchHit.place_name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+              ) : (
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: 'var(--secondary)', color: 'var(--primary)' }}
+                >
+                  <MapPin className="h-5 w-5" />
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                  {searchHit.place_name}
+                </p>
+                {searchHit.visit_date && (
+                  <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                    {searchHit.visit_date}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/checkin/${searchHit.id}`)}
+                className="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold"
+                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              >
+                {t('查看详情')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchHit(null)}
+                aria-label={t('关闭')}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 筛选面板 */}
         {filterOpen && (
