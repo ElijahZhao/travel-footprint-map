@@ -1,7 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { auth } from './cloudbase'
-import { enterGuestStore, exitGuestStore, isGuest } from './guest'
+import { enterGuestStore, exitGuestStore, isGuest, setGuestCheckins } from './guest'
+import { mergeLocalCheckinsToCloud } from './checkins'
 
 export type UserProfile = {
   uid: string
@@ -66,6 +69,7 @@ async function fetchUserProfile(): Promise<UserProfile> {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
   const [user, setUser] = useState<UserProfile>(null)
   const [guest, setGuest] = useState(() => isGuest())
   const [loading, setLoading] = useState(true)
@@ -91,12 +95,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 登录正式账号时自动退出游客模式，二者互不冲突
   const onLoggedIn = useCallback(async (profile: UserProfile) => {
+    // 先把本机游客期间新增的足迹合并进云端账号（跳过示例数据）
+    let merged = 0
+    try {
+      merged = await mergeLocalCheckinsToCloud()
+    } catch {
+      /* 合并失败不阻断登录 */
+    }
+    if (merged > 0) {
+      toast.success(t('已把本机的 {{n}} 条足迹合并到账号', { n: merged }))
+    }
     exitGuestStore()
+    setGuestCheckins([]) // 清空本机游客数据，避免与云端互相串用
     setGuest(false)
     setUser(profile)
-    // 账号模式切换后清空缓存，避免游客示例数据与云端数据互相串用
+    // 账号模式切换后清空缓存，触发从云端重新拉取（含刚合并的数据）
     queryClient.clear()
-  }, [queryClient])
+  }, [queryClient, t])
 
   const applySession = async (
     accessToken: string,

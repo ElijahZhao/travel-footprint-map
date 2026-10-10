@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins, useUpdateCheckin } from '@/lib/hooks'
+import { mergeLocalCheckinsToCloud, getLocalGuestCheckinCount } from '@/lib/checkins'
+import { setGuestCheckins } from '@/lib/guest'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CheckinCard from '@/components/CheckinCard'
@@ -72,7 +75,30 @@ export default function Me() {
   const { data: checkins = [] } = useMyCheckins()
   const updateMut = useUpdateCheckin()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [shareOn, setShareOn] = useState(false)
+  const [importing, setImporting] = useState(false)
+
+  // 已登录但本设备仍残留未同步的游客足迹时，提示可手动导入
+  const leftoverCount = useMemo(
+    () => (!guest && user ? getLocalGuestCheckinCount() : 0),
+    [guest, user],
+  )
+
+  const importLocal = async () => {
+    setImporting(true)
+    try {
+      const n = await mergeLocalCheckinsToCloud()
+      setGuestCheckins([])
+      queryClient.invalidateQueries({ queryKey: ['my-checkins'] })
+      if (n > 0) toast.success(t('已导入本机 {{n}} 条足迹', { n }))
+      else toast.success(t('没有需要导入的本机足迹'))
+    } catch (e: any) {
+      toast.error(e?.message || t('导入失败'))
+    } finally {
+      setImporting(false)
+    }
+  }
 
   useEffect(() => {
     if (!loading && !user && !guest) enterGuest()
@@ -223,6 +249,37 @@ export default function Me() {
             >
               {t('登录后数据跨设备同步')} <span style={{ color: 'var(--primary)' }}>{t('去登录 →')}</span>
             </button>
+          </FadeIn>
+        )}
+
+        {/* 本机残留数据导入（已登录但之前未合并的兜底） */}
+        {!guest && leftoverCount > 0 && (
+          <FadeIn>
+            <div
+              className="flex items-center gap-3 rounded-2xl p-4"
+              style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+            >
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: 'color-mix(in oklab, var(--accent) 16%, transparent)', color: 'var(--accent)' }}
+              >
+                <Compass className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{t('导入本机数据')}</p>
+                <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  {t('检测到本设备还有 {{n}} 条未同步的足迹', { n: leftoverCount })}
+                </p>
+              </div>
+              <button
+                onClick={importLocal}
+                disabled={importing}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                style={{ background: 'var(--primary)' }}
+              >
+                {importing ? t('生成中…') : t('导入')}
+              </button>
+            </div>
           </FadeIn>
         )}
 

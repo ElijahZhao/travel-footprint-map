@@ -112,6 +112,50 @@ export async function deleteCheckin(id: number): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+/** 游客示例数据的固定 id，合并时应跳过，避免把演示数据带进正式账号。 */
+export const SAMPLE_GUEST_IDS = new Set([
+  1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012,
+])
+
+/** 本机游客数据中、用户真正新增（非示例）且可合并的条数。 */
+export function getLocalGuestCheckinCount(): number {
+  return getGuestCheckins().filter((c) => !SAMPLE_GUEST_IDS.has(Number(c.id))).length
+}
+
+/**
+ * 把本机游客打卡合并进当前登录的云端账号（跳过示例数据）。
+ * 直接写云端表，不经由 createCheckin 的 isGuest 分支；user_id 由 RLS 的 auth.uid() 自动填充。
+ * 逐条插入、单条失败不阻断其余，返回成功合并的条数。
+ */
+export async function mergeLocalCheckinsToCloud(): Promise<number> {
+  const local = getGuestCheckins().filter((c) => !SAMPLE_GUEST_IDS.has(Number(c.id)))
+  if (local.length === 0) return 0
+  let merged = 0
+  for (const c of local) {
+    try {
+      const { error } = await db.from('checkins').insert({
+        place_name: c.place_name,
+        address: c.address ?? null,
+        lng: c.lng,
+        lat: c.lat,
+        category: c.category,
+        status: c.status,
+        visit_date: c.visit_date ?? null,
+        mood_text: c.mood_text ?? null,
+        tags: c.tags ?? [],
+        photos: c.photos ?? [],
+        rating: c.rating ?? 0,
+        is_public: c.is_public ?? false,
+        nation: (c as { nation?: string | null }).nation ?? null,
+      })
+      if (!error) merged++
+    } catch {
+      /* 单条失败不阻断其余 */
+    }
+  }
+  return merged
+}
+
 export interface TravelStats {
   total: number
   visited: number

@@ -298,6 +298,12 @@ const en = {
   // ===== 本轮新增 =====
   '{{visited}} 个足迹·{{wish}} 个心愿': '{{visited}} places · {{wish}} wishes',
   '登录后数据跨设备同步': 'Cross-device sync after sign-in',
+  '已把本机的 {{n}} 条足迹合并到账号': 'Merged {{n}} local places into your account',
+  '导入本机数据': 'Import local data',
+  '检测到本设备还有 {{n}} 条未同步的足迹': '{{n}} unsynced places found on this device',
+  '已导入本机 {{n}} 条足迹': 'Imported {{n}} local places',
+  '没有需要导入的本机足迹': 'No local places to import',
+  '导入失败': 'Import failed',
   '走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。': 'The farthest trip was to {{place}}, {{month}}/{{year}}.',
   '最远距离为所有足迹几何中心到最远点的直线距离': 'Farthest distance is the straight-line distance from the geometric center of all places to the farthest one.',
   '— 中间 {{n}} 年暂无记录 —': '— no records for {{n}} years in between —',
