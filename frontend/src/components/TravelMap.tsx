@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
 import { useTranslation } from 'react-i18next'
-import { Route, ChevronRight, X } from 'lucide-react'
+import { Route, ChevronRight, X, Navigation, Play } from 'lucide-react'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */
 function pinSvg(hex: string): string {
@@ -31,6 +31,14 @@ function clusterSvg(count: number, color: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
     <circle cx="22" cy="22" r="20" fill="${color}" stroke="#ffffff" stroke-width="3"/>
     <text x="22" y="23" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif">${count}</text>
+  </svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 纸飞机图标（路线生长动画里沿轨迹飞行的角色） */
+function planeSvg(): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+    <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#2D5A3D" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
@@ -112,10 +120,19 @@ export default function TravelMap({
   const navigate = useNavigate()
   /** 已框进视野的足迹数量，仅在新增时重新缩放到全部标记，避免浏览时镜头乱跳 */
   const fittedCountRef = useRef(0)
-  /** 路线连线开关与当前缩放（用于聚合重算） */
+  /** 路线连线开关、箭头开关与当前缩放（用于聚合重算） */
   const [showRoute, setShowRoute] = useState(true)
+  const [routeArrow, setRouteArrow] = useState(true)
   const [zoom, setZoom] = useState(4)
   const routeRef = useRef<any>(null)
+  /** 路线生长动画相关（纸飞机沿时间顺序飞行，可反复播放） */
+  const [playing, setPlaying] = useState(false)
+  /** 静态路线是否已就绪（>=2 个已去点），用于控制箭头/动画按钮显隐 */
+  const [routeReady, setRouteReady] = useState(false)
+  const routePathRef = useRef<any[]>([])
+  const animRafRef = useRef(0)
+  const animLineRef = useRef<any>(null)
+  const planeRef = useRef<any>(null)
   /** 各聚合簇包含的打卡（供点击数字圈时弹出清单） */
   const groupsRef = useRef<Record<number, Checkin[]>>({})
   /** 当前展开的聚合清单（同地点多个打卡时使用） */
@@ -230,6 +247,15 @@ export default function TravelMap({
     })()
     return () => {
       cancelled = true
+      cancelAnimationFrame(animRafRef.current)
+      try {
+        animLineRef.current?.setMap?.(null)
+      } catch {}
+      animLineRef.current = null
+      try {
+        planeRef.current?.setMap?.(null)
+      } catch {}
+      planeRef.current = null
       try {
         userMarkerRef.current?.setMap?.(null)
       } catch {}
@@ -351,7 +377,7 @@ export default function TravelMap({
     }
   }, [checkins, status, navigate, linkPrefix, zoom])
 
-  // 已去点按时间顺序连成路线（可开关）
+  // 已去点按打卡时间顺序连成路线（可开关；箭头可选；供生长动画复用）
   useEffect(() => {
     const map = mapRef.current
     if (!map || status !== 'ready') return
@@ -359,6 +385,8 @@ export default function TravelMap({
       routeRef.current?.setMap?.(null)
     } catch {}
     routeRef.current = null
+    routePathRef.current = []
+    setRouteReady(false)
     if (!showRoute) return
     try {
       const visitedSorted = [...checkins]
@@ -367,6 +395,8 @@ export default function TravelMap({
       if (visitedSorted.length < 2) return
       const TMap = (window as any).TMap
       const path = visitedSorted.map((c) => new TMap.LatLng(c.lat, c.lng))
+      routePathRef.current = path
+      setRouteReady(true)
       const polyline = new TMap.MultiPolyline({
         map,
         // 双层：底层柔光晕 + 上层浅色虚线航程线，比粗实线轻盈
@@ -385,7 +415,7 @@ export default function TravelMap({
             width: 3,
             dashPattern: [14, 10],
             lineCap: 'round',
-            showArrow: true,
+            showArrow: routeArrow,
             arrowWidth: 7,
           }),
         },
@@ -394,7 +424,84 @@ export default function TravelMap({
     } catch (e) {
       console.warn('route render failed', e)
     }
-  }, [checkins, status, showRoute])
+  }, [checkins, status, showRoute, routeArrow])
+
+  /** 路线生长动画：从第一个打卡点连到最后一个点，纸飞机沿时间顺序飞行，可反复播放 */
+  const playRouteAnim = useCallback(() => {
+    const map = mapRef.current
+    const TMap = (window as any).TMap
+    const raw = routePathRef.current
+    if (!map || !TMap || raw.length < 2) return
+    cancelAnimationFrame(animRafRef.current)
+    try { animLineRef.current?.setMap?.(null) } catch {}
+    try { planeRef.current?.setMap?.(null) } catch {}
+    animLineRef.current = null
+    planeRef.current = null
+    // 隐藏静态路线，让「生长」过程不被剧透
+    try { routeRef.current?.setMap?.(null) } catch {}
+    // 稠密化路径：相邻打卡点之间按距离插值，生长过程更顺滑
+    const dense: any[] = [raw[0]]
+    for (let i = 1; i < raw.length; i++) {
+      const a = raw[i - 1]
+      const b = raw[i]
+      const steps = Math.max(8, Math.min(60, Math.round(Math.hypot(a.lat - b.lat, a.lng - b.lng) * 30)))
+      for (let s = 1; s <= steps; s++) {
+        dense.push(new TMap.LatLng(a.lat + ((b.lat - a.lat) * s) / steps, a.lng + ((b.lng - a.lng) * s) / steps))
+      }
+    }
+    setPlaying(true)
+    const duration = Math.min(9000, 2500 + dense.length * 12)
+    const start = performance.now()
+    const animLine = new TMap.MultiPolyline({
+      map,
+      geometries: [{ id: 'route-anim', paths: [dense[0]], styleId: 'route-anim' }],
+      styles: {
+        'route-anim': new TMap.PolylineStyle({
+          color: '#4E7D61',
+          width: 3,
+          lineCap: 'round',
+        }),
+      },
+    })
+    animLineRef.current = animLine
+    const planeLayer = new TMap.MultiMarker({
+      map,
+      styles: {
+        plane: new TMap.MarkerStyle({ width: 30, height: 30, src: planeSvg(), anchor: { x: 15, y: 15 } }),
+      },
+      geometries: [{ id: 'plane', styleId: 'plane', position: dense[0] }],
+    })
+    planeRef.current = planeLayer
+    const cleanup = () => {
+      try { animLine.setMap(null) } catch {}
+      try { planeLayer.setMap(null) } catch {}
+      if (animLineRef.current === animLine) animLineRef.current = null
+      if (planeRef.current === planeLayer) planeRef.current = null
+      // 恢复静态路线
+      if (showRoute) {
+        try { routeRef.current?.setMap?.(map) } catch {}
+      }
+    }
+    const tick = (now: number) => {
+      const frac = Math.min(1, (now - start) / duration)
+      const eased = frac < 0.5 ? 2 * frac * frac : 1 - Math.pow(-2 * frac + 2, 2) / 2
+      const idx = Math.max(1, Math.round(eased * (dense.length - 1)))
+      try {
+        animLine.updateGeometries([{ id: 'route-anim', paths: dense.slice(0, idx + 1), styleId: 'route-anim' }])
+        planeLayer.updateGeometries([{ id: 'plane', styleId: 'plane', position: dense[idx] }])
+      } catch {}
+      if (frac < 1) {
+        animRafRef.current = requestAnimationFrame(tick)
+      } else {
+        // 停在终点一瞬再收场
+        setTimeout(() => {
+          setPlaying(false)
+          cleanup()
+        }, 500)
+      }
+    }
+    animRafRef.current = requestAnimationFrame(tick)
+  }, [showRoute])
 
   // 同步「我的位置」标记
   useEffect(() => {
@@ -455,7 +562,7 @@ export default function TravelMap({
 
       {/* 图例 + 路线开关（左上） */}
       {status === 'ready' && (
-        <div className="absolute left-3 top-3 z-[1010] flex flex-col gap-2">
+        <div className="absolute left-3 top-3 z-[1010] flex max-w-[62%] flex-col items-start gap-2">
           <button
             type="button"
             onClick={() => setShowRoute((v) => !v)}
@@ -463,8 +570,31 @@ export default function TravelMap({
             style={{ color: showRoute ? 'var(--primary)' : 'var(--muted-foreground)' }}
           >
             <Route className="h-3.5 w-3.5" />
-            {t('路线')} {showRoute ? t('开') : t('关')}
+            {showRoute ? t('隐藏路线') : t('打开路线')}
           </button>
+          {showRoute && routeReady && (
+            <>
+              <button
+                type="button"
+                onClick={() => setRouteArrow((v) => !v)}
+                className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                style={{ color: routeArrow ? 'var(--primary)' : 'var(--muted-foreground)' }}
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                {routeArrow ? t('隐藏箭头') : t('显示箭头')}
+              </button>
+              <button
+                type="button"
+                onClick={playRouteAnim}
+                disabled={playing}
+                className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
+                style={{ color: 'var(--primary)' }}
+              >
+                <Play className="h-3.5 w-3.5" />
+                {playing ? t('动画播放中…') : t('播放路线动画')}
+              </button>
+            </>
+          )}
           <div className="glass space-y-1 rounded-xl px-3 py-2 text-[11px]" style={{ color: 'var(--foreground)' }}>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D' }} /> {t('已去过')}

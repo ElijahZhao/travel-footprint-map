@@ -24,7 +24,40 @@ const SPARKS = [
 const RINGS = [
   { left: '70%', top: '20%', size: 180, delay: '0s' },
   { left: '16%', top: '62%', size: 240, delay: '3s' },
+  { left: '52%', top: '78%', size: 160, delay: '6.5s' },
 ]
+
+/** 飘过屏幕的纸飞机（含初始高度与朝向差异，错峰出现） */
+const PLANES = [
+  { top: '16%', dur: '24s', delay: '2s', scale: 1, flip: false },
+  { top: '52%', dur: '30s', delay: '13s', scale: 0.75, flip: true },
+  { top: '34%', dur: '27s', delay: '24s', scale: 0.85, flip: false },
+]
+
+/** 缓缓横移的小云朵 */
+const CLOUDS = [
+  { top: '10%', dur: '52s', delay: '0s', scale: 1 },
+  { top: '68%', dur: '64s', delay: '18s', scale: 0.7 },
+]
+
+function PlaneGlyph() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="color-mix(in oklab, var(--primary) 22%, transparent)" />
+      <path d="M8.5 13.5L7 18.5" />
+    </svg>
+  )
+}
+
+function CloudGlyph({ scale }: { scale: number }) {
+  return (
+    <svg width={Math.round(56 * scale)} height={Math.round(24 * scale)} viewBox="0 0 56 24" fill="none">
+      <g stroke="color-mix(in oklab, var(--foreground) 24%, transparent)" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M14 18a6 6 0 110-12 7 7 0 0113.3 1.6A5 5 0 1130 18H14z" fill="#ffffff" fillOpacity="0.55" />
+      </g>
+    </svg>
+  )
+}
 
 export default function AmbientBackground() {
   return (
@@ -33,12 +66,36 @@ export default function AmbientBackground() {
       <span className="ambient-blob ambient-blob--2" />
       <span className="ambient-blob ambient-blob--3" />
       <span className="ambient-blob ambient-blob--4" />
+      {CLOUDS.map((c, i) => (
+        <span
+          key={`cloud-${i}`}
+          className="ambient-cloud"
+          style={{ left: 0, top: c.top, ['--dur' as string]: c.dur, ['--delay' as string]: c.delay }}
+        >
+          <CloudGlyph scale={c.scale} />
+        </span>
+      ))}
       {RINGS.map((r, i) => (
         <span
           key={`ring-${i}`}
           className="ambient-ring"
           style={{ left: r.left, top: r.top, width: r.size, height: r.size, ['--delay' as string]: r.delay }}
         />
+      ))}
+      {PLANES.map((p, i) => (
+        <span
+          key={`plane-${i}`}
+          className="ambient-plane"
+          style={{
+            left: 0,
+            top: p.top,
+            ['--dur' as string]: p.dur,
+            ['--delay' as string]: p.delay,
+            scale: p.flip ? '-1 1' : undefined,
+          }}
+        >
+          <PlaneGlyph />
+        </span>
       ))}
       {DOTS.map((d, i) => (
         <span

@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Star } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
 
@@ -52,6 +52,9 @@ function Stars({ n }: { n: number }) {
   )
 }
 
+/** 童趣装饰：时间线节点轮换的小徽章（纸飞机 / 小火车 / 小脚印 / 指南针） */
+const JOURNEY_ICONS = [Send, TrainFront, Footprints, Compass]
+
 /** 单个时间线节点 — 大照片 + 文字 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
   const navigate = useNavigate()
@@ -68,16 +71,23 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease }}
     >
-      {/* 时间轴节点：状态色圆点 + 向下延伸连线 */}
-      <div className="flex w-4 shrink-0 flex-col items-center pt-5">
+      {/* 时间轴节点：轮换的童趣小徽章 + 虚线航线 */}
+      <div className="flex w-7 shrink-0 flex-col items-center pt-4">
         <span
-          className="h-3 w-3 shrink-0 rounded-full border-2"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 shadow-sm"
           style={{
             borderColor: isWish ? 'var(--accent)' : 'var(--primary)',
             background: 'var(--card)',
+            color: isWish ? 'var(--accent)' : 'var(--primary)',
+            transform: `rotate(${(index % 2 === 0 ? -1 : 1) * 8}deg)`,
           }}
-        />
-        <span className="mt-1 w-px flex-1" style={{ background: 'var(--border)' }} />
+        >
+          {(() => {
+            const Deco = JOURNEY_ICONS[index % JOURNEY_ICONS.length]
+            return <Deco className="h-3.5 w-3.5" />
+          })()}
+        </span>
+        <span className="mt-1 w-0 flex-1 border-l-2 border-dashed" style={{ borderColor: 'var(--border)' }} />
       </div>
       <button
         onClick={() => navigate(`/checkin/${item.id}`)}

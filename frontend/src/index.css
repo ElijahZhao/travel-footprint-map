@@ -547,8 +547,8 @@
 .ambient-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(38px);
-  opacity: 0.85;
+  filter: blur(46px);
+  opacity: 0.45;
   mix-blend-mode: multiply;
   will-change: transform;
 }
@@ -557,7 +557,7 @@
   height: 92vw;
   left: -26vw;
   top: -22vh;
-  background: radial-gradient(circle at 38% 38%, color-mix(in oklab, var(--primary) 62%, transparent), transparent 64%);
+  background: radial-gradient(circle at 38% 38%, color-mix(in oklab, var(--primary) 36%, transparent), transparent 64%);
   animation: ambient-drift 18s ease-in-out infinite;
 }
 .ambient-blob--2 {
@@ -565,7 +565,7 @@
   height: 84vw;
   right: -28vw;
   bottom: -24vh;
-  background: radial-gradient(circle at 62% 62%, color-mix(in oklab, var(--accent) 54%, transparent), transparent 64%);
+  background: radial-gradient(circle at 62% 62%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 64%);
   animation: ambient-drift 24s ease-in-out infinite reverse;
 }
 .ambient-blob--3 {
@@ -573,7 +573,7 @@
   height: 70vw;
   left: 18vw;
   top: 26vh;
-  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--theme-gold, #d9b25f) 46%, transparent), transparent 66%);
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--theme-gold, #d9b25f) 26%, transparent), transparent 66%);
   animation: ambient-drift 30s ease-in-out infinite;
 }
 .ambient-blob--4 {
@@ -581,7 +581,7 @@
   height: 56vw;
   right: 8vw;
   top: 8vh;
-  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--theme-rose, #e0a3a3) 40%, transparent), transparent 68%);
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--theme-rose, #e0a3a3) 22%, transparent), transparent 68%);
   animation: ambient-drift 21s ease-in-out infinite reverse;
 }
 @keyframes ambient-drift {
@@ -634,7 +634,44 @@
   0%, 100% { transform: scale(0.5) rotate(0deg); opacity: 0; }
   50% { transform: scale(1) rotate(45deg); opacity: 0.85; }
 }
+
+/* —— 童趣元素：飘过的纸飞机 / 小云朵 —— */
+.ambient-plane {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  opacity: 0;
+  animation: ambient-glide var(--dur, 22s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.ambient-plane > svg {
+  animation: ambient-bob 3.2s ease-in-out infinite;
+}
+.ambient-cloud {
+  position: absolute;
+  opacity: 0;
+  animation: ambient-cloud-drift var(--dur, 46s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes ambient-glide {
+  0% { transform: translate3d(-14vw, 4vh, 0) rotate(10deg); opacity: 0; }
+  8% { opacity: 0.75; }
+  46% { transform: translate3d(42vw, -9vh, 0) rotate(-7deg); opacity: 0.75; }
+  88% { transform: translate3d(104vw, 5vh, 0) rotate(8deg); opacity: 0; }
+  100% { transform: translate3d(104vw, 5vh, 0); opacity: 0; }
+}
+@keyframes ambient-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-6deg); }
+}
+@keyframes ambient-cloud-drift {
+  0% { transform: translate3d(-20vw, 0, 0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translate3d(110vw, -4vh, 0); opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
   .ambient-blob, .ambient-ring, .ambient-dot, .ambient-spark { animation: none; }
   .ambient-ring, .ambient-dot, .ambient-spark { display: none; }
+  .ambient-plane, .ambient-cloud { display: none; }
 }
