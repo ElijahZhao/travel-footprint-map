@@ -1,7 +1,7 @@
 import confetti from 'canvas-confetti'
 
 /** 主题色系：苔绿 / 暖橙 / 麦金 / 浅苔 */
-const COLORS = ['#2D5A3D', '#C46A3D', '#E3B23C', '#7FA88F', '#F4EFE4']
+const COLORS = ['#38A05F', '#F29755', '#EFC241', '#E8708A', '#4E8FD9']
 
 /**
  * 庆祝撒花 —— 用于打卡成功、点亮心愿等高光时刻。

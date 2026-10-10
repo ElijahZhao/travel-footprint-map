@@ -137,7 +137,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
           )}
 
           <div className="flex items-center gap-2 pt-1">
-            <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
+            <CategoryTag label={t(meta.label)} icon={Icon} color={meta.color} />
             {item.visit_date && (
               <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                 {item.visit_date}

@@ -14,12 +14,12 @@ export interface CategoryMeta {
 }
 
 export const CATEGORIES: CategoryMeta[] = [
-  { key: 'scenery', label: '风景', color: 'var(--primary)', hex: '#3fae7e', staticColor: 'green', icon: MapPin },
-  { key: 'food', label: '美食', color: 'var(--primary)', hex: '#e6953a', staticColor: 'orange', icon: Utensils },
-  { key: 'culture', label: '人文', color: 'var(--primary)', hex: '#9b5cc4', staticColor: 'purple', icon: Landmark },
-  { key: 'city', label: '城市', color: 'var(--primary)', hex: '#4a7fd1', staticColor: 'blue', icon: Building2 },
-  { key: 'family', label: '亲子', color: 'var(--primary)', hex: '#d95a6b', staticColor: 'red', icon: Baby },
-  { key: 'outdoor', label: '户外', color: 'var(--primary)', hex: '#3aa9c4', staticColor: 'yellow', icon: Mountain },
+  { key: 'scenery', label: '风景', color: 'var(--primary)', hex: '#38A05F', staticColor: 'green', icon: MapPin },
+  { key: 'food', label: '美食', color: 'var(--accent)', hex: '#F29755', staticColor: 'orange', icon: Utensils },
+  { key: 'culture', label: '人文', color: 'oklch(0.62 0.16 300)', hex: '#9B6FD0', staticColor: 'purple', icon: Landmark },
+  { key: 'city', label: '城市', color: 'var(--theme-blue)', hex: '#4E8FD9', staticColor: 'blue', icon: Building2 },
+  { key: 'family', label: '亲子', color: 'var(--theme-rose)', hex: '#E8708A', staticColor: 'red', icon: Baby },
+  { key: 'outdoor', label: '户外', color: 'oklch(0.72 0.13 195)', hex: '#3FB4C9', staticColor: 'yellow', icon: Mountain },
 ]
 
 const MAP = new Map(CATEGORIES.map((c) => [c.key, c]))

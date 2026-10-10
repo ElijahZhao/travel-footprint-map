@@ -56,7 +56,7 @@ function segmentAngleDeg(a: { lat: number; lng: number }, b: { lat: number; lng:
 function arrowSvg(angle: number): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
     <g transform="rotate(${angle.toFixed(1)} 12 12)">
-      <path d="M12 3.5L19 21l-7-4.2L5 21z" fill="#3E6B52" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M12 3.5L19 21l-7-4.2L5 21z" fill="#2F8A55" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
     </g>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
@@ -64,7 +64,7 @@ function arrowSvg(angle: number): string {
 
 /** 礼花粒子（新打卡点绽放一次的金色星屑） */
 function burstSvg(): string {
-  const colors = ['#D9A441', '#C46A3D', '#4E7D61', '#E0A3A3']
+  const colors = ['#EFC241', '#F29755', '#38A05F', '#E8708A']
   const parts: string[] = []
   for (let i = 0; i < 10; i++) {
     const a = (i / 10) * Math.PI * 2
@@ -94,7 +94,7 @@ function clusterSvg(count: number, color: string): string {
 /** 纸飞机图标（路线生长动画里沿轨迹飞行的角色） */
 function planeSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-    <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#2D5A3D" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#2F8A55" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
@@ -102,7 +102,7 @@ function planeSvg(): string {
 /** 金色涟漪（纸飞机途经打卡点时绽放一圈） */
 function pulseSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
-    <circle cx="28" cy="28" r="6" fill="none" stroke="#D9A441" stroke-width="3">
+    <circle cx="28" cy="28" r="6" fill="none" stroke="#EFC241" stroke-width="3">
       <animate attributeName="r" from="6" to="26" dur="0.8s" fill="freeze"/>
       <animate attributeName="opacity" from="0.9" to="0" dur="0.8s" fill="freeze"/>
     </circle>
@@ -413,7 +413,7 @@ export default function TravelMap({
             styles[styleKey] = new TMap.MarkerStyle({
               width: 32,
               height: 40,
-              src: pinSvg(isWish ? '#C46A3D' : '#2D5A3D'),
+              src: pinSvg(isWish ? '#F29755' : '#38A05F'),
               anchor: { x: 16, y: 40 },
             })
           }
@@ -426,7 +426,7 @@ export default function TravelMap({
         } else {
           const allWish = g.items.every((c) => c.status === 'wish')
           const allVisited = g.items.every((c) => c.status === 'visited')
-          const color = allWish ? '#C46A3D' : allVisited ? '#2D5A3D' : '#7A6F63'
+          const color = allWish ? '#F29755' : allVisited ? '#38A05F' : '#8A8F98'
           const styleKey = `cluster-${idx}`
           styles[styleKey] = new TMap.MarkerStyle({
             width: 44,
@@ -550,12 +550,12 @@ export default function TravelMap({
         ],
         styles: {
           'route-halo': new TMap.PolylineStyle({
-            color: 'rgba(78,125,97,0.16)',
+            color: 'rgba(88,160,107,0.18)',
             width: 10,
             lineCap: 'round',
           }),
           'route-core': new TMap.PolylineStyle({
-            color: '#3E6B52',
+            color: '#2F8A55',
             width: 3.5,
             borderColor: '#ffffff',
             borderWidth: 1,
@@ -563,27 +563,34 @@ export default function TravelMap({
           }),
         },
       })
-      // 箭头贴纸：每个弧段中点一枚旋转对准航向的小纸飞机（大小固定，一定看得见）
-      try {
-        const styles: Record<string, any> = {}
-        const geoms: any[] = []
-        for (let i = 0; i < stops.length - 1; i++) {
-          const k = `arrow-${i}`
-          styles[k] = new TMap.MarkerStyle({
-            width: 24,
-            height: 24,
-            src: arrowSvg(segmentAngleDeg(stops[i], stops[i + 1])),
-            anchor: { x: 12, y: 12 },
-          })
-          geoms.push({
-            id: `__arrow_${i}`,
-            styleId: k,
-            position: new TMap.LatLng((stops[i].lat + stops[i + 1].lat) / 2, (stops[i].lng + stops[i + 1].lng) / 2),
-          })
+      // 箭头贴纸：骑在弧线上（取弧线中点坐标），朝向用中点切线角；受「显示箭头」开关控制
+      if (routeArrow) {
+        try {
+          const styles: Record<string, any> = {}
+          const geoms: any[] = []
+          for (let i = 0; i < stops.length - 1; i++) {
+            const k = `arrow-${i}`
+            const s0 = stopDense[i]
+            const s1 = stopDense[i + 1]
+            const m = Math.floor((s0 + s1) / 2)
+            const pPrev = dense[Math.max(0, m - 2)]
+            const pNext = dense[Math.min(dense.length - 1, m + 2)]
+            styles[k] = new TMap.MarkerStyle({
+              width: 24,
+              height: 24,
+              src: arrowSvg(segmentAngleDeg(pPrev, pNext)),
+              anchor: { x: 12, y: 12 },
+            })
+            geoms.push({
+              id: `__arrow_${i}`,
+              styleId: k,
+              position: dense[m],
+            })
+          }
+          arrowsRef.current = new TMap.MultiMarker({ map, styles, geometries: geoms })
+        } catch (e) {
+          console.warn('arrow render failed', e)
         }
-        arrowsRef.current = new TMap.MultiMarker({ map, styles, geometries: geoms })
-      } catch (e) {
-        console.warn('arrow render failed', e)
       }
       setRouteReady(true)
     } catch (e) {
@@ -616,7 +623,7 @@ export default function TravelMap({
         { id: 'anim-core', paths: [dense[0]], styleId: 'anim-core' },
       ],
       styles: {
-        'anim-halo': new TMap.PolylineStyle({ color: 'rgba(78,125,97,0.16)', width: 10, lineCap: 'round' }),
+        'anim-halo': new TMap.PolylineStyle({ color: 'rgba(88,160,107,0.18)', width: 10, lineCap: 'round' }),
         'anim-core': new TMap.PolylineStyle({
           color: '#3E6B52',
           width: 3.5,
@@ -811,10 +818,10 @@ export default function TravelMap({
             )}
             <div className="space-y-1 border-t pt-2 text-[11px]" style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D' }} /> {t('已去过')}
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#38A05F' }} /> {t('已去过')}
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#C46A3D' }} /> {t('想去')}
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#F29755' }} /> {t('想去')}
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2F6FED', boxShadow: '0 0 0 3px rgba(47,111,237,0.22)' }} /> {t('我的位置')}
@@ -855,7 +862,7 @@ export default function TravelMap({
                 >
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: c.status === 'wish' ? '#C46A3D' : '#2D5A3D' }}
+                    style={{ background: c.status === 'wish' ? '#F29755' : '#38A05F' }}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium" style={{ color: 'var(--foreground)' }}>
