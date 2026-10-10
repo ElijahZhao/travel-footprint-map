@@ -40,6 +40,18 @@ const CLOUDS = [
   { top: '68%', dur: '64s', delay: '18s', scale: 0.7 },
 ]
 
+/** 慢悠悠上升的热气球 */
+const BALLOONS = [
+  { left: '14%', dur: '38s', delay: '6s', scale: 1 },
+  { left: '74%', dur: '46s', delay: '22s', scale: 0.7 },
+]
+
+/** 偶尔划过的流星 */
+const SHOOTINGS = [
+  { left: '58%', top: '10%', dur: '11s', delay: '4s' },
+  { left: '24%', top: '30%', dur: '14s', delay: '17s' },
+]
+
 function PlaneGlyph() {
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -59,6 +71,22 @@ function CloudGlyph({ scale }: { scale: number }) {
   )
 }
 
+function BalloonGlyph({ scale }: { scale: number }) {
+  const s = scale
+  return (
+    <svg width={Math.round(30 * s)} height={Math.round(44 * s)} viewBox="0 0 30 44" fill="none">
+      <path
+        d="M15 2c6.6 0 12 5.2 12 11.7 0 7.4-8 15.6-12 19.3-4-3.7-12-11.9-12-19.3C3 7.2 8.4 2 15 2z"
+        fill="color-mix(in oklab, var(--accent) 30%, #ffffff)"
+        stroke="color-mix(in oklab, var(--accent) 70%, transparent)"
+        strokeWidth="1.4"
+      />
+      <path d="M15 2v31" stroke="color-mix(in oklab, var(--accent) 55%, transparent)" strokeWidth="1" />
+      <path d="M12 33h6l-1.2 4h-3.6z" fill="color-mix(in oklab, var(--primary) 45%, transparent)" />
+    </svg>
+  )
+}
+
 export default function AmbientBackground() {
   return (
     <div className="ambient-bg" aria-hidden="true">
@@ -74,6 +102,22 @@ export default function AmbientBackground() {
         >
           <CloudGlyph scale={c.scale} />
         </span>
+      ))}
+      {BALLOONS.map((b, i) => (
+        <span
+          key={`balloon-${i}`}
+          className="ambient-balloon"
+          style={{ left: b.left, top: '58%', ['--dur' as string]: b.dur, ['--delay' as string]: b.delay }}
+        >
+          <BalloonGlyph scale={b.scale} />
+        </span>
+      ))}
+      {SHOOTINGS.map((sh, i) => (
+        <span
+          key={`shoot-${i}`}
+          className="ambient-shooting"
+          style={{ left: sh.left, top: sh.top, ['--dur' as string]: sh.dur, ['--delay' as string]: sh.delay }}
+        />
       ))}
       {RINGS.map((r, i) => (
         <span

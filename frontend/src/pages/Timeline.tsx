@@ -9,7 +9,8 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag } from 'lucide-react'
+import WavyUnderline from '@/components/WavyUnderline'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
 
@@ -205,6 +206,7 @@ export default function Timeline() {
               <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
                 {t('时间线')}
               </h1>
+              <WavyUnderline />
               <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                 {searching ? t('找到 {{n}} 段旅程', { n: visited.length }) : t('共 {{n}} 段旅程，慢慢回看', { n: visited.length })}
               </p>
@@ -358,9 +360,19 @@ export default function Timeline() {
                     {/* 年份大标题 */}
                     <FadeIn duration={0.4}>
                       <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
-                        <span className="font-display text-3xl font-black tracking-tight" style={{ color: 'var(--primary)' }}>
-                          {year}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {/* 邮戳徽章：像护照章一样斜盖在年份旁 */}
+                          <span
+                            className="flex h-7 w-7 -rotate-12 items-center justify-center rounded-full border-2 border-dashed"
+                            style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                            aria-hidden="true"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                          </span>
+                          <span className="font-display text-3xl font-black tracking-tight" style={{ color: 'var(--primary)' }}>
+                            {year}
+                          </span>
+                        </div>
                         <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                           {t('{{n}} 段旅程', { n: monthGroups.reduce((a, [, its]) => a + its.length, 0) })}
                         </span>
@@ -376,6 +388,8 @@ export default function Timeline() {
                                 {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
                               </span>
                               {isMonthKey(month) && <span className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{t('月')}</span>}
+                              {/* 月度小旗：这一月立了一面小旗 */}
+                              <Flag className="ml-0.5 h-3.5 w-3.5 -rotate-6" style={{ color: 'var(--theme-gold, #d9b25f)' }} fill="currentColor" />
                             </div>
                             <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                               {t('{{n}} 段旅程', { n: items.length })}

@@ -26,6 +26,62 @@ function userDotSvg(): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
+/** 在 A、B 之间生成一条轻轻拱起的弧线（二次贝塞尔），返回 LatLng 稠密点列 */
+function curvedSegment(TMap: any, a: { lat: number; lng: number }, b: { lat: number; lng: number }, steps = 36): any[] {
+  const dLat = b.lat - a.lat
+  const dLng = b.lng - a.lng
+  const dist = Math.hypot(dLat, dLng)
+  const bow = dist * 0.16
+  const nLat = -dLng / (dist || 1)
+  const nLng = dLat / (dist || 1)
+  const ctrl = { lat: (a.lat + b.lat) / 2 + nLat * bow, lng: (a.lng + b.lng) / 2 + nLng * bow }
+  const pts: any[] = []
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps
+    const lat = (1 - t) * (1 - t) * a.lat + 2 * (1 - t) * t * ctrl.lat + t * t * b.lat
+    const lng = (1 - t) * (1 - t) * a.lng + 2 * (1 - t) * t * ctrl.lng + t * t * b.lng
+    pts.push(new TMap.LatLng(lat, lng))
+  }
+  return pts
+}
+
+/** 段中点的航向角（屏幕顺时针角度，0 = 正北），用于箭头贴纸旋转 */
+function segmentAngleDeg(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const dx = (b.lng - a.lng) * Math.cos((((a.lat + b.lat) / 2) * Math.PI) / 180)
+  const dy = b.lat - a.lat
+  return (Math.atan2(dx, dy) * 180) / Math.PI
+}
+
+/** 指向正北的小纸飞机箭头（角度直接烘进 SVG，保证看得见） */
+function arrowSvg(angle: number): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <g transform="rotate(${angle.toFixed(1)} 12 12)">
+      <path d="M12 3.5L19 21l-7-4.2L5 21z" fill="#3E6B52" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+    </g>
+  </svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 礼花粒子（新打卡点绽放一次的金色星屑） */
+function burstSvg(): string {
+  const colors = ['#D9A441', '#C46A3D', '#4E7D61', '#E0A3A3']
+  const parts: string[] = []
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2
+    const x = 24 + Math.cos(a) * 16
+    const y = 24 + Math.sin(a) * 16
+    parts.push(
+      `<circle cx="24" cy="24" r="2.6" fill="${colors[i % colors.length]}">
+        <animate attributeName="cx" from="24" to="${x.toFixed(1)}" dur="0.6s" fill="freeze" begin="0.05s"/>
+        <animate attributeName="cy" from="24" to="${y.toFixed(1)}" dur="0.6s" fill="freeze" begin="0.05s"/>
+        <animate attributeName="opacity" from="1" to="0" dur="1s" fill="freeze"/>
+      </circle>`,
+    )
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">${parts.join('')}</svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
 /** 生成聚合气泡（带数量文字） */
 function clusterSvg(count: number, color: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
@@ -39,6 +95,17 @@ function clusterSvg(count: number, color: string): string {
 function planeSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
     <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#2D5A3D" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
+  </svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 金色涟漪（纸飞机途经打卡点时绽放一圈） */
+function pulseSvg(): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
+    <circle cx="28" cy="28" r="6" fill="none" stroke="#D9A441" stroke-width="3">
+      <animate attributeName="r" from="6" to="26" dur="0.8s" fill="freeze"/>
+      <animate attributeName="opacity" from="0.9" to="0" dur="0.8s" fill="freeze"/>
+    </circle>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
@@ -125,18 +192,41 @@ export default function TravelMap({
   const [routeArrow, setRouteArrow] = useState(true)
   const [zoom, setZoom] = useState(4)
   const routeRef = useRef<any>(null)
+  /** 箭头贴纸层（每个弧段中点一枚旋转对准航向的小纸飞机） */
+  const arrowsRef = useRef<any>(null)
+  /** 涟漪层（动画途经打卡点时绽放） */
+  const pulseRef = useRef<any>(null)
   /** 路线生长动画相关（纸飞机沿时间顺序飞行，可反复播放） */
   const [playing, setPlaying] = useState(false)
   /** 静态路线是否已就绪（>=2 个已去点），用于控制箭头/动画按钮显隐 */
   const [routeReady, setRouteReady] = useState(false)
   const routePathRef = useRef<any[]>([])
+  /** 每个打卡点在稠密路径中的下标（动画涟漪用） */
+  const stopDenseRef = useRef<number[]>([])
   const animRafRef = useRef(0)
   const animLineRef = useRef<any>(null)
   const planeRef = useRef<any>(null)
   /** 各聚合簇包含的打卡（供点击数字圈时弹出清单） */
   const groupsRef = useRef<Record<number, Checkin[]>>({})
+  /** 已知打卡 id（用于检测新增并放礼花） */
+  const knownIdsRef = useRef<Set<number>>(new Set())
   /** 当前展开的聚合清单（同地点多个打卡时使用） */
   const [clusterItems, setClusterItems] = useState<Checkin[] | null>(null)
+  /** 左上角控制面板收起/展开（记住用户选择） */
+  const [panelOpen, setPanelOpen] = useState(() => {
+    try {
+      return localStorage.getItem('map-panel-open') === '1'
+    } catch {
+      return false
+    }
+  })
+  const togglePanel = () =>
+    setPanelOpen((v) => {
+      try {
+        localStorage.setItem('map-panel-open', v ? '0' : '1')
+      } catch {}
+      return !v
+    })
 
   /** 把所有足迹缩放进视野；只有单点时给个合适缩放 */
   const fitToCheckins = useCallback((list: Checkin[]) => {
@@ -235,8 +325,13 @@ export default function TravelMap({
           }
         } catch {}
         mapRef.current = map
+        // 聚合重算用防抖的缩放值：捏合缩放期间标记层保持稳定，点击不会落在重建中的层上
         try {
-          map.on('zoom_change', () => setZoom(map.getZoom()))
+          let zoomTimer: ReturnType<typeof setTimeout> | null = null
+          map.on('zoom_change', () => {
+            if (zoomTimer) clearTimeout(zoomTimer)
+            zoomTimer = setTimeout(() => setZoom(map.getZoom()), 250)
+          })
         } catch {}
         setStatus('ready')
       } catch (e) {
@@ -256,6 +351,14 @@ export default function TravelMap({
         planeRef.current?.setMap?.(null)
       } catch {}
       planeRef.current = null
+      try {
+        arrowsRef.current?.setMap?.(null)
+      } catch {}
+      arrowsRef.current = null
+      try {
+        pulseRef.current?.setMap?.(null)
+      } catch {}
+      pulseRef.current = null
       try {
         userMarkerRef.current?.setMap?.(null)
       } catch {}
@@ -343,7 +446,12 @@ export default function TravelMap({
 
       const markerLayer = new TMap.MultiMarker({ map, styles, geometries })
       markerLayer.on('click', (evt: any) => {
-        const p = evt?.geometry?.properties
+        // 双保险：properties 取不到时从几何 id 反解簇序号
+        let p = evt?.geometry?.properties
+        const gid: string = evt?.geometry?.id ?? ''
+        if (!p && gid.startsWith('__cluster__')) {
+          p = { cluster: true, idx: Number(gid.slice('__cluster__'.length)) }
+        }
         if (!p) return
         if (p.cluster) {
           const items = groupsRef.current[p.idx]
@@ -366,25 +474,52 @@ export default function TravelMap({
       })
       markersRef.current = markerLayer
 
-      // 新增打卡时自动缩放到包含所有足迹
+      // 新增打卡时自动缩放到包含所有足迹；并给新点放一朵礼花
+      const known = knownIdsRef.current
+      const newOnes = known.size ? checkins.filter((c) => !known.has(c.id)) : []
       if (checkins.length > fittedCountRef.current) {
         fitToCheckins(checkins)
       }
       fittedCountRef.current = checkins.length
+      knownIdsRef.current = new Set(checkins.map((c) => c.id))
+      if (newOnes.length && checkins.length > newOnes.length) {
+        try {
+          const burstLayer = new TMap.MultiMarker({
+            map,
+            styles: {
+              burst: new TMap.MarkerStyle({ width: 48, height: 48, src: burstSvg(), anchor: { x: 24, y: 24 } }),
+            },
+            geometries: newOnes.map((c) => ({
+              id: `__burst_${c.id}`,
+              styleId: 'burst',
+              position: new TMap.LatLng(c.lat, c.lng),
+            })),
+          })
+          setTimeout(() => {
+            try {
+              burstLayer.setMap(null)
+            } catch {}
+          }, 1600)
+        } catch {}
+      }
     } catch (e) {
       // 标记渲染失败不应阻塞地图
       console.warn('marker render failed', e)
     }
   }, [checkins, status, navigate, linkPrefix, zoom])
 
-  // 已去点按打卡时间顺序连成路线（可开关；箭头可选；供生长动画复用）
+  // 已去点按打卡时间顺序连成弧形航线（可开关；箭头贴纸可选；供生长动画复用）
   useEffect(() => {
     const map = mapRef.current
     if (!map || status !== 'ready') return
     try {
       routeRef.current?.setMap?.(null)
     } catch {}
+    try {
+      arrowsRef.current?.setMap?.(null)
+    } catch {}
     routeRef.current = null
+    arrowsRef.current = null
     routePathRef.current = []
     setRouteReady(false)
     if (!showRoute) return
@@ -394,71 +529,99 @@ export default function TravelMap({
         .sort((a, b) => (a.visit_date || '').localeCompare(b.visit_date || ''))
       if (visitedSorted.length < 2) return
       const TMap = (window as any).TMap
-      const path = visitedSorted.map((c) => new TMap.LatLng(c.lat, c.lng))
-      routePathRef.current = path
-      setRouteReady(true)
-      const polyline = new TMap.MultiPolyline({
+      const stops = visitedSorted.map((c) => ({ lat: c.lat, lng: c.lng }))
+      // 弧形稠密路径：相邻点之间轻轻拱起，像航空航线图
+      const dense: any[] = []
+      const stopDense: number[] = [0]
+      for (let i = 1; i < stops.length; i++) {
+        const seg = curvedSegment(TMap, stops[i - 1], stops[i])
+        if (i > 1) seg.shift()
+        dense.push(...seg)
+        stopDense.push(dense.length - 1)
+      }
+      routePathRef.current = dense
+      stopDenseRef.current = stopDense
+      routeRef.current = new TMap.MultiPolyline({
         map,
-        // 双层：底层柔光晕 + 上层浅色虚线航程线，比粗实线轻盈
+        // 双层：柔光晕 + 带白衬边的实心弧线，动画与静态共用同一观感
         geometries: [
-          { id: 'route-halo', paths: path, styleId: 'route-halo' },
-          { id: 'route-core', paths: path, styleId: 'route-core' },
+          { id: 'route-halo', paths: dense, styleId: 'route-halo' },
+          { id: 'route-core', paths: dense, styleId: 'route-core' },
         ],
         styles: {
           'route-halo': new TMap.PolylineStyle({
-            color: 'rgba(45,90,61,0.13)',
-            width: 9,
+            color: 'rgba(78,125,97,0.16)',
+            width: 10,
             lineCap: 'round',
           }),
           'route-core': new TMap.PolylineStyle({
-            color: '#4E7D61',
-            width: 3,
-            dashPattern: [14, 10],
+            color: '#3E6B52',
+            width: 3.5,
+            borderColor: '#ffffff',
+            borderWidth: 1,
             lineCap: 'round',
-            showArrow: routeArrow,
-            arrowWidth: 7,
           }),
         },
       })
-      routeRef.current = polyline
+      // 箭头贴纸：每个弧段中点一枚旋转对准航向的小纸飞机（大小固定，一定看得见）
+      try {
+        const styles: Record<string, any> = {}
+        const geoms: any[] = []
+        for (let i = 0; i < stops.length - 1; i++) {
+          const k = `arrow-${i}`
+          styles[k] = new TMap.MarkerStyle({
+            width: 24,
+            height: 24,
+            src: arrowSvg(segmentAngleDeg(stops[i], stops[i + 1])),
+            anchor: { x: 12, y: 12 },
+          })
+          geoms.push({
+            id: `__arrow_${i}`,
+            styleId: k,
+            position: new TMap.LatLng((stops[i].lat + stops[i + 1].lat) / 2, (stops[i].lng + stops[i + 1].lng) / 2),
+          })
+        }
+        arrowsRef.current = new TMap.MultiMarker({ map, styles, geometries: geoms })
+      } catch (e) {
+        console.warn('arrow render failed', e)
+      }
+      setRouteReady(true)
     } catch (e) {
       console.warn('route render failed', e)
     }
   }, [checkins, status, showRoute, routeArrow])
 
-  /** 路线生长动画：从第一个打卡点连到最后一个点，纸飞机沿时间顺序飞行，可反复播放 */
+  /** 路线生长动画：纸飞机从第一个打卡点沿弧形航线飞到最后一个点，可反复播放 */
   const playRouteAnim = useCallback(() => {
     const map = mapRef.current
     const TMap = (window as any).TMap
-    const raw = routePathRef.current
-    if (!map || !TMap || raw.length < 2) return
+    const dense = routePathRef.current
+    const stopDense = stopDenseRef.current
+    if (!map || !TMap || dense.length < 2 || stopDense.length < 2) return
     cancelAnimationFrame(animRafRef.current)
     try { animLineRef.current?.setMap?.(null) } catch {}
     try { planeRef.current?.setMap?.(null) } catch {}
+    try { pulseRef.current?.setMap?.(null) } catch {}
     animLineRef.current = null
     planeRef.current = null
-    // 隐藏静态路线，让「生长」过程不被剧透
+    pulseRef.current = null
+    // 藏起静态线与箭头，让「生长」不被剧透
     try { routeRef.current?.setMap?.(null) } catch {}
-    // 稠密化路径：相邻打卡点之间按距离插值，生长过程更顺滑
-    const dense: any[] = [raw[0]]
-    for (let i = 1; i < raw.length; i++) {
-      const a = raw[i - 1]
-      const b = raw[i]
-      const steps = Math.max(8, Math.min(60, Math.round(Math.hypot(a.lat - b.lat, a.lng - b.lng) * 30)))
-      for (let s = 1; s <= steps; s++) {
-        dense.push(new TMap.LatLng(a.lat + ((b.lat - a.lat) * s) / steps, a.lng + ((b.lng - a.lng) * s) / steps))
-      }
-    }
+    try { arrowsRef.current?.setMap?.(null) } catch {}
     setPlaying(true)
-    const duration = Math.min(9000, 2500 + dense.length * 12)
-    const start = performance.now()
     const animLine = new TMap.MultiPolyline({
       map,
-      geometries: [{ id: 'route-anim', paths: [dense[0]], styleId: 'route-anim' }],
+      geometries: [
+        { id: 'anim-halo', paths: [dense[0]], styleId: 'anim-halo' },
+        { id: 'anim-core', paths: [dense[0]], styleId: 'anim-core' },
+      ],
       styles: {
-        'route-anim': new TMap.PolylineStyle({
-          color: '#4E7D61',
-          width: 3,
+        'anim-halo': new TMap.PolylineStyle({ color: 'rgba(78,125,97,0.16)', width: 10, lineCap: 'round' }),
+        'anim-core': new TMap.PolylineStyle({
+          color: '#3E6B52',
+          width: 3.5,
+          borderColor: '#ffffff',
+          borderWidth: 1,
           lineCap: 'round',
         }),
       },
@@ -472,23 +635,45 @@ export default function TravelMap({
       geometries: [{ id: 'plane', styleId: 'plane', position: dense[0] }],
     })
     planeRef.current = planeLayer
+    // 纸飞机途经打卡点时绽放一圈金色涟漪
+    const pulses: any[] = []
+    let crossed = 0
+    const pulseLayer = new TMap.MultiMarker({
+      map,
+      styles: {
+        pulse: new TMap.MarkerStyle({ width: 56, height: 56, src: pulseSvg(), anchor: { x: 28, y: 28 } }),
+      },
+      geometries: [],
+    })
+    pulseRef.current = pulseLayer
+    const duration = Math.min(9000, 2500 + dense.length * 10)
+    const start = performance.now()
     const cleanup = () => {
       try { animLine.setMap(null) } catch {}
       try { planeLayer.setMap(null) } catch {}
+      try { pulseLayer.setMap(null) } catch {}
       if (animLineRef.current === animLine) animLineRef.current = null
       if (planeRef.current === planeLayer) planeRef.current = null
-      // 恢复静态路线
-      if (showRoute) {
-        try { routeRef.current?.setMap?.(map) } catch {}
-      }
+      if (pulseRef.current === pulseLayer) pulseRef.current = null
+      // 恢复静态航线与箭头
+      try { routeRef.current?.setMap?.(map) } catch {}
+      try { arrowsRef.current?.setMap?.(map) } catch {}
     }
     const tick = (now: number) => {
       const frac = Math.min(1, (now - start) / duration)
       const eased = frac < 0.5 ? 2 * frac * frac : 1 - Math.pow(-2 * frac + 2, 2) / 2
       const idx = Math.max(1, Math.round(eased * (dense.length - 1)))
       try {
-        animLine.updateGeometries([{ id: 'route-anim', paths: dense.slice(0, idx + 1), styleId: 'route-anim' }])
+        animLine.updateGeometries([
+          { id: 'anim-halo', paths: dense.slice(0, idx + 1), styleId: 'anim-halo' },
+          { id: 'anim-core', paths: dense.slice(0, idx + 1), styleId: 'anim-core' },
+        ])
         planeLayer.updateGeometries([{ id: 'plane', styleId: 'plane', position: dense[idx] }])
+        while (crossed < stopDense.length && stopDense[crossed] <= idx) {
+          pulses.push({ id: `__pulse_${crossed}`, styleId: 'pulse', position: dense[stopDense[crossed]] })
+          crossed++
+        }
+        if (pulses.length) pulseLayer.updateGeometries([...pulses])
       } catch {}
       if (frac < 1) {
         animRafRef.current = requestAnimationFrame(tick)
@@ -560,50 +745,80 @@ export default function TravelMap({
     >
       <div ref={containerRef} className="h-full w-full" />
 
-      {/* 图例 + 路线开关（左上） */}
-      {status === 'ready' && (
-        <div className="absolute left-3 top-3 z-[1010] flex max-w-[62%] flex-col items-start gap-2">
+      {/* 图例 + 路线控制（左上，可收起展开） */}
+      {status === 'ready' && !panelOpen && (
+        <div className="absolute left-3 top-3 z-[1010]">
           <button
             type="button"
-            onClick={() => setShowRoute((v) => !v)}
-            className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-            style={{ color: showRoute ? 'var(--primary)' : 'var(--muted-foreground)' }}
+            onClick={togglePanel}
+            aria-label={t('打开路线面板')}
+            className="glass flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
+            style={{ color: 'var(--primary)' }}
           >
-            <Route className="h-3.5 w-3.5" />
-            {showRoute ? t('隐藏路线') : t('打开路线')}
+            <Route className="h-5 w-5" />
           </button>
-          {showRoute && routeReady && (
-            <>
+        </div>
+      )}
+      {status === 'ready' && panelOpen && (
+        <div className="absolute left-3 top-3 z-[1010] flex max-w-[64%] flex-col items-start gap-2">
+          <div className="glass w-full space-y-2 rounded-2xl p-3">
+            {/* 面板头：标题 + 收起 */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold" style={{ color: 'var(--foreground)' }}>
+                {t('路线与图例')}
+              </span>
               <button
                 type="button"
-                onClick={() => setRouteArrow((v) => !v)}
-                className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-                style={{ color: routeArrow ? 'var(--primary)' : 'var(--muted-foreground)' }}
+                onClick={togglePanel}
+                aria-label={t('收起面板')}
+                className="flex h-6 w-6 items-center justify-center rounded-full"
+                style={{ color: 'var(--muted-foreground)' }}
               >
-                <Navigation className="h-3.5 w-3.5" />
-                {routeArrow ? t('隐藏箭头') : t('显示箭头')}
+                <X className="h-3.5 w-3.5" />
               </button>
-              <button
-                type="button"
-                onClick={playRouteAnim}
-                disabled={playing}
-                className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
-                style={{ color: 'var(--primary)' }}
-              >
-                <Play className="h-3.5 w-3.5" />
-                {playing ? t('动画播放中…') : t('播放路线动画')}
-              </button>
-            </>
-          )}
-          <div className="glass space-y-1 rounded-xl px-3 py-2 text-[11px]" style={{ color: 'var(--foreground)' }}>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D' }} /> {t('已去过')}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#C46A3D' }} /> {t('想去')}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2F6FED', boxShadow: '0 0 0 3px rgba(47,111,237,0.22)' }} /> {t('我的位置')}
+            <button
+              type="button"
+              onClick={() => setShowRoute((v) => !v)}
+              className="flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+              style={{ background: showRoute ? 'color-mix(in oklab, var(--primary) 12%, transparent)' : 'transparent', color: showRoute ? 'var(--primary)' : 'var(--muted-foreground)' }}
+            >
+              <Route className="h-3.5 w-3.5" />
+              {showRoute ? t('隐藏路线') : t('打开路线')}
+            </button>
+            {showRoute && routeReady && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setRouteArrow((v) => !v)}
+                  className="flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                  style={{ background: routeArrow ? 'color-mix(in oklab, var(--primary) 12%, transparent)' : 'transparent', color: routeArrow ? 'var(--primary)' : 'var(--muted-foreground)' }}
+                >
+                  <Navigation className="h-3.5 w-3.5" />
+                  {routeArrow ? t('隐藏箭头') : t('显示箭头')}
+                </button>
+                <button
+                  type="button"
+                  onClick={playRouteAnim}
+                  disabled={playing}
+                  className="flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
+                  style={{ background: 'color-mix(in oklab, var(--primary) 12%, transparent)', color: 'var(--primary)' }}
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  {playing ? t('动画播放中…') : t('播放路线动画')}
+                </button>
+              </>
+            )}
+            <div className="space-y-1 border-t pt-2 text-[11px]" style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D' }} /> {t('已去过')}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#C46A3D' }} /> {t('想去')}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2F6FED', boxShadow: '0 0 0 3px rgba(47,111,237,0.22)' }} /> {t('我的位置')}
+              </div>
             </div>
           </div>
         </div>

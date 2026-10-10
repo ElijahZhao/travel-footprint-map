@@ -92,36 +92,50 @@ export default function CheckinDetail() {
         </div>
         <FadeIn>
           {checkin.photos?.length > 0 && (
-            <div className="relative overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
+            <div
+              className="relative"
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--ds-shadow-md)',
+                borderRadius: '1rem',
+                padding: '10px 10px 18px',
+              }}
+            >
+              {/* 拍立得胶带贴角 */}
+              <span className="photo-tape photo-tape--l" aria-hidden="true" />
+              <span className="photo-tape photo-tape--r" aria-hidden="true" />
               {/* 相册：多图横向滑动，单图直接展示 */}
-              <div className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {checkin.photos.map((p, i) => (
-                  <img
-                    key={i}
-                    src={p.url}
-                    alt={`${checkin.place_name} ${i + 1}`}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    onClick={() => setLightbox(i)}
-                    className="max-h-80 w-full shrink-0 snap-center cursor-zoom-in object-cover"
-                  />
-                ))}
-              </div>
-              {checkin.photos.length > 1 && (
-                <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
-                  {t('{{n}} 张', { n: checkin.photos.length })}
-                </span>
-              )}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20" style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.5))' }} />
-              <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-full"
-                  style={{ background: meta.color, color: 'white' }}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
-                  {t(meta.label)}
-                </span>
+              <div className="overflow-hidden rounded-lg">
+                <div className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {checkin.photos.map((p, i) => (
+                    <img
+                      key={i}
+                      src={p.url}
+                      alt={`${checkin.place_name} ${i + 1}`}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      onClick={() => setLightbox(i)}
+                      className="max-h-80 w-full shrink-0 snap-center cursor-zoom-in object-cover"
+                    />
+                  ))}
+                </div>
+                {checkin.photos.length > 1 && (
+                  <span className="absolute right-5 top-5 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+                    {t('{{n}} 张', { n: checkin.photos.length })}
+                  </span>
+                )}
+                <div className="pointer-events-none absolute inset-x-3 bottom-14 h-16" style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.4))' }} />
+                <div className="absolute bottom-5 left-5 flex items-center gap-2">
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-full"
+                    style={{ background: meta.color, color: 'white' }}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+                    {t(meta.label)}
+                  </span>
+                </div>
               </div>
             </div>
           )}

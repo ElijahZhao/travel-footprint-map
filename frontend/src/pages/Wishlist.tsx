@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck, Plus } from 'lucide-react'
+import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck, Plus, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -40,6 +40,16 @@ function WishCard({ item, lit, index, onComplete }: { item: Checkin; lit: boolea
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.3) }}
     >
+      {/* 未点亮的愿望：贴一颗手绘星星贴纸，「总有一天要去」的期待感 */}
+      {!lit && (
+        <span
+          className="absolute -top-1.5 right-3 z-10 flex h-6 w-6 rotate-12 items-center justify-center rounded-full"
+          style={{ background: 'color-mix(in oklab, var(--theme-gold, #d9b25f) 22%, white)', color: 'var(--theme-gold, #d9b25f)', boxShadow: '0 1px 3px rgba(43,36,32,0.15)' }}
+          aria-hidden="true"
+        >
+          <Star className="h-3.5 w-3.5" fill="currentColor" />
+        </span>
+      )}
       <div
         role="button"
         tabIndex={0}

@@ -7,6 +7,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
+import WavyUnderline from '@/components/WavyUnderline'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, BarChart3, CalendarRange } from 'lucide-react'
 
@@ -170,9 +171,7 @@ export default function Stats() {
             <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
               {t('旅行年鉴')}
             </h1>
-            <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              {t('你的足迹数据报告')}
-            </p>
+            <WavyUnderline />
           </div>
         </FadeIn>
 
@@ -290,7 +289,7 @@ export default function Stats() {
                         initial={{ height: 0 }}
                         whileInView={{ height: `${(n / maxYear) * 100}%` }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeOut' }}
+                        transition={{ type: 'spring', stiffness: 160, damping: 20, delay: i * 0.08 }}
                       />
                     </div>
                     <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>
@@ -326,19 +325,23 @@ export default function Stats() {
               />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {PROVINCES.filter((p) => litProvinces.has(p)).map((p) => {
+              {PROVINCES.filter((p) => litProvinces.has(p)).map((p, i) => {
                 const lit = litProvinces.has(p)
                 return (
-                  <span
+                  <motion.span
                     key={p}
                     className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
                     style={{
                       background: lit ? 'var(--primary)' : 'var(--secondary)',
                       color: lit ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
                     }}
+                    initial={{ scale: 0, rotate: -12, opacity: 0 }}
+                    whileInView={{ scale: 1, rotate: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 18, delay: i * 0.05 }}
                   >
                     {p}
-                  </span>
+                  </motion.span>
                 )
               })}
             </div>
