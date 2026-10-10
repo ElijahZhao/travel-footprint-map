@@ -12,7 +12,6 @@ import { CategoryTag } from '@/components/Surface'
 import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
-import AmbientBackground from '@/components/AmbientBackground'
 
 const PROVINCES = [
   '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江', '上海', '江苏',
@@ -152,7 +151,7 @@ export default function Wishlist() {
 
   if (!loading && !user && !guest) {
     return (
-      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'transparent' }}>
         <EmptyState icon={Compass} title={t('登录后使用心愿清单')} description={t('列出想去的地方，并点亮你去过的省份。')} />
       </div>
     )
@@ -163,8 +162,7 @@ export default function Wishlist() {
   const litPct = totalAll ? (totalLit / totalAll) * 100 : 0
 
   return (
-    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
-      <AmbientBackground />
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-6">
         {/* 标题 + 按钮 */}
         <FadeIn>

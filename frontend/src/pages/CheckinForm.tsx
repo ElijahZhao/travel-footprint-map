@@ -306,7 +306,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
   if (isEdit && loadingExisting) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-[60vh] items-center justify-center" style={{ background: 'transparent' }}>
         <p className="text-center" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
       </div>
     )
@@ -317,7 +317,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   const busy = createMut.isPending || updateMut.isPending || uploading || resolving
 
   return (
-    <div style={{ background: 'var(--background)' }}>
+    <div style={{ background: 'transparent' }}>
       <main className="mx-auto max-w-2xl space-y-5 px-4 pb-4 pt-1">
         <FadeIn duration={0.35}>
           <div className="flex items-center gap-2">

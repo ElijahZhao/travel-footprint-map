@@ -7,7 +7,6 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
-import AmbientBackground from '@/components/AmbientBackground'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, BarChart3, CalendarRange } from 'lucide-react'
 
@@ -139,7 +138,7 @@ export default function Stats() {
 
   if (!loading && !user && !guest) {
     return (
-      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'transparent' }}>
         <EmptyState icon={Globe2} title={t('登录后查看统计')} description={t('看看你走过多少城市、点亮多少分类。')} />
       </div>
     )
@@ -147,7 +146,7 @@ export default function Stats() {
 
   if (visited.length === 0) {
     return (
-      <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+      <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
         <main className="space-y-6">
           <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
             {t('旅行年鉴')}
@@ -163,8 +162,7 @@ export default function Stats() {
   }
 
   return (
-    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
-      <AmbientBackground />
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-8">
         {/* 标题 + 引导语 */}
         <FadeIn>

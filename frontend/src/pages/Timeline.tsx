@@ -8,7 +8,6 @@ import type { Checkin } from '@/lib/types'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
-import AmbientBackground from '@/components/AmbientBackground'
 import { CategoryTag } from '@/components/Surface'
 import { MapPin, Heart, LogIn, Search, X, Star } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -169,15 +168,14 @@ export default function Timeline() {
 
   if (!loading && !user && !guest) {
     return (
-      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'transparent' }}>
         <EmptyState icon={LogIn} title={t('登录后查看时间线')} description={t('按时间回顾你的每一次出发。')} />
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-full px-4 pb-32 pt-6" style={{ background: 'var(--background)' }}>
-      <AmbientBackground />
+    <div className="relative min-h-full px-4 pb-32 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-8">
         {/* 页面标题 */}
         <FadeIn>

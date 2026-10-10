@@ -5,7 +5,6 @@ import { useCheckin, useDeleteCheckin } from '@/lib/hooks'
 import { categoryMeta } from '@/lib/categories'
 import TravelMap from '@/components/TravelMap'
 import { FadeIn } from '@/components/MotionPrimitives'
-import AmbientBackground from '@/components/AmbientBackground'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -37,7 +36,7 @@ export default function CheckinDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-full" style={{ background: 'var(--background)' }}>
+      <div className="min-h-full" style={{ background: 'transparent' }}>
         <p className="py-20 text-center" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
       </div>
     )
@@ -45,7 +44,7 @@ export default function CheckinDetail() {
 
   if (!checkin) {
     return (
-      <div className="min-h-full" style={{ background: 'var(--background)' }}>
+      <div className="min-h-full" style={{ background: 'transparent' }}>
         <div className="mx-auto max-w-2xl px-4 py-20 text-center">
           <p style={{ color: 'var(--muted-foreground)' }}>{t('未找到该打卡记录')}</p>
           <Button className="mt-4" onClick={() => navigate('/')}>{t('返回地图')}</Button>
@@ -78,7 +77,6 @@ export default function CheckinDetail() {
 
   return (
     <div className="page-bg paper-texture relative min-h-full px-4 pb-10 pt-3">
-      <AmbientBackground />
       <main className="relative z-10 space-y-5">
         <div className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-[var(--background)]/90 px-4 py-2 backdrop-blur">
           <button

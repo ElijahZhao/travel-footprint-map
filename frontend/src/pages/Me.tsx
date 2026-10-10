@@ -9,7 +9,6 @@ import { setGuestCheckins } from '@/lib/guest'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CheckinCard from '@/components/CheckinCard'
-import AmbientBackground from '@/components/AmbientBackground'
 import { FadeIn, Stagger } from '@/components/MotionPrimitives'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -126,7 +125,7 @@ export default function Me() {
 
   if (!loading && !user && !guest) {
     return (
-      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-full items-center justify-center px-6" style={{ background: 'transparent' }}>
         <EmptyState
           icon={UserRound}
           title={t('请先登录')}
@@ -192,8 +191,7 @@ export default function Me() {
   const displayName = user?.name || user?.email?.split('@')[0] || (guest ? t('游客') : t('旅行者'))
 
   return (
-    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
-      <AmbientBackground />
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-6">
         {/* 头像与身份 */}
         <FadeIn>

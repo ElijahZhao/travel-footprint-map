@@ -8,7 +8,6 @@ import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import Postcard from '@/components/Postcard'
 import { FadeIn, Stagger } from '@/components/MotionPrimitives'
-import AmbientBackground from '@/components/AmbientBackground'
 import { Surface } from '@/components/Surface'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, ArrowRight, UserRound, Download, ImageIcon, X } from 'lucide-react'
@@ -52,7 +51,6 @@ export default function SharePage() {
 
   return (
     <div className="page-bg paper-texture relative min-h-full px-4 pb-28 pt-5">
-      <AmbientBackground />
       <main className="relative z-10 space-y-5">
         {/* 分享者信息 */}
         <FadeIn>

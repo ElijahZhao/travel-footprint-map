@@ -40,7 +40,7 @@ export default function Index() {
 
   if (!loading && !user && !guest) {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center px-6" style={{ background: 'var(--background)' }}>
+      <div className="flex min-h-[100dvh] items-center justify-center px-6" style={{ background: 'transparent' }}>
         <EmptyState
           illustration={<TravelIllustration scene="welcome" className="h-28 w-28" />}
           title={t('欢迎来到旅行打卡地图')}
