@@ -72,6 +72,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   const [results, setResults] = useState<POI[]>([])
   const [searching, setSearching] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
+  const [resolving, setResolving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -96,6 +97,32 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }))
+
+  // 输入停顿后自动搜索，无需按回车或点按钮
+  useEffect(() => {
+    const q = query.trim()
+    if (!q) {
+      setResults([])
+      return
+    }
+    const timer = window.setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await lbs.searchPlace(q, {
+          boundary: 'region(全国,0)',
+          pageSize: 10,
+          pageIndex: 1,
+        })
+        setResults(res.data ?? [])
+      } catch {
+        // 自动搜索失败不打扰用户，用户点按钮/回车时会给出完整提示
+        setResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 400)
+    return () => window.clearTimeout(timer)
+  }, [query])
 
   const handleAi = async () => {
     if (!form.place_name.trim()) {
@@ -176,9 +203,26 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   }
 
   const submit = async () => {
-    if (!form.place_name.trim()) return toast.error(t('请填写地点名称'))
-    if (form.lng == null || form.lat == null)
-      return toast.error(t('请先搜索并选择地点以获取坐标'))
+    const name = form.place_name.trim()
+    if (!name) return toast.error(t('请填写地点名称'))
+
+    // 没经过搜索选点（手动填写名称）时，自动把地点名解析成坐标
+    let lng = form.lng
+    let lat = form.lat
+    if (lng == null || lat == null) {
+      setResolving(true)
+      try {
+        const res = await lbs.geocode(name)
+        lng = res.result.location.lng
+        lat = res.result.location.lat
+        set('lng', lng)
+        set('lat', lat)
+      } catch {
+        return toast.error(t('没找到「{{name}}」的坐标，请在上方搜索并从结果中选择', { name }))
+      } finally {
+        setResolving(false)
+      }
+    }
 
     const input: CheckinInput = {
       place_name: form.place_name.trim(),
@@ -194,8 +238,8 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       rating: form.rating,
       is_public: form.is_public,
       photos,
-      lng: form.lng,
-      lat: form.lat,
+      lng,
+      lat,
     }
 
     try {
@@ -230,7 +274,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
   const meta = categoryMeta(form.category)
   const MetaIcon = meta.icon
-  const busy = createMut.isPending || updateMut.isPending || uploading
+  const busy = createMut.isPending || updateMut.isPending || uploading || resolving
 
   return (
     <div style={{ background: 'var(--background)' }}>

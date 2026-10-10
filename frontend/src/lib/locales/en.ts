@@ -80,7 +80,7 @@ const en = {
   '{{n}} 张': '{{n}} photos',
   '照片处理失败，请换一张试试': 'Photo processing failed, try another one',
   '请填写地点名称': 'Please enter a place name',
-  '请先搜索并选择地点以获取坐标': 'Search and pick a place to get its coordinates',
+  '没找到「{{name}}」的坐标，请在上方搜索并从结果中选择': "Couldn't locate {{name}}. Please search above and pick a result",
   '已点亮：{{name}}': 'Lit up: {{name}}',
   '已更新打卡': 'Check-in updated',
   '打卡成功': 'Check-in saved',

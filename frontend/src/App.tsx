@@ -54,7 +54,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
+        <Toaster position="top-center" />
         <AuthProvider>
           <BrowserRouter>
             <AppShell>
