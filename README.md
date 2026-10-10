@@ -2,6 +2,14 @@
 
 > 移动端风格的「地图 + 时间线 + 统计 + 心愿 + 精选分享」个人足迹应用。桌面浏览器下居中显示带手机边框的「真机」视图。
 
+## 在线访问
+
+**https://travel-footprint-d8em6aa6331d820-1495478913.tcloudbaseapp.com/**
+
+> 免登录可体验游客模式；手机浏览器打开效果最佳。
+
+[![在线访问](https://img.shields.io/badge/%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C-travel--footprint-38A05F?logo=leaflet&logoColor=white)](https://travel-footprint-d8em6aa6331d820-1495478913.tcloudbaseapp.com/)
+
 [![React](https://img.shields.io/badge/React-19.2-61dafb?logo=react&logoColor=white)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-7.3-646cff?logo=vite&logoColor=white)](https://vite.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -79,9 +87,7 @@ generated-images/   UI 概念图（10 张）
 
 ## 更新日志
 
-- **v1.0** — 首版：地图主页、打卡/心愿、时间线、统计、游客模式、登录、精选分享。
-
----
+- **v1.0** — 首版：地图主页、打卡/心愿、时间线、统计、游客模式、登录、精选分享。---
 
 ### 本页事实性陈述与代码依据（供复核）
 
