@@ -56,7 +56,7 @@ function segmentAngleDeg(a: { lat: number; lng: number }, b: { lat: number; lng:
 function arrowSvg(angle: number): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
     <g transform="rotate(${angle.toFixed(1)} 12 12)">
-      <path d="M12 3.5L19 21l-7-4.2L5 21z" fill="#2F8A55" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M12 3.5L19 21l-7-4.2L5 21z" fill="#8A63D2" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
     </g>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
@@ -94,7 +94,7 @@ function clusterSvg(count: number, color: string): string {
 /** 纸飞机图标（路线生长动画里沿轨迹飞行的角色） */
 function planeSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-    <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#2F8A55" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="#8A63D2" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
@@ -564,12 +564,12 @@ export default function TravelMap({
         ],
         styles: {
           'route-halo': new TMap.PolylineStyle({
-            color: 'rgba(88,160,107,0.18)',
+            color: 'rgba(138,99,210,0.16)',
             width: 10,
             lineCap: 'round',
           }),
           'route-core': new TMap.PolylineStyle({
-            color: '#2F8A55',
+            color: '#8A63D2',
             width: 3.5,
             borderColor: '#ffffff',
             borderWidth: 1,
@@ -637,7 +637,7 @@ export default function TravelMap({
         { id: 'anim-core', paths: [dense[0]], styleId: 'anim-core' },
       ],
       styles: {
-        'anim-halo': new TMap.PolylineStyle({ color: 'rgba(88,160,107,0.18)', width: 10, lineCap: 'round' }),
+        'anim-halo': new TMap.PolylineStyle({ color: 'rgba(138,99,210,0.16)', width: 10, lineCap: 'round' }),
         'anim-core': new TMap.PolylineStyle({
           color: '#3E6B52',
           width: 3.5,
