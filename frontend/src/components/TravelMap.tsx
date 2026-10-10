@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
 import { useTranslation } from 'react-i18next'
-import { Route } from 'lucide-react'
+import { Route, ChevronRight, X } from 'lucide-react'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */
 function pinSvg(hex: string): string {
@@ -17,11 +17,11 @@ function pinSvg(hex: string): string {
 /** 生成「我的位置」蓝色脉冲圆点（SVG data URI，带呼吸动画） */
 function userDotSvg(): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-    <circle cx="24" cy="24" r="20" fill="oklch(0.45 0.10 155 / 0.20)">
+    <circle cx="24" cy="24" r="20" fill="rgba(47,111,237,0.22)">
       <animate attributeName="r" values="13;22;13" dur="2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.45;0.10;0.45" dur="2s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="24" cy="24" r="7" fill="oklch(0.45 0.10 155)" stroke="#ffffff" stroke-width="3"/>
+    <circle cx="24" cy="24" r="7" fill="#2F6FED" stroke="#ffffff" stroke-width="3"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
@@ -116,6 +116,10 @@ export default function TravelMap({
   const [showRoute, setShowRoute] = useState(true)
   const [zoom, setZoom] = useState(4)
   const routeRef = useRef<any>(null)
+  /** 各聚合簇包含的打卡（供点击数字圈时弹出清单） */
+  const groupsRef = useRef<Record<number, Checkin[]>>({})
+  /** 当前展开的聚合清单（同地点多个打卡时使用） */
+  const [clusterItems, setClusterItems] = useState<Checkin[] | null>(null)
 
   /** 把所有足迹缩放进视野；只有单点时给个合适缩放 */
   const fitToCheckins = useCallback((list: Checkin[]) => {
@@ -267,6 +271,7 @@ export default function TravelMap({
 
       const TMap = (window as any).TMap
       const groups = clusterCheckins(checkins, zoom)
+      groupsRef.current = {}
       const styles: Record<string, any> = {}
       const geometries: any[] = []
 
@@ -300,11 +305,12 @@ export default function TravelMap({
             src: clusterSvg(g.items.length, color),
             anchor: { x: 22, y: 22 },
           })
+          groupsRef.current[idx] = g.items
           geometries.push({
             id: `__cluster__${idx}`,
             styleId: styleKey,
             position: new TMap.LatLng(g.lat, g.lng),
-            properties: { cluster: true, lat: g.lat, lng: g.lng },
+            properties: { cluster: true, idx, lat: g.lat, lng: g.lng },
           })
         }
       })
@@ -314,6 +320,16 @@ export default function TravelMap({
         const p = evt?.geometry?.properties
         if (!p) return
         if (p.cluster) {
+          const items = groupsRef.current[p.idx]
+          // 同一地点的多个打卡（坐标几乎相同）放大也拆不开，直接弹出清单；
+          // 已经放大到较深层级仍是一簇的，同样弹清单，避免「点不动」。
+          const sameSpot = items?.every(
+            (c) => Math.abs(c.lat - items[0].lat) < 0.002 && Math.abs(c.lng - items[0].lng) < 0.002,
+          )
+          if (items && (sameSpot || (map.getZoom?.() ?? 0) >= 13)) {
+            setClusterItems(items)
+            return
+          }
           map.setCenter(new TMap.LatLng(p.lat, p.lng))
           try {
             map.setZoom(Math.min((map.getZoom?.() ?? 4) + 2, 18))
@@ -353,14 +369,24 @@ export default function TravelMap({
       const path = visitedSorted.map((c) => new TMap.LatLng(c.lat, c.lng))
       const polyline = new TMap.MultiPolyline({
         map,
-        geometries: [{ id: 'route', paths: path, styleId: 'route' }],
+        // 双层：底层柔光晕 + 上层浅色虚线航程线，比粗实线轻盈
+        geometries: [
+          { id: 'route-halo', paths: path, styleId: 'route-halo' },
+          { id: 'route-core', paths: path, styleId: 'route-core' },
+        ],
         styles: {
-          route: new TMap.PolylineStyle({
-            color: '#2D5A3D',
-            width: 4,
-            borderColor: '#ffffff',
-            borderWidth: 1,
+          'route-halo': new TMap.PolylineStyle({
+            color: 'rgba(45,90,61,0.13)',
+            width: 9,
+            lineCap: 'round',
+          }),
+          'route-core': new TMap.PolylineStyle({
+            color: '#4E7D61',
+            width: 3,
+            dashPattern: [14, 10],
+            lineCap: 'round',
             showArrow: true,
+            arrowWidth: 7,
           }),
         },
       })
@@ -447,7 +473,58 @@ export default function TravelMap({
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#C46A3D' }} /> {t('想去')}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D', boxShadow: '0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent)' }} /> {t('我的位置')}
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2F6FED', boxShadow: '0 0 0 3px rgba(47,111,237,0.22)' }} /> {t('我的位置')}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 聚合清单：点击数字圈弹出，可进入单条详情 */}
+      {clusterItems && (
+        <div className="absolute inset-x-3 bottom-3 z-[1010]">
+          <div
+            className="max-h-72 overflow-hidden rounded-2xl border bg-white/95 shadow-lg backdrop-blur"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <div className="flex items-center justify-between border-b px-4 py-2.5" style={{ borderColor: 'var(--border)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                {t('{{n}} 条足迹', { n: clusterItems.length })}
+              </span>
+              <button
+                type="button"
+                onClick={() => setClusterItems(null)}
+                aria-label={t('关闭')}
+                className="flex h-6 w-6 items-center justify-center rounded-full"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-56 overflow-auto">
+              {clusterItems.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => navigate(`${linkPrefix}${c.id}`)}
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[var(--secondary)]"
+                >
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ background: c.status === 'wish' ? '#C46A3D' : '#2D5A3D' }}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                      {c.place_name}
+                    </span>
+                    {c.visit_date && (
+                      <span className="block text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                        {c.visit_date}
+                      </span>
+                    )}
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -36,6 +36,23 @@ function StatusPill({ isWish, t }: { isWish: boolean; t: (k: string, o?: Record<
   )
 }
 
+/** 票据撕票口：虚线 + 两侧半圆缺口，模拟登机牌打孔 */
+function Perforation() {
+  return (
+    <div className="relative">
+      <div className="border-t border-dashed" style={{ borderColor: 'var(--border)' }} />
+      <span
+        className="absolute -left-2 -top-2 h-4 w-4 rounded-full"
+        style={{ background: 'var(--secondary)', boxShadow: 'inset 0 0 0 1px var(--border)' }}
+      />
+      <span
+        className="absolute -right-2 -top-2 h-4 w-4 rounded-full"
+        style={{ background: 'var(--secondary)', boxShadow: 'inset 0 0 0 1px var(--border)' }}
+      />
+    </div>
+  )
+}
+
 export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: string }) {
   const meta = categoryMeta(checkin.category)
   const Icon = meta.icon
@@ -45,9 +62,16 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
   return (
     <Link to={to ?? `/checkin/${checkin.id}`} className="block">
       <div
-        className="overflow-hidden rounded-2xl"
-        style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.04)' }}
+        className="relative overflow-hidden rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 1px 3px rgba(43,36,32,0.04)',
+        }}
       >
+        {/* 左侧分类色书脊 — 像登机牌的色条 */}
+        <span className="absolute inset-y-0 left-0 z-10 w-1.5" style={{ background: meta.color }} />
+
         {/* 封面照片 — 占满宽度，无白边 */}
         {checkin.photos?.length > 0 ? (
           <div className="relative">
@@ -55,7 +79,8 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
               src={checkin.photos[0].url}
               alt={checkin.place_name}
               loading="lazy"
-              className="h-44 w-full object-cover"
+              className="ml-1.5 h-44 w-full object-cover"
+              style={{ width: 'calc(100% - 6px)' }}
             />
             {/* 照片底部氛围渐变 */}
             <div
@@ -67,20 +92,38 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
                 {t('{{n}} 张', { n: checkin.photos.length })}
               </span>
             )}
+            {/* 出行日期戳（左上） */}
+            {checkin.visit_date && !isWish && (
+              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow-sm" style={{ color: 'var(--foreground)' }}>
+                {checkin.visit_date}
+              </span>
+            )}
             <span className="absolute right-3 top-3">
               <StatusPill isWish={isWish} t={t} />
             </span>
+            {/* 撕票口 */}
+            <Perforation />
           </div>
         ) : (
           <div
-            className="flex h-28 w-full items-center justify-center"
-            style={{ background: 'var(--secondary)', color: 'var(--muted-foreground)' }}
+            className="relative flex h-28 w-full items-center justify-center"
+            style={{
+              background: `color-mix(in oklab, ${meta.color} 10%, var(--secondary))`,
+              color: meta.color,
+            }}
           >
             <Icon className="h-10 w-10" />
+            {checkin.visit_date && !isWish && (
+              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow-sm" style={{ color: 'var(--foreground)' }}>
+                {checkin.visit_date}
+              </span>
+            )}
+            {/* 撕票口 */}
+            <Perforation />
           </div>
         )}
 
-        <div className="space-y-2 p-4">
+        <div className="space-y-2 py-4 pl-5 pr-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate font-semibold text-base">{checkin.place_name}</span>
@@ -103,10 +146,8 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
 
           <div className="flex items-center justify-between pt-1">
             <span className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-              {checkin.visit_date && !isWish && <span>{checkin.visit_date}</span>}
-              {checkin.photos?.length > 0 && (
-                <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
-              )}
+              {checkin.visit_date && !isWish && !checkin.photos?.length && <span>{checkin.visit_date}</span>}
+              <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
             </span>
             <Stars n={checkin.rating} />
           </div>

@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "重构全站动态背景使其真正可见",
+  "version_description": "加强动态背景并修复搜索体验",
   "preview_type": "mobile"
 }

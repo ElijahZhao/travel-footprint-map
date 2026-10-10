@@ -62,15 +62,26 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
 
   return (
     <motion.div
-      className="relative"
+      className="relative flex gap-3"
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease }}
     >
+      {/* 时间轴节点：状态色圆点 + 向下延伸连线 */}
+      <div className="flex w-4 shrink-0 flex-col items-center pt-5">
+        <span
+          className="h-3 w-3 shrink-0 rounded-full border-2"
+          style={{
+            borderColor: isWish ? 'var(--accent)' : 'var(--primary)',
+            background: 'var(--card)',
+          }}
+        />
+        <span className="mt-1 w-px flex-1" style={{ background: 'var(--border)' }} />
+      </div>
       <button
         onClick={() => navigate(`/checkin/${item.id}`)}
-        className="block w-full overflow-hidden rounded-2xl text-left"
+        className="min-w-0 flex-1 overflow-hidden rounded-2xl text-left"
         style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.04)' }}
       >
         {/* 大照片 — 占满宽度；无照片时直接文字卡片 */}

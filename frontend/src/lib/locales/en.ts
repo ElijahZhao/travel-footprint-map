@@ -301,6 +301,7 @@ const en = {
   '{{visited}} 个足迹·{{wish}} 个心愿': '{{visited}} places · {{wish}} wishes',
   '登录后数据跨设备同步': 'Cross-device sync after sign-in',
   '已把本机的 {{n}} 条足迹合并到账号': 'Merged {{n}} local places into your account',
+  '{{n}} 条足迹': '{{n}} stops here',
   '导入本机数据': 'Import local data',
   '检测到本设备还有 {{n}} 条未同步的足迹': '{{n}} unsynced places found on this device',
   '已导入本机 {{n}} 条足迹': 'Imported {{n}} local places',

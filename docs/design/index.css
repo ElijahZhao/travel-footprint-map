@@ -125,6 +125,7 @@
   --theme-green: oklch(0.62 0.16 158);
   --theme-gold: oklch(0.78 0.17 65);
   --theme-blue: oklch(0.62 0.17 245);
+  --theme-rose: oklch(0.72 0.13 20);
   --chart-1: var(--primary);
   --chart-2: var(--accent);
   --chart-3: #7A6F63;
