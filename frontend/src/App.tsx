@@ -8,12 +8,12 @@ import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/lib/AuthContext";
 import AppShell from "@/components/AppShell";
 import Index from "./pages/Index";
-import CheckinDetail from "./pages/CheckinDetail";
-import Timeline from "./pages/Timeline";
-import Stats from "./pages/Stats";
-import Wishlist from "./pages/Wishlist";
-import Me from "./pages/Me";
-import NotFound from "./pages/NotFound";
+const CheckinDetail = lazy(() => import("./pages/CheckinDetail"));
+const Timeline = lazy(() => import("./pages/Timeline"));
+const Stats = lazy(() => import("./pages/Stats"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Me = lazy(() => import("./pages/Me"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // 低频页面按需加载，缩短首屏体积
 const Login = lazy(() => import("./pages/Login"));

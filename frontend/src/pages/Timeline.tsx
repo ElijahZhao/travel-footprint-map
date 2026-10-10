@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins } from '@/lib/hooks'
-import { categoryMeta } from '@/lib/categories'
+import { CATEGORIES, categoryMeta } from '@/lib/categories'
 import type { Checkin } from '@/lib/types'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
+import AmbientBackground from '@/components/AmbientBackground'
 import { CategoryTag } from '@/components/Surface'
 import { MapPin, Heart, LogIn, Search, X, Star } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -15,15 +16,26 @@ import { useTranslation } from 'react-i18next'
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const
 
-/** 按「年-月」分组 */
-function groupByMonth(items: Checkin[]) {
-  const map = new Map<string, Checkin[]>()
+/** 按「年 → 月」分组，年份之间可标注空白期 */
+function groupByYear(items: Checkin[]) {
+  const byYear = new Map<string, Checkin[]>()
   for (const it of items) {
-    const key = (it.visit_date || '').slice(0, 7) || '未标注日期'
-    if (!map.has(key)) map.set(key, [])
-    map.get(key)!.push(it)
+    const y = (it.visit_date || '').slice(0, 4) || '未标注年份'
+    if (!byYear.has(y)) byYear.set(y, [])
+    byYear.get(y)!.push(it)
   }
-  return Array.from(map.entries()).sort((a, b) => (a[0] < b[0] ? 1 : -1))
+  return Array.from(byYear.entries())
+    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    .map(([year, list]) => {
+      const months = new Map<string, Checkin[]>()
+      for (const it of list) {
+        const m = (it.visit_date || '').slice(0, 7) || '未标注日期'
+        if (!months.has(m)) months.set(m, [])
+        months.get(m)!.push(it)
+      }
+      const monthGroups = Array.from(months.entries()).sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      return { year, monthGroups }
+    })
 }
 
 function isMonthKey(key: string) {
@@ -98,7 +110,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
           )}
 
           {item.mood_text && (
-            <p className="line-clamp-2 text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
+            <p className="line-clamp-3 text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
               {item.mood_text}
             </p>
           )}
@@ -124,6 +136,8 @@ export default function Timeline() {
   const { data: checkins = [] } = useMyCheckins()
   const [searchOpen, setSearchOpen] = useState(false)
   const [keyword, setKeyword] = useState('')
+  const [activeCats, setActiveCats] = useState<Set<string>>(new Set())
+  const [activeTags, setActiveTags] = useState<Set<string>>(new Set())
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -131,18 +145,26 @@ export default function Timeline() {
   }, [loading, user, guest, enterGuest])
 
   const kw = keyword.trim().toLowerCase()
+  const visitedAll = useMemo(
+    () => checkins.filter((c) => c.status === 'visited').sort((a, b) => (b.visit_date || '').localeCompare(a.visit_date || '')),
+    [checkins],
+  )
+  const allTags = useMemo(
+    () => Array.from(new Set(visitedAll.flatMap((c) => c.tags ?? []))).slice(0, 14),
+    [visitedAll],
+  )
   const visited = useMemo(() => {
-    const base = checkins
-      .filter((c) => c.status === 'visited')
-      .sort((a, b) => (b.visit_date || '').localeCompare(a.visit_date || ''))
+    let base = visitedAll
+    if (activeCats.size) base = base.filter((c) => activeCats.has(c.category))
+    if (activeTags.size) base = base.filter((c) => (c.tags ?? []).some((tg) => activeTags.has(tg)))
     if (!kw) return base
     return base.filter(
       (c) => c.place_name.toLowerCase().includes(kw) || (c.address ?? '').toLowerCase().includes(kw),
     )
-  }, [checkins, kw])
+  }, [visitedAll, activeCats, activeTags, kw])
 
   const wishes = useMemo(() => checkins.filter((c) => c.status === 'wish'), [checkins])
-  const groups = useMemo(() => groupByMonth(visited), [visited])
+  const yearGroups = useMemo(() => groupByYear(visited), [visited])
   const searching = kw.length > 0
 
   if (!loading && !user && !guest) {
@@ -154,7 +176,8 @@ export default function Timeline() {
   }
 
   return (
-    <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+    <div className="relative min-h-full px-4 pb-32 pt-6" style={{ background: 'var(--background)' }}>
+      <AmbientBackground />
       <main className="space-y-8">
         {/* 页面标题 */}
         <FadeIn>
@@ -236,6 +259,56 @@ export default function Timeline() {
           )}
         </AnimatePresence>
 
+        {/* 筛选：分类 + 标签 */}
+        {(CATEGORIES.length > 0 || allTags.length > 0) && (
+          <FadeIn>
+            <div className="space-y-2">
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {CATEGORIES.map((c) => {
+                  const active = activeCats.has(c.key)
+                  const Icon = c.icon
+                  return (
+                    <button
+                      key={c.key}
+                      onClick={() => setActiveCats((prev) => { const n = new Set(prev); n.has(c.key) ? n.delete(c.key) : n.add(c.key); return n })}
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium"
+                      style={active ? { background: 'var(--primary)', color: 'var(--primary-foreground)' } : { background: 'var(--card)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
+                    >
+                      <Icon className="h-3.5 w-3.5" /> {t(c.label)}
+                    </button>
+                  )
+                })}
+              </div>
+              {allTags.length > 0 && (
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {allTags.map((tg) => {
+                    const active = activeTags.has(tg)
+                    return (
+                      <button
+                        key={tg}
+                        onClick={() => setActiveTags((prev) => { const n = new Set(prev); n.has(tg) ? n.delete(tg) : n.add(tg); return n })}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium"
+                        style={active ? { background: 'var(--accent)', color: 'var(--accent-foreground)' } : { background: 'var(--card)', color: 'var(--muted-foreground)', border: '1px solid var(--border)' }}
+                      >
+                        #{tg}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              {(activeCats.size > 0 || activeTags.size > 0) && (
+                <button
+                  onClick={() => { setActiveCats(new Set()); setActiveTags(new Set()) }}
+                  className="text-xs font-medium"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  {t('清除筛选')}
+                </button>
+              )}
+            </div>
+          </FadeIn>
+        )}
+
         {/* 空状态 */}
         {searching && visited.length === 0 ? (
           <EmptyState
@@ -251,37 +324,56 @@ export default function Timeline() {
           />
         ) : (
           <>
-            {/* 按月份分组 */}
-            {groups.map(([month, items]) => (
-              <section key={month} className="space-y-4">
-                {/* 月份大标题 — 杂志期号感 */}
-                <FadeIn duration={0.4}>
-                  <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display text-5xl font-black leading-none" style={{ color: 'var(--primary)' }}>
-                        {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
-                      </span>
-                      {isMonthKey(month) && <span className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{t('月')}</span>}
-                      {isMonthKey(month) && (
-                        <span className="ml-2 text-xs tracking-[0.15em]" style={{ color: 'var(--muted-foreground)' }}>
-                          {month.split('-')[0]}
-                        </span>
-                      )}
+            {/* 按年份 → 月份分组，年份之间标注空白期 */}
+            {yearGroups.map(({ year, monthGroups }, gi) => {
+              const prevYear = gi > 0 ? yearGroups[gi - 1].year : null
+              const gap = prevYear && /^\d{4}$/.test(prevYear) && /^\d{4}$/.test(year) ? Number(year) - Number(prevYear) : 0
+              return (
+                <Fragment key={year}>
+                  {gap > 1 && (
+                    <div className="py-1 text-center text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                      {t('— 中间 {{n}} 年暂无记录 —', { n: gap - 1 })}
                     </div>
-                    <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {t('{{n}} 段旅程', { n: items.length })}
-                    </span>
-                  </div>
-                </FadeIn>
-
-                {/* 打卡列表 — 大照片卡片 */}
-                <div className="space-y-4">
-                  {items.map((c, i) => (
-                    <TimelineItem key={c.id} item={c} index={i} />
-                  ))}
-                </div>
-              </section>
-            ))}
+                  )}
+                  <section className="space-y-6">
+                    {/* 年份大标题 */}
+                    <FadeIn duration={0.4}>
+                      <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+                        <span className="font-display text-3xl font-black tracking-tight" style={{ color: 'var(--primary)' }}>
+                          {year}
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                          {t('{{n}} 段旅程', { n: monthGroups.reduce((a, [, its]) => a + its.length, 0) })}
+                        </span>
+                      </div>
+                    </FadeIn>
+                    {monthGroups.map(([month, items]) => (
+                      <section key={month} className="space-y-4">
+                        {/* 月份小标题 — 杂志期号感 */}
+                        <FadeIn duration={0.4}>
+                          <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+                            <div className="flex items-baseline gap-2">
+                              <span className="font-display text-5xl font-black leading-none" style={{ color: 'var(--primary)' }}>
+                                {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
+                              </span>
+                              {isMonthKey(month) && <span className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{t('月')}</span>}
+                            </div>
+                            <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                              {t('{{n}} 段旅程', { n: items.length })}
+                            </span>
+                          </div>
+                        </FadeIn>
+                        <div className="space-y-4">
+                          {items.map((c, i) => (
+                            <TimelineItem key={c.id} item={c} index={i} />
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </section>
+                </Fragment>
+              )
+            })}
 
             {/* 心愿单 */}
             {wishes.length > 0 && (

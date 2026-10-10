@@ -22,4 +22,14 @@ export default defineConfig({
       clientPort: 5173,
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'framer-motion': ['framer-motion'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+  },
 })

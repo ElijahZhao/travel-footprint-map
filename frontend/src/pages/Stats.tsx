@@ -7,6 +7,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
+import AmbientBackground from '@/components/AmbientBackground'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, BarChart3, CalendarRange } from 'lucide-react'
 
@@ -97,11 +98,25 @@ export default function Stats() {
     ? { n: furthest.km, label: t('公里外的远方') }
     : { n: byCategory.filter((c) => c.count > 0).length, label: t('类足迹') }
   const heroSentence = furthest
-    ? t('这一年走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。', { year: furthest.year, month: furthest.month, place: furthest.place })
+    ? t('走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。', { year: furthest.year, month: furthest.month, place: furthest.place })
     : t('你已在 {{cities}} 座城市，留下 {{visited}} 段旅程。', { cities: s.cities, visited: s.visited })
 
   const maxCat = Math.max(1, ...byCategory.map((c) => c.count))
-  const maxYear = Math.max(1, ...byYear.map(([, n]) => n))
+
+  /** 连续年份轴：把有数据的年份之间的空年也补出来（计 0），避免被误读成连续三年 */
+  const yearList = useMemo(() => {
+    if (byYear.length === 0) return []
+    const ys = byYear.map(([y]) => Number(y))
+    const min = Math.min(...ys)
+    const max = Math.max(...ys)
+    const out: [string, number][] = []
+    for (let y = min; y <= max; y++) {
+      const hit = byYear.find(([yy]) => yy === String(y))
+      out.push([String(y), hit ? hit[1] : 0])
+    }
+    return out
+  }, [byYear])
+  const maxYear = Math.max(1, ...yearList.map(([, n]) => n))
 
   useEffect(() => {
     if (!loading && !user && !guest) enterGuest()
@@ -133,7 +148,8 @@ export default function Stats() {
   }
 
   return (
-    <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+      <AmbientBackground />
       <main className="space-y-8">
         {/* 标题 + 引导语 */}
         <FadeIn>
@@ -233,7 +249,7 @@ export default function Stats() {
                 <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('年度足迹')}</span>
               </div>
               <div className="flex h-40 items-stretch justify-between gap-3">
-                {byYear.map(([year, n], i) => (
+                {yearList.map(([year, n], i) => (
                   <div key={year} className="flex h-full min-w-0 flex-1 flex-col items-center gap-2">
                     {/* 数字 + 柱体放进固定高度轨道，百分比才有参照（修复柱体不可见） */}
                     <div className="flex w-full flex-1 flex-col items-center justify-end gap-1 overflow-hidden">
@@ -292,7 +308,7 @@ export default function Stats() {
               />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {PROVINCES.map((p) => {
+              {PROVINCES.filter((p) => litProvinces.has(p)).map((p) => {
                 const lit = litProvinces.has(p)
                 return (
                   <span

@@ -16,6 +16,26 @@ function Stars({ n }: { n: number }) {
   )
 }
 
+/** 统一的「已去 / 心愿」状态药丸，照片卡与无图卡使用同一样式 */
+function StatusPill({ isWish, t }: { isWish: boolean; t: (k: string, o?: Record<string, unknown>) => string }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium shadow-sm"
+      style={{ color: isWish ? 'var(--accent)' : 'var(--primary)' }}
+    >
+      {isWish ? (
+        <>
+          <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿')}
+        </>
+      ) : (
+        <>
+          <CheckCircle2 className="h-3 w-3" /> {t('已去')}
+        </>
+      )}
+    </span>
+  )
+}
+
 export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: string }) {
   const meta = categoryMeta(checkin.category)
   const Icon = meta.icon
@@ -48,15 +68,7 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
               </span>
             )}
             <span className="absolute right-3 top-3">
-              {isWish ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
-                  <Heart className="h-3 w-3" fill="currentColor" /> {t('心愿')}
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium" style={{ color: 'var(--primary)' }}>
-                  <CheckCircle2 className="h-3 w-3" /> {t('已去')}
-                </span>
-              )}
+              <StatusPill isWish={isWish} t={t} />
             </span>
           </div>
         ) : (
@@ -73,16 +85,7 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate font-semibold text-base">{checkin.place_name}</span>
             </div>
-            {!checkin.photos?.length &&
-              (isWish ? (
-                <span className="shrink-0 text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
-                  {t('心愿')}
-                </span>
-              ) : (
-                <span className="shrink-0 text-[11px] font-medium" style={{ color: 'var(--primary)' }}>
-                  {t('已去')}
-                </span>
-              ))}
+            {!checkin.photos?.length && <StatusPill isWish={isWish} t={t} />}
           </div>
 
           {checkin.address && (

@@ -6,6 +6,7 @@ import { useMyCheckins, useUpdateCheckin } from '@/lib/hooks'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import CheckinCard from '@/components/CheckinCard'
+import AmbientBackground from '@/components/AmbientBackground'
 import { FadeIn, Stagger } from '@/components/MotionPrimitives'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -89,7 +90,7 @@ export default function Me() {
     () => [
       { key: 'first', label: t('初次出发'), icon: Sparkles, got: visitedCount >= 1 },
       { key: 'five', label: t('五处打卡'), icon: MapPin, got: visitedCount >= 5 },
-      { key: 'photo', label: t('影像记录'), icon: Camera, got: photoCount >= 3 },
+      { key: 'photo', label: t('影像记录'), icon: Camera, got: photoCount >= 1 },
       { key: 'year', label: t('跨年旅行'), icon: CalendarCheck, got: new Set(checkins.map((c) => (c.visit_date || '').slice(0, 4)).filter(Boolean)).size >= 2 },
       { key: 'explorer', label: t('探索者'), icon: Mountain, got: visitedCount >= 10 },
       { key: 'curator', label: t('精选策展'), icon: BadgeCheck, got: publicCount >= 1 },
@@ -165,7 +166,8 @@ export default function Me() {
   const displayName = user?.name || user?.email?.split('@')[0] || (guest ? t('游客') : t('旅行者'))
 
   return (
-    <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+      <AmbientBackground />
       <main className="space-y-6">
         {/* 头像与身份 */}
         <FadeIn>
@@ -219,7 +221,7 @@ export default function Me() {
               className="flex w-full items-center justify-center gap-1 py-1 text-xs"
               style={{ color: 'var(--muted-foreground)' }}
             >
-              {t('游客模式 · 登录后数据跨设备同步')} <span style={{ color: 'var(--primary)' }}>{t('去登录 →')}</span>
+              {t('登录后数据跨设备同步')} <span style={{ color: 'var(--primary)' }}>{t('去登录 →')}</span>
             </button>
           </FadeIn>
         )}
@@ -304,7 +306,7 @@ export default function Me() {
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4" style={{ color: 'var(--primary)' }} />
               <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>
-                {t('我的打卡（{{n}}）', { n: checkins.length })}
+                {t('我的打卡（{{n}}）', { n: visitedCount })}
               </span>
             </div>
             <Button

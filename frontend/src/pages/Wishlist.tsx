@@ -12,6 +12,7 @@ import { CategoryTag } from '@/components/Surface'
 import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
+import AmbientBackground from '@/components/AmbientBackground'
 
 const PROVINCES = [
   '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江', '上海', '江苏',
@@ -84,7 +85,7 @@ function WishCard({ item, lit, index, onComplete }: { item: Checkin; lit: boolea
             {item.place_name}
           </p>
           <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            {item.address || t('想去的地方')}
+            {lit ? (item.address || item.place_name || t('已去过')) : (item.address || t('想去的地方'))}
           </p>
           <div className="mt-1 flex items-center gap-1.5">
             <CategoryTag label={t(meta.label)} icon={Icon} color="var(--muted-foreground)" />
@@ -162,7 +163,8 @@ export default function Wishlist() {
   const litPct = totalAll ? (totalLit / totalAll) * 100 : 0
 
   return (
-    <div className="min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+    <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'var(--background)' }}>
+      <AmbientBackground />
       <main className="space-y-6">
         {/* 标题 + 按钮 */}
         <FadeIn>

@@ -283,6 +283,19 @@ const en = {
   '切换到中文': 'Switch to Chinese',
   '类足迹': 'Categories',
   '删除打卡': 'Delete check-in',
+
+  // ===== 本轮新增 =====
+  '{{visited}} 个足迹·{{wish}} 个心愿': '{{visited}} places · {{wish}} wishes',
+  '登录后数据跨设备同步': 'Cross-device sync after sign-in',
+  '走得最远的一次，是 {{year}} 年 {{month}} 月的 {{place}}。': 'The farthest trip was to {{place}}, {{month}}/{{year}}.',
+  '最远距离为所有足迹几何中心到最远点的直线距离': 'Farthest distance is the straight-line distance from the geometric center of all places to the farthest one.',
+  '— 中间 {{n}} 年暂无记录 —': '— no records for {{n}} years in between —',
+  '路线': 'Route',
+  '开': 'On',
+  '关': 'Off',
+  '已去过': 'Visited',
+  '我的位置': 'My location',
+  '清除筛选': 'Clear filters',
 }
 
 export default en

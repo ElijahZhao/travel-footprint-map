@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
 import { useTranslation } from 'react-i18next'
+import { Route } from 'lucide-react'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */
 function pinSvg(hex: string): string {
@@ -23,6 +24,31 @@ function userDotSvg(): string {
     <circle cx="24" cy="24" r="7" fill="oklch(0.45 0.10 155)" stroke="#ffffff" stroke-width="3"/>
   </svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 生成聚合气泡（带数量文字） */
+function clusterSvg(count: number, color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" fill="${color}" stroke="#ffffff" stroke-width="3"/>
+    <text x="22" y="23" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif">${count}</text>
+  </svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 按网格把相近的打卡聚成一簇，缩放越大格子越小（点越分散） */
+function clusterCheckins(list: Checkin[], zoom: number): Array<{ cluster: boolean; items: Checkin[]; lat: number; lng: number }> {
+  const cell = zoom >= 11 ? 0.05 : zoom >= 9 ? 0.15 : zoom >= 7 ? 0.5 : 1.5
+  const map = new Map<string, Checkin[]>()
+  for (const c of list) {
+    const key = `${Math.floor(c.lat / cell)}_${Math.floor(c.lng / cell)}`
+    if (!map.has(key)) map.set(key, [])
+    map.get(key)!.push(c)
+  }
+  return Array.from(map.values()).map((items) => {
+    const lat = items.reduce((a, c) => a + c.lat, 0) / items.length
+    const lng = items.reduce((a, c) => a + c.lng, 0) / items.length
+    return { cluster: items.length > 1, items, lat, lng }
+  })
 }
 
 interface TravelMapProps {
@@ -86,6 +112,10 @@ export default function TravelMap({
   const navigate = useNavigate()
   /** 已框进视野的足迹数量，仅在新增时重新缩放到全部标记，避免浏览时镜头乱跳 */
   const fittedCountRef = useRef(0)
+  /** 路线连线开关与当前缩放（用于聚合重算） */
+  const [showRoute, setShowRoute] = useState(true)
+  const [zoom, setZoom] = useState(4)
+  const routeRef = useRef<any>(null)
 
   /** 把所有足迹缩放进视野；只有单点时给个合适缩放 */
   const fitToCheckins = useCallback((list: Checkin[]) => {
@@ -184,6 +214,9 @@ export default function TravelMap({
           }
         } catch {}
         mapRef.current = map
+        try {
+          map.on('zoom_change', () => setZoom(map.getZoom()))
+        } catch {}
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
@@ -202,6 +235,10 @@ export default function TravelMap({
       } catch {}
       markersRef.current = null
       try {
+        routeRef.current?.setMap?.(null)
+      } catch {}
+      routeRef.current = null
+      try {
         mapRef.current?.destroy()
       } catch {}
       mapRef.current = null
@@ -215,7 +252,7 @@ export default function TravelMap({
     }
   }, [status, showUserLocation, locState, locateOnly])
 
-  // 同步标记点
+  // 同步标记点（含聚合）
   useEffect(() => {
     const map = mapRef.current
     if (!map || status !== 'ready') return
@@ -228,37 +265,62 @@ export default function TravelMap({
         markersRef.current = null
       }
 
+      const TMap = (window as any).TMap
+      const groups = clusterCheckins(checkins, zoom)
       const styles: Record<string, any> = {}
       const geometries: any[] = []
 
-      checkins.forEach((c) => {
-        const isWish = c.status === 'wish'
-        const color = isWish ? '#C46A3D' : '#2D5A3D'
-        const styleKey = isWish ? 'wish' : 'visited'
-        if (!styles[styleKey]) {
-          styles[styleKey] = new (window as any).TMap.MarkerStyle({
-            width: 32,
-            height: 40,
-            src: pinSvg(color),
-            anchor: { x: 16, y: 40 },
+      groups.forEach((g, idx) => {
+        if (!g.cluster) {
+          const c = g.items[0]
+          const isWish = c.status === 'wish'
+          const styleKey = isWish ? 'wish' : 'visited'
+          if (!styles[styleKey]) {
+            styles[styleKey] = new TMap.MarkerStyle({
+              width: 32,
+              height: 40,
+              src: pinSvg(isWish ? '#C46A3D' : '#2D5A3D'),
+              anchor: { x: 16, y: 40 },
+            })
+          }
+          geometries.push({
+            id: String(c.id),
+            styleId: styleKey,
+            position: new TMap.LatLng(c.lat, c.lng),
+            properties: { id: c.id, cluster: false },
+          })
+        } else {
+          const allWish = g.items.every((c) => c.status === 'wish')
+          const allVisited = g.items.every((c) => c.status === 'visited')
+          const color = allWish ? '#C46A3D' : allVisited ? '#2D5A3D' : '#7A6F63'
+          const styleKey = `cluster-${idx}`
+          styles[styleKey] = new TMap.MarkerStyle({
+            width: 44,
+            height: 44,
+            src: clusterSvg(g.items.length, color),
+            anchor: { x: 22, y: 22 },
+          })
+          geometries.push({
+            id: `__cluster__${idx}`,
+            styleId: styleKey,
+            position: new TMap.LatLng(g.lat, g.lng),
+            properties: { cluster: true, lat: g.lat, lng: g.lng },
           })
         }
-        geometries.push({
-          id: String(c.id),
-          styleId: styleKey,
-          position: new (window as any).TMap.LatLng(c.lat, c.lng),
-          properties: { id: c.id },
-        })
       })
 
-      const markerLayer = new (window as any).TMap.MultiMarker({
-        map,
-        styles,
-        geometries,
-      })
+      const markerLayer = new TMap.MultiMarker({ map, styles, geometries })
       markerLayer.on('click', (evt: any) => {
-        const id = evt?.geometry?.properties?.id
-        if (id != null) navigate(`${linkPrefix}${id}`)
+        const p = evt?.geometry?.properties
+        if (!p) return
+        if (p.cluster) {
+          map.setCenter(new TMap.LatLng(p.lat, p.lng))
+          try {
+            map.setZoom(Math.min((map.getZoom?.() ?? 4) + 2, 18))
+          } catch {}
+        } else if (p.id != null) {
+          navigate(`${linkPrefix}${p.id}`)
+        }
       })
       markersRef.current = markerLayer
 
@@ -271,7 +333,42 @@ export default function TravelMap({
       // 标记渲染失败不应阻塞地图
       console.warn('marker render failed', e)
     }
-  }, [checkins, status, navigate, linkPrefix])
+  }, [checkins, status, navigate, linkPrefix, zoom])
+
+  // 已去点按时间顺序连成路线（可开关）
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || status !== 'ready') return
+    try {
+      routeRef.current?.setMap?.(null)
+    } catch {}
+    routeRef.current = null
+    if (!showRoute) return
+    try {
+      const visitedSorted = [...checkins]
+        .filter((c) => c.status === 'visited' && c.visit_date)
+        .sort((a, b) => (a.visit_date || '').localeCompare(b.visit_date || ''))
+      if (visitedSorted.length < 2) return
+      const TMap = (window as any).TMap
+      const path = visitedSorted.map((c) => new TMap.LatLng(c.lat, c.lng))
+      const polyline = new TMap.MultiPolyline({
+        map,
+        geometries: [{ id: 'route', paths: path, styleId: 'route' }],
+        styles: {
+          route: new TMap.PolylineStyle({
+            color: '#2D5A3D',
+            width: 4,
+            borderColor: '#ffffff',
+            borderWidth: 1,
+            showArrow: true,
+          }),
+        },
+      })
+      routeRef.current = polyline
+    } catch (e) {
+      console.warn('route render failed', e)
+    }
+  }, [checkins, status, showRoute])
 
   // 同步「我的位置」标记
   useEffect(() => {
@@ -329,6 +426,32 @@ export default function TravelMap({
       }
     >
       <div ref={containerRef} className="h-full w-full" />
+
+      {/* 图例 + 路线开关（左上） */}
+      {status === 'ready' && (
+        <div className="absolute left-3 top-3 z-[1010] flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setShowRoute((v) => !v)}
+            className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+            style={{ color: showRoute ? 'var(--primary)' : 'var(--muted-foreground)' }}
+          >
+            <Route className="h-3.5 w-3.5" />
+            {t('路线')} {showRoute ? t('开') : t('关')}
+          </button>
+          <div className="glass space-y-1 rounded-xl px-3 py-2 text-[11px]" style={{ color: 'var(--foreground)' }}>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D' }} /> {t('已去过')}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#C46A3D' }} /> {t('想去')}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#2D5A3D', boxShadow: '0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent)' }} /> {t('我的位置')}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 定位按钮：置于右下（底部入口卡之上），避开顶部浮层区 */}
       {showUserLocation && status === 'ready' && (

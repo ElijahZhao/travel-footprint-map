@@ -34,6 +34,8 @@ export default function Index() {
   }, [checkins, filter])
 
   const activeFilterCount = (filter.category ? 1 : 0) + (filter.status ? 1 : 0)
+  const visitedCount = filtered.filter((c) => c.status === 'visited').length
+  const wishCount = filtered.filter((c) => c.status === 'wish').length
   const panelTop = guest ? 'top-[60px]' : 'top-[60px]'
 
   if (!loading && !user && !guest) {
@@ -117,7 +119,7 @@ export default function Index() {
           >
             <span className="flex items-center gap-2 text-sm font-semibold">
               <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />
-              {t('{{count}} 个足迹', { count: filtered.length })}
+              {t('{{visited}} 个足迹·{{wish}} 个心愿', { visited: visitedCount, wish: wishCount })}
             </span>
             <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>{t('查看列表 →')}</span>
           </button>

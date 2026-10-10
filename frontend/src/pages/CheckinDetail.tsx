@@ -5,6 +5,7 @@ import { useCheckin, useDeleteCheckin } from '@/lib/hooks'
 import { categoryMeta } from '@/lib/categories'
 import TravelMap from '@/components/TravelMap'
 import { FadeIn } from '@/components/MotionPrimitives'
+import AmbientBackground from '@/components/AmbientBackground'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,6 +33,7 @@ export default function CheckinDetail() {
   const { data: checkin, isLoading } = useCheckin(id ? Number(id) : null)
   const delMut = useDeleteCheckin()
   const [delOpen, setDelOpen] = useState(false)
+  const [lightbox, setLightbox] = useState<number | null>(null)
 
   if (isLoading) {
     return (
@@ -75,7 +77,8 @@ export default function CheckinDetail() {
   }
 
   return (
-    <div className="page-bg paper-texture min-h-full px-4 pb-10 pt-3">
+    <div className="page-bg paper-texture relative min-h-full px-4 pb-10 pt-3">
+      <AmbientBackground />
       <main className="relative z-10 space-y-5">
         <div className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-[var(--background)]/90 px-4 py-2 backdrop-blur">
           <button
@@ -100,7 +103,8 @@ export default function CheckinDetail() {
                     src={p.url}
                     alt={`${checkin.place_name} ${i + 1}`}
                     loading={i === 0 ? 'eager' : 'lazy'}
-                    className="max-h-80 w-full shrink-0 snap-center object-cover"
+                    onClick={() => setLightbox(i)}
+                    className="max-h-80 w-full shrink-0 snap-center cursor-zoom-in object-cover"
                   />
                 ))}
               </div>
@@ -240,6 +244,52 @@ export default function CheckinDetail() {
           </div>
         )}
       </main>
+
+      {/* 大图查看（lightbox） */}
+      {lightbox !== null && checkin.photos[lightbox] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            aria-label={t('关闭')}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+          <img
+            src={checkin.photos[lightbox].url}
+            alt={`${checkin.place_name} ${lightbox + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-full rounded-xl object-contain"
+          />
+          {checkin.photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightbox((i) => (i !== null ? (i - 1 + checkin.photos.length) % checkin.photos.length : 0)) }}
+                aria-label="上一张"
+                className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightbox((i) => (i !== null ? (i + 1) % checkin.photos.length : 0)) }}
+                aria-label="下一张"
+                className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+              </button>
+              <span className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white">
+                {lightbox + 1} / {checkin.photos.length}
+              </span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
