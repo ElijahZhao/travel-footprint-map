@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "新增游客数据自动合并到账号",
+  "version_description": "重构全站动态背景使其真正可见",
   "preview_type": "mobile"
 }

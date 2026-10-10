@@ -79,6 +79,8 @@ const en = {
   '「AI 建议标签」还未开通：需要配置 AI 密钥后才能使用': '“AI suggest tags” is not enabled yet: an AI key must be configured first',
   '地点搜索暂不可用：需要把本站域名加入腾讯位置服务的授权名单': 'Place search is unavailable: this site’s domain must be added to Tencent LBS allowlist',
   '地点搜索失败，请稍后重试': 'Place search failed, please retry later',
+  '搜索中…': 'Searching…',
+  '未找到相关地点，换个词试试': 'No matching places — try another keyword',
   '已上传 {{count}} 张照片': 'Uploaded {{count}} photo(s)',
   '{{n}} 张': '{{n}} photos',
   '照片处理失败，请换一张试试': 'Photo processing failed, try another one',

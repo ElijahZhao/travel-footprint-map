@@ -10,6 +10,7 @@ export default function AmbientBackground() {
       <span className="ambient-blob ambient-blob--1" />
       <span className="ambient-blob ambient-blob--2" />
       <span className="ambient-blob ambient-blob--3" />
+      <span className="ambient-blob ambient-blob--4" />
     </div>
   )
 }

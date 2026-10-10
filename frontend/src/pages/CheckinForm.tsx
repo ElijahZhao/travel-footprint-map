@@ -188,16 +188,21 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
     }
   }
 
-  const searchPlace = async () => {    if (!query.trim()) return
+  const searchPlace = async (q?: string) => {
+    const kw = (q ?? query).trim()
+    if (!kw) { setResults([]); return }
+    const seq = ++searchSeq.current
     setSearching(true)
     try {
-      const res = await lbs.searchPlace(query.trim(), {
+      const res = await lbs.searchPlace(kw, {
         boundary: 'region(全国,0)',
         pageSize: 10,
         pageIndex: 1,
       })
+      if (seq !== searchSeq.current) return
       setResults(res.data ?? [])
     } catch (e) {
+      if (seq !== searchSeq.current) return
       // 域名未授权是最常见的搜索失败场景：给出简短、指向真实解法的提示，
       // 不把 SDK 的长报错原文（带 URL）直接甩给用户。
       if (e instanceof LBSError && e.status === LBS_ERROR_CODES.UNAUTHORIZED_REFERER) {
@@ -206,10 +211,19 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       } else {
         toast.error(e instanceof LBSError ? t(e.getSolution()) : t('地点搜索失败，请稍后重试'))
       }
+      setResults([])
     } finally {
-      setSearching(false)
+      if (seq === searchSeq.current) setSearching(false)
     }
   }
+
+  // 输入即搜：停止输入 350ms 后自动触发，避免每次按键都打接口、候选列表乱跳
+  useEffect(() => {
+    const kw = query.trim()
+    if (!kw) { setResults([]); return }
+    const tid = setTimeout(() => { void searchPlace(kw) }, 350)
+    return () => clearTimeout(tid)
+  }, [query])
 
   const pickPlace = (poi: POI) => {
     set('place_name', poi.title)
@@ -355,12 +369,18 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && searchPlace()}
                   />
-                  <Button variant="outline" onClick={searchPlace} disabled={searching}>
+                  <Button variant="outline" onClick={() => searchPlace()} disabled={searching}>
                     {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                   </Button>
                 </div>
-                {results.length > 0 && (
+                {(searching || results.length > 0 || query.trim()) && (
                   <div className="max-h-56 overflow-auto rounded-lg border" style={{ borderColor: 'var(--border)' }}>
+                    {searching && (
+                      <p className="px-3 py-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('搜索中…')}</p>
+                    )}
+                    {!searching && results.length === 0 && query.trim() && (
+                      <p className="px-3 py-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('未找到相关地点，换个词试试')}</p>
+                    )}
                     {results.map((poi) => (
                       <button
                         key={poi.id}
