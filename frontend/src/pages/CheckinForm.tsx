@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent } from '@/components/ui/card'
 import { Star, MapPin, Upload, X, Search, Loader2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+import { celebrate } from '@/lib/celebrate'
 import { useTranslation } from 'react-i18next'
 
 const lbs = createClient()
@@ -202,6 +203,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
         await updateMut.mutateAsync({ id: Number(id), input })
         if (completeWish) {
           toast.success(t('已点亮：{{name}}', { name: input.place_name }))
+          celebrate()
           navigate('/timeline')
         } else {
           toast.success(t('已更新打卡'))
@@ -210,6 +212,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       } else {
         await createMut.mutateAsync(input)
         toast.success(t('打卡成功'))
+        celebrate()
         navigate('/')
       }
     } catch (e: any) {

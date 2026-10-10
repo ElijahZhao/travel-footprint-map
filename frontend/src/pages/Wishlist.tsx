@@ -58,6 +58,7 @@ function WishCard({ item, lit, index, onComplete }: { item: Checkin; lit: boolea
             <img
               src={item.photos[0].url}
               alt={item.place_name}
+              loading="lazy"
               className="h-full w-full object-cover"
               style={{ filter: lit ? 'none' : 'grayscale(0.7) opacity(0.7)' }}
             />
@@ -213,7 +214,7 @@ export default function Wishlist() {
             <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ background: 'var(--primary)' }}
+                style={{ background: 'linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 50%, var(--accent)))' }}
                 initial={{ width: 0 }}
                 whileInView={{ width: `${litPct}%` }}
                 viewport={{ once: true }}

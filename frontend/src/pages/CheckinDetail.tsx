@@ -92,7 +92,23 @@ export default function CheckinDetail() {
         <FadeIn>
           {checkin.photos?.length > 0 && (
             <div className="relative overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)', boxShadow: 'var(--ds-shadow-md)' }}>
-              <img src={checkin.photos[0].url} alt={checkin.place_name} className="max-h-80 w-full object-cover" />
+              {/* 相册：多图横向滑动，单图直接展示 */}
+              <div className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {checkin.photos.map((p, i) => (
+                  <img
+                    key={i}
+                    src={p.url}
+                    alt={`${checkin.place_name} ${i + 1}`}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    className="max-h-80 w-full shrink-0 snap-center object-cover"
+                  />
+                ))}
+              </div>
+              {checkin.photos.length > 1 && (
+                <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+                  {t('{{n}} 张', { n: checkin.photos.length })}
+                </span>
+              )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20" style={{ background: 'linear-gradient(transparent, oklch(0.2 0.02 80 / 0.5))' }} />
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
                 <span

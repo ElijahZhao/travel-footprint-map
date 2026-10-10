@@ -34,8 +34,19 @@ export default function CheckinCard({ checkin, to }: { checkin: Checkin; to?: st
             <img
               src={checkin.photos[0].url}
               alt={checkin.place_name}
+              loading="lazy"
               className="h-44 w-full object-cover"
             />
+            {/* 照片底部氛围渐变 */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
+              style={{ background: 'linear-gradient(transparent, rgba(30,24,20,0.32))' }}
+            />
+            {checkin.photos.length > 1 && (
+              <span className="absolute bottom-2.5 right-3 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+                {t('{{n}} 张', { n: checkin.photos.length })}
+              </span>
+            )}
             <span className="absolute right-3 top-3">
               {isWish ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium" style={{ color: 'var(--accent)' }}>

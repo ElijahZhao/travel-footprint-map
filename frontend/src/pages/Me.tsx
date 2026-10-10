@@ -169,11 +169,14 @@ export default function Me() {
       <main className="space-y-6">
         {/* 头像与身份 */}
         <FadeIn>
-          <div className="overflow-hidden rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div
+            className="grad-vivid overflow-hidden rounded-2xl p-5"
+            style={{ boxShadow: 'var(--ds-shadow-lg)' }}
+          >
             <div className="flex items-center gap-4">
               <motion.div
                 className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
-                style={{ background: 'var(--primary)' }}
+                style={{ background: 'rgba(255,255,255,0.22)' }}
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 20 }}
@@ -181,17 +184,17 @@ export default function Me() {
                 {displayName.slice(0, 1).toUpperCase()}
                 <span
                   className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
-                  style={{ background: guest ? 'var(--accent)' : 'var(--primary)', border: '2px solid var(--card)' }}
+                  style={{ background: guest ? 'var(--accent)' : 'var(--primary)', border: '2px solid rgba(255,255,255,0.55)' }}
                 >
                   {guest ? <UserRound className="h-3 w-3" /> : <BadgeCheck className="h-3.5 w-3.5" />}
                 </span>
               </motion.div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-lg font-bold">{displayName}</p>
-                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                <p className="truncate text-lg font-bold text-white">{displayName}</p>
+                <p className="mt-0.5 truncate text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   {guest ? t('游客模式 · 数据保存于本设备') : user?.email}
                 </p>
-                <div className="mt-1.5 flex gap-3 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                <div className="mt-1.5 flex gap-3 text-[11px]" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   <span>{t('足迹 {{n}}', { n: visitedCount })}</span>
                   <span>{t('心愿 {{n}}', { n: checkins.length - visitedCount })}</span>
                   <span>{t('照片 {{n}}', { n: photoCount })}</span>
@@ -200,7 +203,7 @@ export default function Me() {
               <button
                 onClick={guest ? exitGuest : () => signOut()}
                 className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-xs"
-                style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
+                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
               >
                 <DoorOpen className="h-3.5 w-3.5" /> {t('退出')}
               </button>
@@ -251,6 +254,7 @@ export default function Me() {
                         background: b.got ? 'var(--primary)' : 'transparent',
                         color: b.got ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
                         border: b.got ? 'none' : '1.5px dashed var(--border)',
+                        boxShadow: b.got ? '0 6px 16px color-mix(in oklab, var(--primary) 32%, transparent)' : 'none',
                       }}
                     >
                       <Icon className="h-5 w-5" />

@@ -68,6 +68,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
             <img
               src={item.photos[0].url}
               alt={item.place_name}
+              loading="lazy"
               className="h-48 w-full object-cover"
             />
             {isWish && (

@@ -113,8 +113,7 @@ export default function Index() {
           <button
             type="button"
             onClick={() => setListOpen(true)}
-            className="pointer-events-auto flex w-full items-center justify-between rounded-xl px-4 py-3 text-left"
-            style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+            className="glass-strong pointer-events-auto flex w-full items-center justify-between rounded-xl px-4 py-3 text-left"
           >
             <span className="flex items-center gap-2 text-sm font-semibold">
               <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />

@@ -147,11 +147,21 @@ export default function Stats() {
           </div>
         </FadeIn>
 
-        {/* 引导句 — 杂志式导语 */}
+        {/* 引导句 — 杂志式拉引卡 */}
         <FadeIn>
-          <p className="font-display text-lg leading-relaxed" style={{ color: 'var(--foreground)' }}>
-            {heroSentence}
-          </p>
+          <div
+            className="rounded-2xl p-4 pl-5"
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderLeft: '3px solid var(--accent)',
+              boxShadow: '0 2px 8px rgba(43,36,32,0.05)',
+            }}
+          >
+            <p className="font-display text-lg leading-relaxed" style={{ color: 'var(--foreground)' }}>
+              {heroSentence}
+            </p>
+          </div>
         </FadeIn>
 
         {/* 核心数字 — 大数字横排，不用卡片 */}
@@ -222,27 +232,33 @@ export default function Stats() {
                 <CalendarRange className="h-4 w-4" style={{ color: 'var(--primary)' }} />
                 <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('年度足迹')}</span>
               </div>
-              <div className="flex h-32 items-end justify-between gap-3">
+              <div className="flex h-40 items-stretch justify-between gap-3">
                 {byYear.map(([year, n], i) => (
-                  <div key={year} className="flex flex-1 flex-col items-center gap-2">
-                    <motion.span
-                      className="text-xs font-semibold tabular-nums"
-                      style={{ color: 'var(--primary)' }}
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.05 }}
-                    >
-                      {n}
-                    </motion.span>
-                    <motion.div
-                      className="w-full rounded-t-sm"
-                      style={{ background: 'var(--accent)' }}
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${(n / maxYear) * 100}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: i * 0.05, ease: 'easeOut' }}
-                    />
+                  <div key={year} className="flex h-full min-w-0 flex-1 flex-col items-center gap-2">
+                    {/* 数字 + 柱体放进固定高度轨道，百分比才有参照（修复柱体不可见） */}
+                    <div className="flex w-full flex-1 flex-col items-center justify-end gap-1 overflow-hidden">
+                      <motion.span
+                        className="text-xs font-semibold tabular-nums"
+                        style={{ color: 'var(--accent)' }}
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 + i * 0.05 }}
+                      >
+                        {n}
+                      </motion.span>
+                      <motion.div
+                        className="w-full rounded-t-lg"
+                        style={{
+                          background: 'linear-gradient(180deg, var(--accent), color-mix(in oklab, var(--accent) 40%, transparent))',
+                          minHeight: 10,
+                        }}
+                        initial={{ height: 0 }}
+                        whileInView={{ height: `${(n / maxYear) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeOut' }}
+                      />
+                    </div>
                     <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>
                       {year}
                     </span>
@@ -318,7 +334,7 @@ export default function Stats() {
                       transition={{ delay: i * 0.06 }}
                     >
                       {c.photos?.length > 0 && (
-                        <img src={c.photos[0].url} alt={c.place_name} className="h-36 w-full object-cover" />
+                        <img src={c.photos[0].url} alt={c.place_name} loading="lazy" className="h-36 w-full object-cover" />
                       )}
                       <div className="p-3">
                         <div className="flex items-center justify-between">
