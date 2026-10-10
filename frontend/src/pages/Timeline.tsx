@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag, Images } from 'lucide-react'
 import WavyUnderline from '@/components/WavyUnderline'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
@@ -212,6 +212,15 @@ export default function Timeline() {
               </p>
             </div>
             <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                aria-label={t('足迹相册')}
+                onClick={() => navigate('/album')}
+                className="flex h-10 w-10 items-center justify-center rounded-full"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--theme-gold, #EFC241)' }}
+              >
+                <Images className="h-4 w-4" />
+              </button>
               <button
                 type="button"
                 aria-label={t('心愿清单')}

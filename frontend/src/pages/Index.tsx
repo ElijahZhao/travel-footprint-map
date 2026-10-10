@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins } from '@/lib/hooks'
 import FilterBar, { type FilterValue } from '@/components/FilterBar'
@@ -8,7 +9,7 @@ import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import BottomSheet from '@/components/BottomSheet'
-import { Plus, UserRound, List, SlidersHorizontal, X } from 'lucide-react'
+import { Plus, UserRound, List, SlidersHorizontal, X, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -37,6 +38,32 @@ export default function Index() {
   const visitedCount = filtered.filter((c) => c.status === 'visited').length
   const wishCount = filtered.filter((c) => c.status === 'wish').length
   const panelTop = guest ? 'top-[60px]' : 'top-[60px]'
+
+  /** 纪念日：往年同月同日的打卡（每天最多冒一次，可关掉） */
+  const anniversary = useMemo(() => {
+    const now = new Date()
+    const mmdd = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const thisYear = now.getFullYear()
+    const hits = checkins.filter(
+      (c) => c.status === 'visited' && (c.visit_date || '').endsWith(mmdd) && Number((c.visit_date || '').slice(0, 4)) < thisYear,
+    )
+    if (!hits.length) return null
+    return hits.sort((a, b) => (b.visit_date || '').localeCompare(a.visit_date || ''))[0]
+  }, [checkins])
+  const [annivDismissed, setAnnivDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('anniv-dismissed') === new Date().toDateString()
+    } catch {
+      return false
+    }
+  })
+  const dismissAnniv = () => {
+    setAnnivDismissed(true)
+    try {
+      localStorage.setItem('anniv-dismissed', new Date().toDateString())
+    } catch {}
+  }
+  const annivYears = anniversary ? new Date().getFullYear() - Number((anniversary.visit_date || '').slice(0, 4)) : 0
 
   if (!loading && !user && !guest) {
     return (
@@ -107,6 +134,52 @@ export default function Index() {
               </button>
             </div>
             <FilterBar value={filter} onChange={setFilter} />
+          </div>
+        )}
+
+        {/* 纪念日小卡片：一年前的今天，你在哪里 */}
+        {anniversary && !annivDismissed && (
+          <div className="pointer-events-none absolute inset-x-3 top-14 z-[1005] flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: -14, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="glass-strong pointer-events-auto flex w-full max-w-[340px] items-center gap-3 rounded-2xl p-3 text-left"
+            >
+              <button
+                type="button"
+                onClick={() => navigate(`/checkin/${anniversary.id}`)}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                {anniversary.photos?.length > 0 ? (
+                  <img src={anniversary.photos[0].url} alt={anniversary.place_name} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                ) : (
+                  <span
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in oklab, var(--theme-gold, #EFC241) 25%, white)', color: 'var(--theme-gold, #EFC241)' }}
+                  >
+                    <Sparkles className="h-5 w-5" />
+                  </span>
+                )}
+                <span className="min-w-0">
+                  <span className="block text-xs font-bold" style={{ color: 'var(--theme-gold, #B8860B)' }}>
+                    {t('{{n}} 年前的今天', { n: annivYears })}
+                  </span>
+                  <span className="block truncate text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                    {t('你在 {{place}}', { place: anniversary.place_name })}
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={dismissAnniv}
+                aria-label={t('关闭')}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </motion.div>
           </div>
         )}
 

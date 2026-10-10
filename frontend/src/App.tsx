@@ -13,6 +13,8 @@ const Timeline = lazy(() => import("./pages/Timeline"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Me = lazy(() => import("./pages/Me"));
+const Album = lazy(() => import("./pages/Album"));
+const Report = lazy(() => import("./pages/Report"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // 低频页面按需加载，缩短首屏体积
@@ -72,6 +74,8 @@ function App() {
                   <Route path="/wishlist" data-genie-title="心愿点亮" data-genie-key="Wishlist" element={<PageTransition transition="slide-fade"><Wishlist /></PageTransition>} />
                   <Route path="/login" data-genie-title="登录" data-genie-key="Login" element={<PageTransition transition="fade"><Login /></PageTransition>} />
                   <Route path="/me" data-genie-title="我的" data-genie-key="Me" element={<PageTransition transition="fade"><Me /></PageTransition>} />
+                  <Route path="/album" data-genie-title="足迹相册" data-genie-key="Album" element={<PageTransition transition="slide-fade"><Album /></PageTransition>} />
+                  <Route path="/report" data-genie-title="年度旅行报告" data-genie-key="Report" element={<PageTransition transition="slide-fade"><Report /></PageTransition>} />
                   <Route path="/share/:publicId" data-genie-title="分享页" data-genie-key="Share" element={<PageTransition transition="fade"><SharePage /></PageTransition>} />
                   <Route path="/auth/callback" data-genie-title="登录回调" data-genie-key="AuthCallback" element={<PageTransition transition="fade"><AuthCallback /></PageTransition>} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

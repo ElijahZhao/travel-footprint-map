@@ -9,7 +9,8 @@ import CountUp from '@/components/CountUp'
 import { FadeIn } from '@/components/MotionPrimitives'
 import WavyUnderline from '@/components/WavyUnderline'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Globe2, BarChart3, CalendarRange } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { MapPin, Globe2, BarChart3, CalendarRange, BookOpen, ChevronRight } from 'lucide-react'
 
 /** 两点间距离（km） */
 function haversineKm(a: { lng: number; lat: number }, b: { lng: number; lat: number }) {
@@ -43,6 +44,7 @@ function nationOf(c: { nation?: string | null; address?: string | null }): strin
 
 export default function Stats() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { user, guest, loading, enterGuest } = useAuth()
   const { data: checkins = [] } = useMyCheckins()
   const { data: stats } = useStats(user?.uid ?? '')
@@ -190,6 +192,36 @@ export default function Stats() {
               {heroSentence}
             </p>
           </div>
+        </FadeIn>
+
+        {/* 年度报告入口 — 翻开一本手帐 */}
+        <FadeIn>
+          <button
+            type="button"
+            onClick={() => navigate('/report')}
+            className="flex w-full items-center gap-3 rounded-2xl p-4 text-left transition active:scale-[0.99]"
+            style={{
+              background: 'linear-gradient(120deg, color-mix(in oklab, var(--theme-gold, #EFC241) 14%, var(--card)), var(--card))',
+              border: '1px solid var(--border)',
+              boxShadow: '0 2px 8px rgba(43,36,32,0.06)',
+            }}
+          >
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: 'color-mix(in oklab, var(--theme-gold, #EFC241) 22%, white)', color: 'var(--theme-gold, #B8860B)' }}
+            >
+              <BookOpen className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-bold" style={{ color: 'var(--foreground)' }}>
+                {t('翻翻我的年度旅行报告')}
+              </span>
+              <span className="block text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                {t('一页一页，像翻一本旅行手帐')}
+              </span>
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
+          </button>
         </FadeIn>
 
         {/* 核心数字 — 大数字横排，不用卡片 */}
