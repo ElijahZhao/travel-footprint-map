@@ -21,6 +21,7 @@ export interface Checkin {
   photos: PhotoItem[]
   rating: number
   is_public: boolean
+  nation?: string | null
   created_at: string
   updated_at: string
 }
@@ -38,4 +39,5 @@ export interface CheckinInput {
   photos?: PhotoItem[]
   rating?: number
   is_public?: boolean
+  nation?: string | null
 }

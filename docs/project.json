@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行打卡地图",
   "app_slug": "travel-footprint-map",
-  "version_description": "修复地图视野与搜索稳定性问题",
+  "version_description": "修复数据一致性并升级地图与动效体验",
   "preview_type": "mobile"
 }

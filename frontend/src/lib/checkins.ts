@@ -67,6 +67,7 @@ export async function createCheckin(input: CheckinInput): Promise<void> {
     photos: input.photos ?? [],
     rating: input.rating ?? 0,
     is_public: input.is_public ?? false,
+    nation: input.nation ?? null,
   })
   if (error) throw new Error(error.message)
 }
@@ -96,6 +97,7 @@ export async function updateCheckin(id: number, input: CheckinInput): Promise<vo
       photos: input.photos ?? [],
       rating: input.rating ?? 0,
       is_public: input.is_public ?? false,
+      nation: input.nation ?? null,
     })
     .eq('id', id)
   if (error) throw new Error(error.message)

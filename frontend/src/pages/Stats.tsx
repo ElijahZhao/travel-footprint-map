@@ -35,6 +35,12 @@ function provinceOf(address?: string | null): string | null {
   return null
 }
 
+/** 取一条打卡所属国家：优先用落库的 nation；国内未落库时按省份推断为中国。 */
+function nationOf(c: { nation?: string | null; address?: string | null }): string | null {
+  if (c.nation && c.nation.trim()) return c.nation.trim()
+  return provinceOf(c.address) ? '中国' : null
+}
+
 export default function Stats() {
   const { t } = useTranslation()
   const { user, guest, loading, enterGuest } = useAuth()
@@ -64,6 +70,15 @@ export default function Stats() {
     visited.forEach((c) => {
       const p = provinceOf(c.address) || provinceOf(c.place_name)
       if (p) set.add(p)
+    })
+    return set
+  }, [visited])
+
+  const litNations = useMemo(() => {
+    const set = new Set<string>()
+    visited.forEach((c) => {
+      const n = nationOf(c)
+      if (n) set.add(n)
     })
     return set
   }, [visited])
@@ -199,6 +214,11 @@ export default function Stats() {
               </div>
             ))}
           </div>
+          {furthest && (
+            <p className="mt-2 text-center text-[11px] leading-snug" style={{ color: 'var(--muted-foreground)' }}>
+              {t('最远距离为所有足迹几何中心到最远点的直线距离')}
+            </p>
+          )}
         </FadeIn>
 
         {/* 分类分布 — 横条图，不用环形图 */}
@@ -326,6 +346,37 @@ export default function Stats() {
             </div>
           </div>
         </FadeIn>
+
+        {/* 国家点亮 */}
+        {litNations.size > 0 && (
+          <FadeIn>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex items-center gap-2">
+                  <Globe2 className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                  <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('国家点亮')}</span>
+                </div>
+                <span className="text-sm font-semibold tabular-nums" style={{ color: 'var(--primary)' }}>
+                  {t('{{n}} 个国家', { n: litNations.size })}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[...litNations].map((n) => (
+                  <span
+                    key={n}
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                    style={{
+                      background: n === '中国' ? 'var(--primary)' : 'color-mix(in oklab, var(--accent) 18%, transparent)',
+                      color: n === '中国' ? 'var(--primary-foreground)' : 'var(--foreground)',
+                    }}
+                  >
+                    {n}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+        )}
 
         {/* 最近打卡 — 大照片 */}
         {recent.length > 0 && (

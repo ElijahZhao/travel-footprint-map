@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext'
 import { useCheckin, useCreateCheckin, useUpdateCheckin } from '@/lib/hooks'
 import { CATEGORIES, categoryMeta } from '@/lib/categories'
 import { uploadPhoto } from '@/lib/storage'
-import { generateCheckinText, aiConfigured } from '@/lib/ai'
+import { generateCheckinText, generateTags, aiConfigured } from '@/lib/ai'
 import { createClient, LBSError, LBS_ERROR_CODES, type POI } from '@/lib/tencent-lbs'
 import type { CategoryKey, CheckinStatus, CheckinInput, PhotoItem } from '@/lib/types'
 import { FadeIn } from '@/components/MotionPrimitives'
@@ -31,6 +31,7 @@ interface FormState {
   tags: string
   rating: number
   is_public: boolean
+  nation: string | null
   lng: number | null
   lat: number | null
 }
@@ -45,6 +46,7 @@ const EMPTY: FormState = {
   tags: '',
   rating: 0,
   is_public: false,
+  nation: null,
   lng: null,
   lat: null,
 }
@@ -72,6 +74,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
   const [results, setResults] = useState<POI[]>([])
   const [searching, setSearching] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
+  const [tagLoading, setTagLoading] = useState(false)
   const [resolving, setResolving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const searchSeq = useRef(0)
@@ -89,6 +92,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
         tags: (existing.tags ?? []).join(', '),
         rating: existing.rating,
         is_public: existing.is_public,
+        nation: existing.nation ?? null,
         lng: existing.lng,
         lat: existing.lat,
       })
@@ -153,6 +157,37 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
     }
   }
 
+  const handleAiTags = async () => {
+    if (!form.place_name.trim()) {
+      toast.error(t('先填写或搜索地点，AI 才能给出合适的标签'))
+      return
+    }
+    if (!aiConfigured()) {
+      toast.error(t('「AI 建议标签」还未开通：需要配置 AI 密钥后才能使用'))
+      return
+    }
+    setTagLoading(true)
+    try {
+      const current = form.tags
+        ? form.tags.split(/[,，]/).map((x) => x.trim()).filter(Boolean)
+        : []
+      const suggested = await generateTags({
+        placeName: form.place_name,
+        address: form.address,
+        category: form.category,
+        moodText: form.mood_text,
+        existingTags: current,
+      })
+      const merged = Array.from(new Set([...current, ...suggested]))
+      set('tags', merged.join(', '))
+      toast.success(t('AI 标签建议已添加'))
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('AI 标签生成失败'))
+    } finally {
+      setTagLoading(false)
+    }
+  }
+
   const searchPlace = async () => {    if (!query.trim()) return
     setSearching(true)
     try {
@@ -181,6 +216,8 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
     set('address', poi.address)
     set('lng', poi.location.lng)
     set('lat', poi.location.lat)
+    // 国家免费来自 POI 的行政区划（避免国际逆地址解析的海外收费）；国内默认中国
+    set('nation', poi.ad_info?.nation ?? '中国')
     setResults([])
     setQuery('')
   }
@@ -240,6 +277,7 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
       rating: form.rating,
       is_public: form.is_public,
       photos,
+      nation: form.nation,
       lng,
       lat,
     }
@@ -444,7 +482,21 @@ export default function CheckinForm({ checkinId }: { checkinId?: string }) {
 
               {/* 标签 */}
               <div className="space-y-2">
-                <Label>{t('标签（用逗号分隔）')}</Label>
+                <div className="flex items-center justify-between">
+                  <Label>{t('标签（用逗号分隔）')}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    onClick={handleAiTags}
+                    disabled={tagLoading}
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    {tagLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                    {t('AI 建议标签')}
+                  </Button>
+                </div>
                 <Input value={form.tags} placeholder={t('日落, 亲子, 必去')} onChange={(e) => set('tags', e.target.value)} />
               </div>
 
