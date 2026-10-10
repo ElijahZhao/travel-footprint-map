@@ -1,8 +1,8 @@
 {
   "project_type": "web",
   "sub_project_type": "",
-  "name": "旅行打卡地图",
-  "app_slug": "travel-footprint-map",
-  "version_description": "修复数据一致性并升级地图与动效体验",
+  "name": "旅行足迹地图",
+  "app_slug": "travel-footprint",
+  "version_description": "新增国际足迹统计与AI标签建议",
   "preview_type": "mobile"
 }

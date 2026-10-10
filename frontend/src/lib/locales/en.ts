@@ -230,6 +230,11 @@ const en = {
   '这位旅行者尚未开启公开分享，或暂未标记精选打卡。': 'This traveler has not enabled public sharing, or has not marked any picks yet.',
   '在 App 中查看': 'View in the app',
   '记录你自己的旅行足迹，点亮想去的地方': 'Record your own travel trail and light up the places you want to visit',
+  '导出分享图': 'Export share image',
+  '明信片': 'Postcard',
+  '年鉴': 'Yearbook',
+  '下载图片': 'Download image',
+  '生成中…': 'Generating…',
 
   // ===== CheckinDetail =====
   '未找到该打卡记录': 'Check-in not found',
