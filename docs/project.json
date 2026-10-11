@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "路线连线颜色改紫色",
+  "version_description": "Collapsible map bar + shimmer glass",
   "preview_type": "mobile"
 }

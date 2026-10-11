@@ -384,6 +384,46 @@
     inset 0 1px 0 oklch(1 0 0 / 0.08);
 }
 
+/* 通透流光玻璃：更透明 + 更重的模糊 + 一道缓缓掠过的高光（浮光掠影） */
+.glass-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--card) 46%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid color-mix(in oklab, #fff 55%, transparent);
+  box-shadow:
+    0 6px 22px oklch(0.45 0.05 85 / 0.10),
+    inset 0 1px 0 oklch(1 0 0 / 0.4);
+}
+.glass-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: -60%;
+  width: 42%;
+  background: linear-gradient(105deg, transparent, oklch(1 0 0 / 0.4) 45%, oklch(1 0 0 / 0.15) 60%, transparent);
+  transform: skewX(-18deg);
+  animation: shimmer-sweep 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+@keyframes shimmer-sweep {
+  0% { left: -60%; }
+  55%, 100% { left: 135%; }
+}
+
+/* 童趣贴纸：轻轻摇摆的小装饰 */
+.sticker-wiggle {
+  animation: sticker-wiggle 3.2s ease-in-out infinite;
+  transform-origin: center;
+  filter: drop-shadow(0 2px 3px oklch(0.4 0.08 80 / 0.18));
+}
+@keyframes sticker-wiggle {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.08); }
+}
+
 /* 点亮发光（心愿点亮态 —— 鲜活绿光） */
 .lit-glow {
   box-shadow:

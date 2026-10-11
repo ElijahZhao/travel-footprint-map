@@ -7,7 +7,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import WavyUnderline from '@/components/WavyUnderline'
 import { FadeIn } from '@/components/MotionPrimitives'
-import { LogIn, Download } from 'lucide-react'
+import { ArrowLeft, LogIn, Download } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
@@ -83,6 +83,12 @@ export default function Album() {
   const navigate = useNavigate()
   const { data: checkins = [] } = useMyCheckins()
 
+  // 能后退就后退，否则回到首页（避免直接打开相册页时返回失效）
+  const goBack = () => {
+    if (window.history.length > 1) navigate(-1)
+    else navigate('/')
+  }
+
   useEffect(() => {
     if (!loading && !user && !guest) enterGuest()
   }, [loading, user, guest, enterGuest])
@@ -108,7 +114,19 @@ export default function Album() {
     <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-5">
         <FadeIn>
-          <div>
+          <div className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-[var(--background)]/90 px-4 py-2 backdrop-blur" style={{ marginTop: '-0.5rem' }}>
+            <button
+              type="button"
+              onClick={goBack}
+              className="flex h-9 w-9 items-center justify-center rounded-full"
+              style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
+              aria-label={t('返回')}
+            >
+              <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+            <span className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>{t('足迹相册')}</span>
+          </div>
+          <div className="mt-2">
             <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
               {t('足迹相册')}
             </h1>

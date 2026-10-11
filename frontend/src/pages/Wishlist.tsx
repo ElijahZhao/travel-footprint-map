@@ -8,6 +8,7 @@ import type { Checkin } from '@/lib/types'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
+import WavyUnderline from '@/components/WavyUnderline'
 import { CategoryTag } from '@/components/Surface'
 import { Heart, MapPin, Check, Sparkles, Compass, CalendarCheck, Plus, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -180,7 +181,9 @@ export default function Wishlist() {
             <div>
               <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
                 {t('心愿 & 点亮')}
+                <Star className="sticker-wiggle ml-2 inline h-6 w-6" style={{ color: 'var(--theme-gold)' }} />
               </h1>
+              <WavyUnderline />
               <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                 {t('想去的地方，一个一个点亮')}
               </p>

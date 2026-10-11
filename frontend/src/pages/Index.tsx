@@ -9,8 +9,7 @@ import TravelMap from '@/components/TravelMap'
 import CheckinCard from '@/components/CheckinCard'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
-import BottomSheet from '@/components/BottomSheet'
-import { Plus, UserRound, List, SlidersHorizontal, X, Sparkles, Search, MapPin, ChevronRight } from 'lucide-react'
+import { Plus, UserRound, List, SlidersHorizontal, X, Sparkles, Search, MapPin, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
@@ -20,7 +19,16 @@ export default function Index() {
   const { t } = useTranslation()
   const { data: checkins = [], isLoading } = useMyCheckins()
   const [filter, setFilter] = useState<FilterValue>({ category: null, status: null })
-  const [listOpen, setListOpen] = useState(false)
+  /** 底栏三态：collapsed(缩成小角标，露出更多地图) / bar(常驻条) / list(展开列表)，记忆用户选择 */
+  const [barState, setBarState] = useState<'collapsed' | 'bar' | 'list'>(() => {
+    const saved = localStorage.getItem('map-bar-state')
+    return saved === 'collapsed' || saved === 'list' ? (saved as 'collapsed' | 'list') : 'bar'
+  })
+  const setBarPersist = (s: 'collapsed' | 'bar' | 'list') => {
+    setBarState(s)
+    localStorage.setItem('map-bar-state', s)
+  }
+  const [clusterItems, setClusterItems] = useState<Checkin[] | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -116,7 +124,15 @@ export default function Index() {
   return (
     <div className="relative flex h-full min-h-0 flex-col">
       <div className="relative min-h-0 flex-1">
-        <TravelMap checkins={filtered} fill focus={focus} />
+        <TravelMap
+          checkins={filtered}
+          fill
+          focus={focus}
+          onCluster={(items) => {
+            setBarState('bar')
+            setClusterItems(items)
+          }}
+        />
 
         {/* 顶部浮层：搜索 + 筛选 */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-end gap-2 p-3">
@@ -321,45 +337,169 @@ export default function Index() {
           </div>
         )}
 
-        {/* 底部：查看足迹抽屉入口 */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-3 pb-6">
-          <button
-            type="button"
-            onClick={() => setListOpen(true)}
-            className="glass-strong pointer-events-auto flex w-full items-center justify-between rounded-xl px-4 py-3 text-left"
-          >
-            <span className="flex items-center gap-2 text-sm font-semibold">
-              <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />
-              {t('{{visited}} 个足迹·{{wish}} 个心愿', { visited: visitedCount, wish: wishCount })}
-            </span>
-            <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>{t('查看列表 →')}</span>
-          </button>
-        </div>
+        {/* 数字圈展开的「同地多条足迹」清单：独立图层，固定在底部列表条之上，互不遮挡 */}
+        {clusterItems && (
+          <div className="absolute inset-x-3 bottom-[150px] z-30">
+            <div
+              className="glass-shimmer max-h-72 overflow-hidden rounded-2xl"
+            >
+              <div className="flex items-center justify-between border-b px-4 py-2.5" style={{ borderColor: 'var(--border)' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                  {t('{{n}} 条足迹', { n: clusterItems.length })}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setClusterItems(null)}
+                  aria-label={t('关闭')}
+                  className="flex h-6 w-6 items-center justify-center rounded-full"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="max-h-56 overflow-auto">
+                {clusterItems.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setClusterItems(null)
+                      navigate(`/checkin/${c.id}`)
+                    }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[var(--secondary)]"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: c.status === 'wish' ? '#F29755' : '#38A05F' }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                        {c.place_name}
+                      </span>
+                      {c.visit_date && (
+                        <span className="block text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                          {c.visit_date}
+                        </span>
+                      )}
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
-        <BottomSheet open={listOpen} onClose={() => setListOpen(false)} title="我的足迹">
-          {isLoading ? (
-            <p className="py-10 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
-              title={checkins.length === 0 ? t('还没有打卡记录') : t('没有符合条件的地点')}
-              description={checkins.length === 0 ? t('点击下方按钮记录你的第一个足迹吧。') : t('试着切换分类或状态筛选。')}
-              action={
-                checkins.length === 0 ? (
-                  <Button onClick={() => navigate('/checkin/new')} style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
-                    <Plus className="h-4 w-4" /> {t('新增打卡')}
-                  </Button>
-                ) : undefined
-              }
-            />
+        {/* 底部常驻：足迹心愿，三态切换 —— collapsed(小角标) / bar(常驻条) / list(展开列表) */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-start px-3 pb-6">
+          {barState === 'collapsed' ? (
+            /* 收起态：缩成左下角小角标，露出整张地图 */
+            <button
+              type="button"
+              onClick={() => setBarPersist('bar')}
+              aria-label={t('展开足迹条')}
+              className="glass-shimmer pointer-events-auto flex h-11 items-center gap-2 rounded-full pl-3 pr-4"
+            >
+              <span className="relative flex h-6 w-6 items-center justify-center" style={{ color: 'var(--primary)' }}>
+                <List className="h-5 w-5" />
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: 'var(--accent)' }}>
+                  {visitedCount + wishCount}
+                </span>
+              </span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                {t('{{visited}} 足迹 · {{wish}} 心愿', { visited: visitedCount, wish: wishCount })}
+              </span>
+              <ChevronUp className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+            </button>
+          ) : barState === 'bar' ? (
+            /* 常驻条：显示统计 + 可展开列表 / 收起成角标 */
+            <div className="glass-shimmer pointer-events-auto flex w-full items-center justify-between gap-2 rounded-2xl px-4 py-2.5">
+              <button
+                type="button"
+                onClick={() => setBarPersist('collapsed')}
+                aria-label={t('收起足迹条')}
+                className="flex items-center gap-2 text-sm font-semibold"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                {t('{{visited}} 个足迹·{{wish}} 个心愿', { visited: visitedCount, wish: wishCount })}
+              </button>
+              <span className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setBarPersist('list')}
+                  className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold"
+                  style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+                >
+                  {t('展开列表')}
+                  <ChevronUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBarPersist('collapsed')}
+                  aria-label={t('收起')}
+                  className="flex h-7 w-7 items-center justify-center rounded-full"
+                  style={{ background: 'color-mix(in oklab, #fff 35%, transparent)', color: 'var(--muted-foreground)' }}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </span>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
-              {filtered.map((c) => (
-                <CheckinCard key={c.id} checkin={c} />
-              ))}
+            /* 展开列表态 */
+            <div className="glass-shimmer pointer-events-auto flex max-h-[46dvh] w-full flex-col overflow-hidden rounded-2xl">
+              <div className="flex items-center justify-between px-4 py-2.5">
+                <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                  <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                  {t('我的足迹列表')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setBarPersist('bar')}
+                    className="rounded-full px-2.5 py-1 text-xs font-medium"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    {t('收起')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBarPersist('collapsed')}
+                    aria-label={t('收起成角标')}
+                    className="flex h-7 w-7 items-center justify-center rounded-full"
+                    style={{ background: 'color-mix(in oklab, #fff 35%, transparent)', color: 'var(--muted-foreground)' }}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </span>
+              </div>
+              <div className="max-h-[calc(46dvh-52px)] overflow-auto px-3 py-2" style={{ borderTop: '1px solid color-mix(in oklab, #fff 30%, transparent)' }}>
+                {isLoading ? (
+                  <p className="py-10 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('加载中…')}</p>
+                ) : filtered.length === 0 ? (
+                  <EmptyState
+                    illustration={<TravelIllustration scene="empty" className="h-24 w-24" />}
+                    title={checkins.length === 0 ? t('还没有打卡记录') : t('没有符合条件的地点')}
+                    description={checkins.length === 0 ? t('点击下方按钮记录你的第一个足迹吧。') : t('试着切换分类或状态筛选。')}
+                    action={
+                      checkins.length === 0 ? (
+                        <Button onClick={() => navigate('/checkin/new')} style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+                          <Plus className="h-4 w-4" /> {t('新增打卡')}
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {filtered.map((c) => (
+                      <CheckinCard key={c.id} checkin={c} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
-        </BottomSheet>
+        </div>
       </div>
     </div>
   )

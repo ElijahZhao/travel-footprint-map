@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadTMapGL, createMap, LBSError } from '@/lib/tencent-lbs'
 import type { Checkin } from '@/lib/types'
 import { useTranslation } from 'react-i18next'
-import { Route, ChevronRight, X, Navigation, Play } from 'lucide-react'
+import { Route, X, Navigation, Play } from 'lucide-react'
 
 /** 生成带分类配色的地图大头针（SVG data URI） */
 function pinSvg(hex: string): string {
@@ -141,6 +141,8 @@ interface TravelMapProps {
   className?: string
   /** 外部定位请求（如搜索直达）：nonce 变化时平移到该点 */
   focus?: { lat: number; lng: number; nonce: number } | null
+  /** 点击「数字圈」展开多条足迹时，把清单交给外层渲染（避免与底部列表条互相遮挡） */
+  onCluster?: (items: Checkin[]) => void
 }
 
 type LocState = 'idle' | 'locating' | 'ready' | 'denied' | 'unsupported' | 'error'
@@ -177,6 +179,7 @@ export default function TravelMap({
   fill = false,
   className,
   focus,
+  onCluster,
 }: TravelMapProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -188,6 +191,63 @@ export default function TravelMap({
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [locState, setLocState] = useState<LocState>('idle')
   const navigate = useNavigate()
+  /** 定位按钮可拖动：记录其在容器内的像素坐标，默认浮在底部列表条上方、贴右 */
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [locPos, setLocPos] = useState<{ x: number; y: number } | null>(null)
+  const dragRef = useRef<{ sx: number; sy: number; bx: number; by: number; moved: boolean } | null>(null)
+
+  const clampLoc = useCallback((x: number, y: number): { x: number; y: number } => {
+    const el = wrapRef.current
+    if (!el) return { x, y }
+    const r = el.getBoundingClientRect()
+    const size = 40
+    const pad = 10
+    return {
+      x: Math.max(pad, Math.min(x, r.width - size - pad)),
+      y: Math.max(pad, Math.min(y, r.height - size - pad)),
+    }
+  }, [])
+
+  // 地图就绪后把定位按钮放到默认位置（右下、底部列表条之上）
+  useLayoutEffect(() => {
+    if (status !== 'ready') return
+    const el = wrapRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    setLocPos({ x: r.width - 40 - 10, y: r.height - 40 - 96 })
+  }, [status])
+
+  // 容器尺寸变化时把按钮拉回可视范围内
+  useEffect(() => {
+    const onResize = () => {
+      setLocPos((p) => (p ? clampLoc(p.x, p.y) : p))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [clampLoc])
+
+  const onLocDown = (e: React.PointerEvent) => {
+    if (!locPos) return
+    dragRef.current = { sx: e.clientX, sy: e.clientY, bx: locPos.x, by: locPos.y, moved: false }
+    try {
+      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    } catch {}
+  }
+  const onLocMove = (e: React.PointerEvent) => {
+    const d = dragRef.current
+    if (!d) return
+    const dx = e.clientX - d.sx
+    const dy = e.clientY - d.sy
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true
+    setLocPos(clampLoc(d.bx + dx, d.by + dy))
+  }
+  const onLocUp = () => {
+    const d = dragRef.current
+    dragRef.current = null
+    // 视为点击（未拖动）才触发定位，拖动只移动按钮
+    if (d && !d.moved) handleLocateClick()
+  }
+
   /** 已框进视野的足迹数量，仅在新增时重新缩放到全部标记，避免浏览时镜头乱跳 */
   const fittedCountRef = useRef(0)
   /** 路线连线开关、箭头开关与当前缩放（用于聚合重算） */
@@ -213,8 +273,6 @@ export default function TravelMap({
   const groupsRef = useRef<Record<number, Checkin[]>>({})
   /** 已知打卡 id（用于检测新增并放礼花） */
   const knownIdsRef = useRef<Set<number>>(new Set())
-  /** 当前展开的聚合清单（同地点多个打卡时使用） */
-  const [clusterItems, setClusterItems] = useState<Checkin[] | null>(null)
   /** 左上角控制面板收起/展开（记住用户选择） */
   const [panelOpen, setPanelOpen] = useState(() => {
     try {
@@ -475,7 +533,7 @@ export default function TravelMap({
             (c) => Math.abs(c.lat - items[0].lat) < 0.002 && Math.abs(c.lng - items[0].lng) < 0.002,
           )
           if (items && (sameSpot || (map.getZoom?.() ?? 0) >= 13)) {
-            setClusterItems(items)
+            onCluster?.(items)
             return
           }
           map.setCenter(new TMap.LatLng(p.lat, p.lng))
@@ -751,6 +809,7 @@ export default function TravelMap({
 
   return (
     <div
+      ref={wrapRef}
       className={
         fill
           ? `absolute inset-0 overflow-hidden ${className ?? ''}`
@@ -845,67 +904,28 @@ export default function TravelMap({
         </div>
       )}
 
-      {/* 聚合清单：点击数字圈弹出，可进入单条详情 */}
-      {clusterItems && (
-        <div className="absolute inset-x-3 bottom-3 z-[1010]">
-          <div
-            className="max-h-72 overflow-hidden rounded-2xl border bg-white/95 shadow-lg backdrop-blur"
-            style={{ borderColor: 'var(--border)' }}
-          >
-            <div className="flex items-center justify-between border-b px-4 py-2.5" style={{ borderColor: 'var(--border)' }}>
-              <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                {t('{{n}} 条足迹', { n: clusterItems.length })}
-              </span>
-              <button
-                type="button"
-                onClick={() => setClusterItems(null)}
-                aria-label={t('关闭')}
-                className="flex h-6 w-6 items-center justify-center rounded-full"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="max-h-56 overflow-auto">
-              {clusterItems.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => navigate(`${linkPrefix}${c.id}`)}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[var(--secondary)]"
-                >
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: c.status === 'wish' ? '#F29755' : '#38A05F' }}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                      {c.place_name}
-                    </span>
-                    {c.visit_date && (
-                      <span className="block text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                        {c.visit_date}
-                      </span>
-                    )}
-                  </span>
-                  <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 定位按钮：置于右下（底部入口卡之上），避开顶部浮层区 */}
+      {/* 定位按钮：可拖动，默认浮在底部列表条上方、贴右，避开顶部浮层区 */}
       {showUserLocation && status === 'ready' && (
-        <div className="absolute bottom-[96px] right-3 z-[1010] flex flex-col items-end gap-1">
+        <div
+          className="absolute z-[1010]"
+          style={{
+            left: locPos ? locPos.x : 'auto',
+            top: locPos ? locPos.y : 'auto',
+            right: locPos ? 'auto' : 12,
+            bottom: locPos ? 'auto' : 96,
+            touchAction: 'none',
+          }}
+        >
           <button
             type="button"
-            onClick={handleLocateClick}
-            title={t('定位我的位置')}
+            onPointerDown={onLocDown}
+            onPointerMove={onLocMove}
+            onPointerUp={onLocUp}
+            onPointerCancel={onLocUp}
+            title={t('定位我的位置（可拖动）')}
             aria-label={t('定位我的位置')}
             className="glass flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
-            style={{ color: 'var(--primary)' }}
+            style={{ color: 'var(--primary)', cursor: 'grab' }}
           >
             {locState === 'locating' ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -918,12 +938,12 @@ export default function TravelMap({
             )}
           </button>
           {locState === 'denied' && (
-            <span className="rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
+            <span className="absolute bottom-full right-0 mb-1 rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
               {t('定位被拒绝，可重试')}
             </span>
           )}
           {locState === 'unsupported' && (
-            <span className="rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
+            <span className="absolute bottom-full right-0 mb-1 rounded-md bg-black/70 px-2 py-1 text-[11px] text-white shadow">
               {t('当前环境不支持定位')}
             </span>
           )}

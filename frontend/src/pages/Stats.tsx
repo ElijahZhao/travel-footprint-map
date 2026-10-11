@@ -10,7 +10,7 @@ import { FadeIn } from '@/components/MotionPrimitives'
 import WavyUnderline from '@/components/WavyUnderline'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Globe2, BarChart3, CalendarRange, BookOpen, ChevronRight } from 'lucide-react'
+import { MapPin, Globe2, BarChart3, CalendarRange, BookOpen, ChevronRight, Sparkles } from 'lucide-react'
 
 /** 两点间距离（km） */
 function haversineKm(a: { lng: number; lat: number }, b: { lng: number; lat: number }) {
@@ -172,6 +172,7 @@ export default function Stats() {
           <div>
             <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
               {t('旅行年鉴')}
+              <Sparkles className="sticker-wiggle ml-2 inline h-6 w-6" style={{ color: 'var(--theme-blue)' }} />
             </h1>
             <WavyUnderline />
           </div>
