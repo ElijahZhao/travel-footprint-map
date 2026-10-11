@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "Collapsible map bar + shimmer glass",
+  "version_description": "Remove redundant expand-list button",
   "preview_type": "mobile"
 }

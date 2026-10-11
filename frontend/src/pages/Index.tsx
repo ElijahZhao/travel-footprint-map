@@ -412,28 +412,19 @@ export default function Index() {
               <ChevronUp className="h-4 w-4" style={{ color: 'var(--primary)' }} />
             </button>
           ) : barState === 'bar' ? (
-            /* 常驻条：显示统计 + 可展开列表 / 收起成角标 */
+            /* 常驻条：点条身展开列表，右侧小钮收起成角标 */
             <div className="glass-shimmer pointer-events-auto flex w-full items-center justify-between gap-2 rounded-2xl px-4 py-2.5">
               <button
                 type="button"
-                onClick={() => setBarPersist('collapsed')}
-                aria-label={t('收起足迹条')}
-                className="flex items-center gap-2 text-sm font-semibold"
+                onClick={() => setBarPersist('list')}
+                aria-label={t('展开列表')}
+                className="flex flex-1 items-center gap-2 text-sm font-semibold"
                 style={{ color: 'var(--foreground)' }}
               >
                 <List className="h-4 w-4" style={{ color: 'var(--primary)' }} />
                 {t('{{visited}} 个足迹·{{wish}} 个心愿', { visited: visitedCount, wish: wishCount })}
               </button>
               <span className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setBarPersist('list')}
-                  className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold"
-                  style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                >
-                  {t('展开列表')}
-                  <ChevronUp className="h-3.5 w-3.5" />
-                </button>
                 <button
                   type="button"
                   onClick={() => setBarPersist('collapsed')}
