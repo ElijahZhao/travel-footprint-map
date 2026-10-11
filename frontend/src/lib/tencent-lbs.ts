@@ -467,7 +467,9 @@ interface TMapMarkerStyleOptions {
   anchor?: { x: number; y: number };
 }
 
-interface TMapMarkerStyle {}
+interface TMapMarkerStyle {
+  [key: string]: unknown
+}
 
 interface TMapMultiMarkerOptions {
   id?: string;
@@ -515,7 +517,9 @@ interface TMapLabelStyleOptions {
   verticalAlignment?: string;
 }
 
-interface TMapLabelStyle {}
+interface TMapLabelStyle {
+  [key: string]: unknown
+}
 
 interface TMapMultiLabelOptions {
   id?: string;

@@ -342,7 +342,7 @@ export default function Timeline() {
                   return (
                     <button
                       key={c.key}
-                      onClick={() => setActiveCats((prev) => { const n = new Set(prev); n.has(c.key) ? n.delete(c.key) : n.add(c.key); return n })}
+                      onClick={() => setActiveCats((prev) => { const n = new Set(prev); if (n.has(c.key)) n.delete(c.key); else n.add(c.key); return n })}
                       className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium"
                       style={active ? { background: 'var(--primary)', color: 'var(--primary-foreground)' } : { background: 'var(--card)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
                     >
@@ -358,7 +358,7 @@ export default function Timeline() {
                     return (
                       <button
                         key={tg}
-                        onClick={() => setActiveTags((prev) => { const n = new Set(prev); n.has(tg) ? n.delete(tg) : n.add(tg); return n })}
+                        onClick={() => setActiveTags((prev) => { const n = new Set(prev); if (n.has(tg)) n.delete(tg); else n.add(tg); return n })}
                         className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium"
                         style={active ? { background: 'var(--accent)', color: 'var(--accent-foreground)' } : { background: 'var(--card)', color: 'var(--muted-foreground)', border: '1px solid var(--border)' }}
                       >

@@ -71,7 +71,9 @@ export default function Index() {
     setAnnivDismissed(true)
     try {
       localStorage.setItem('anniv-dismissed', new Date().toDateString())
-    } catch {}
+    } catch (e) {
+      console.error('保存纪念日忽略状态失败', e)
+    }
   }
   const annivYears = anniversary ? new Date().getFullYear() - Number((anniversary.visit_date || '').slice(0, 4)) : 0
 

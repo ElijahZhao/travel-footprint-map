@@ -147,7 +147,7 @@ export async function generateTags(args: GenerateTagsArgs): Promise<string[]> {
   }
   return raw
     .split(/[,，、]/)
-    .map((s) => s.replace(/^["'\[『「]|["'\]』」]$/g, '').trim())
+    .map((s) => s.replace(/^["'『「]|["'』」]$/g, '').trim())
     .filter(Boolean)
     .slice(0, 6)
 }
