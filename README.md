@@ -26,17 +26,53 @@
 
 ## 效果预览
 
-真机截图（手机视口，游客模式实录）：
+全部为实机截图（手机视口实录）。
 
-| 地图主页 | 时间线 | 统计 |
+### 游客模式（中文）
+
+打开链接即可体验，无需注册。地图支持路线连线、箭头与路线动画：
+
+| 地图主页 | 路线动画 | 时间线 |
 |---|---|---|
-| ![地图主页](docs/screenshots/map.png) | ![时间线](docs/screenshots/timeline.png) | ![统计](docs/screenshots/stats.png) |
+| ![地图主页](docs/screenshots/guest-zh/01-map.png) | ![路线动画](docs/screenshots/guest-zh/02-map-animation.png) | ![时间线](docs/screenshots/guest-zh/03-timeline.png) |
 
-| 心愿单 | 我的 |
+| 心愿 & 点亮 | 旅行年鉴 | 我的 |
+|---|---|---|
+| ![心愿](docs/screenshots/guest-zh/04-wishlist.png) | ![统计](docs/screenshots/guest-zh/05-stats.png) | ![我的](docs/screenshots/guest-zh/06-me.png) |
+
+| 打卡详情 |
+|---|
+| ![打卡详情](docs/screenshots/guest-zh/07-checkin-detail.png) |
+
+### 邮箱验证码登录（真实账号）
+
+登录后数据写入云端，跨设备同步；新账号从零开始记录：
+
+| 登录页 | 邮箱验证码 | 登录成功 |
+|---|---|---|
+| ![登录页](docs/screenshots/real-user/01-login.png) | ![邮箱验证码](docs/screenshots/real-user/02-email-code.png) | ![登录成功](docs/screenshots/real-user/03-login-success.png) |
+
+| 地图（空） | 时间线（空） | 心愿（空） |
+|---|---|---|
+| ![空地图](docs/screenshots/real-user/04-map-empty.png) | ![空时间线](docs/screenshots/real-user/05-timeline-empty.png) | ![空心愿](docs/screenshots/real-user/06-wishlist-empty.png) |
+
+| 统计（空） | 我的 |
 |---|---|
-| ![心愿单](docs/screenshots/wishlist.png) | ![我的](docs/screenshots/me.png) |
+| ![空统计](docs/screenshots/real-user/07-stats-empty.png) | ![我的](docs/screenshots/real-user/08-me.png) |
 
-> 截图取自运行实例，界面以公网部署为准。
+### 游客模式（English）
+
+「我的」页一键切换中/英，即时生效：
+
+| Map | Timeline | Wishes |
+|---|---|---|
+| ![Map](docs/screenshots/guest-en/01-map.png) | ![Timeline](docs/screenshots/guest-en/02-timeline.png) | ![Wishes](docs/screenshots/guest-en/03-wishlist.png) |
+
+| Stats | Me |
+|---|---|
+| ![Stats](docs/screenshots/guest-en/04-stats.png) | ![Me](docs/screenshots/guest-en/05-me.png) |
+
+> 界面以公网部署为准。
 
 ## 快速开始
 
