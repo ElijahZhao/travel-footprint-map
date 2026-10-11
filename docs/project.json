@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "Timeline icons variety + animated connectors",
+  "version_description": "Add Vitest unit tests and config",
   "preview_type": "mobile"
 }
