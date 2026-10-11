@@ -308,7 +308,7 @@ const en = {
   '类足迹': 'Categories',
   '删除打卡': 'Delete check-in',
 
-  // ===== 本轮新增 =====
+  // ===== 新增英文文案 =====
   '{{visited}} 个足迹·{{wish}} 个心愿': '{{visited}} places · {{wish}} wishes',
   '登录后数据跨设备同步': 'Cross-device sync after sign-in',
   '已把本机的 {{n}} 条足迹合并到账号': 'Merged {{n}} local places into your account',

@@ -68,7 +68,7 @@ frontend/
     components/ 外壳（AppShell/MobileFrame/BottomNav/BottomSheet）+ UI 组件（shadcn/ui，脚手架生成，当前实际使用 16 个，其余为预留组件，不影响运行）
     lib/        cloudbase(云端SDK) / checkins(数据层) / guest(游客模式) / ai / tencent-lbs(地图) / auth
 docs/
-  产品方案.md        历史方案文档（开发前推演，部分已过时，保留作过程记录）
+  产品方案.md        历史方案文档（开发前推演，部分已过时，以 frontend/src 代码为准）
   product/features.md 产品功能说明
 generated-images/   UI 概念图（10 张）
 ```
