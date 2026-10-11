@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "Fix lint defects and add tests",
+  "version_description": "Expand README with module docs and fact checks",
   "preview_type": "mobile"
 }
