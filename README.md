@@ -65,7 +65,7 @@ pnpm preview --host 0.0.0.0 --port 4173
 frontend/
   src/
     pages/      各页面（Index 地图主页、Timeline、Stats、Wishlist、Me、Checkin*、Login、SharePage）
-    components/ 外壳（AppShell/MobileFrame/BottomNav/BottomSheet）+ UI 组件（shadcn/ui）
+    components/ 外壳（AppShell/MobileFrame/BottomNav/BottomSheet）+ UI 组件（shadcn/ui，脚手架生成，当前实际使用 16 个，其余为预留组件，不影响运行）
     lib/        cloudbase(云端SDK) / checkins(数据层) / guest(游客模式) / ai / tencent-lbs(地图) / auth
 docs/
   产品方案.md        历史方案文档（开发前推演，部分已过时，保留作过程记录）
