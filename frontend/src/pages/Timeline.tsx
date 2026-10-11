@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag, Images, Mountain, Camera, Ship } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star, Send, Plane, TrainFront, Car, Bike, Bus, Rocket, Sailboat, Footprints, Compass, Mountain, Camera, Tent, Ship, Flag, Images } from 'lucide-react'
 import WavyUnderline from '@/components/WavyUnderline'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
@@ -53,11 +53,45 @@ function Stars({ n }: { n: number }) {
   )
 }
 
-/** 童趣装饰：时间线节点轮换的小徽章（纸飞机 / 小火车 / 小脚印 / 指南针 / 小山 / 相机 / 小船） */
-const JOURNEY_ICONS = [Send, TrainFront, Footprints, Compass, Mountain, Camera, Ship]
+/** 童趣装饰：时间线节点轮换的小徽章（各种出行方式 / 旅途小道具） */
+const JOURNEY_ICONS = [
+  Send, Plane, TrainFront, Car, Bike, Bus, Rocket, Sailboat,
+  Footprints, Compass, Mountain, Camera, Tent, Ship,
+]
+
+/** 已去足迹徽章轮换的冷色系（心愿仍用橙色区分） */
+const BADGE_PALETTE = ['var(--primary)', 'oklch(0.62 0.16 300)', 'var(--theme-blue)', 'oklch(0.72 0.13 195)']
 
 /** 年份/月份标题轮换的糖果色（相邻的年份与月份颜色不同） */
 const YEAR_PALETTE = ['var(--primary)', 'var(--accent)', 'oklch(0.62 0.16 300)', 'var(--theme-blue)', 'var(--theme-rose)']
+
+/** 时间线连线：多种形态轮换（虚线 / 波浪 / 点线 / 飞行弧线 / 海波 / 锯齿），虚线还会向前流动 */
+function TimelineConnector({ variant, color }: { variant: number; color: string }) {
+  const shapes: { d: string; dash?: string; flow?: boolean }[] = [
+    { d: 'M7 2 V58', dash: '6 7', flow: true },                                  // 虚线
+    { d: 'M7 2 C1 12 13 22 7 32 C1 42 13 52 7 58' },                             // 波浪
+    { d: 'M7 2 V58', dash: '1.5 6', flow: true },                                // 点线
+    { d: 'M7 2 C15 16 -1 30 7 44 C11 51 8 55 7 58', dash: '5 5', flow: true },   // 飞行弧线
+    { d: 'M7 2 q7 7 0 14 t0 14 t0 14 t0 14' },                                   // 海波
+    { d: 'M2 2 L12 9 L2 16 L12 23 L2 30 L12 37 L2 44 L12 51 L2 58' },            // 锯齿
+  ]
+  const s = shapes[variant % shapes.length]
+  return (
+    <svg className="h-full w-4 overflow-visible" viewBox="0 0 14 60" preserveAspectRatio="none" aria-hidden="true">
+      <path
+        d={s.d}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray={s.dash}
+        vectorEffect="non-scaling-stroke"
+        className={s.flow ? 'dash-flow' : undefined}
+      />
+    </svg>
+  )
+}
 
 /** 单个时间线节点 — 大照片 + 文字 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
@@ -75,14 +109,14 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease }}
     >
-      {/* 时间轴节点：轮换的童趣小徽章 + 虚线航线 */}
+      {/* 时间轴节点：轮换的童趣小徽章 + 多形态流动连线 */}
       <div className="flex w-7 shrink-0 flex-col items-center pt-4">
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 shadow-sm"
           style={{
-            borderColor: isWish ? 'var(--accent)' : 'var(--primary)',
+            borderColor: isWish ? 'var(--accent)' : BADGE_PALETTE[index % BADGE_PALETTE.length],
             background: 'var(--card)',
-            color: isWish ? 'var(--accent)' : 'var(--primary)',
+            color: isWish ? 'var(--accent)' : BADGE_PALETTE[index % BADGE_PALETTE.length],
             transform: `rotate(${(index % 2 === 0 ? -1 : 1) * 8}deg)`,
           }}
         >
@@ -91,7 +125,12 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
             return <Deco className="h-3.5 w-3.5 sticker-wiggle" />
           })()}
         </span>
-        <span className="mt-1 w-0 flex-1 border-l-2 border-dashed" style={{ borderColor: 'var(--border)' }} />
+        <div className="relative mt-1 flex w-7 flex-1 justify-center">
+          <TimelineConnector
+            variant={index}
+            color={`color-mix(in oklab, ${isWish ? 'var(--accent)' : BADGE_PALETTE[index % BADGE_PALETTE.length]} 55%, transparent)`}
+          />
+        </div>
       </div>
       <button
         onClick={() => navigate(`/checkin/${item.id}`)}

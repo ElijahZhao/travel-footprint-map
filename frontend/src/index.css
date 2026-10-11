@@ -442,6 +442,17 @@
   .season-particle { display: none; }
 }
 
+/* 时间线连线：虚线段缓缓向前流动 */
+.dash-flow {
+  animation: dash-flow 1.4s linear infinite;
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -26; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-flow { animation: none; }
+}
+
 /* 点亮发光（心愿点亮态 —— 鲜活绿光） */
 .lit-glow {
   box-shadow:
