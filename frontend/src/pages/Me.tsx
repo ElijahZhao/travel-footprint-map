@@ -286,7 +286,7 @@ export default function Me() {
           <div className="rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Award className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                <Award className="sticker-wiggle h-4 w-4" style={{ color: 'var(--primary)' }} />
                 <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('成就徽章')}</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -296,6 +296,8 @@ export default function Me() {
             <div className="grid grid-cols-3 gap-3">
               {badges.map((b, i) => {
                 const Icon = b.icon
+                const pal = ['var(--primary)', 'var(--accent)', 'var(--theme-blue)', 'var(--theme-rose)', 'var(--theme-gold, #EFC241)', 'oklch(0.62 0.16 300)']
+                const gotColor = pal[i % pal.length]
                 return (
                   <motion.div
                     key={b.key}
@@ -308,10 +310,10 @@ export default function Me() {
                     <span
                       className="flex h-12 w-12 items-center justify-center rounded-full"
                       style={{
-                        background: b.got ? 'var(--primary)' : 'transparent',
-                        color: b.got ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+                        background: b.got ? gotColor : 'transparent',
+                        color: b.got ? '#fff' : 'var(--muted-foreground)',
                         border: b.got ? 'none' : '1.5px dashed var(--border)',
-                        boxShadow: b.got ? '0 6px 16px color-mix(in oklab, var(--primary) 32%, transparent)' : 'none',
+                        boxShadow: b.got ? `0 6px 16px color-mix(in oklab, ${gotColor} 32%, transparent)` : 'none',
                       }}
                     >
                       <Icon className="h-5 w-5" />
@@ -359,7 +361,7 @@ export default function Me() {
         <FadeIn>
           <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+              <MapPin className="h-4 w-4" style={{ color: 'var(--accent)' }} />
               <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>
                 {t('我的打卡（{{n}}）', { n: visitedCount })}
               </span>

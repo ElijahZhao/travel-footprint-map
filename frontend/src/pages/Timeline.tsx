@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import { FadeIn } from '@/components/MotionPrimitives'
 import { CategoryTag } from '@/components/Surface'
-import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag, Images } from 'lucide-react'
+import { MapPin, Heart, LogIn, Search, X, Star, Send, TrainFront, Footprints, Compass, Flag, Images, Mountain, Camera, Ship } from 'lucide-react'
 import WavyUnderline from '@/components/WavyUnderline'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
@@ -53,8 +53,8 @@ function Stars({ n }: { n: number }) {
   )
 }
 
-/** 童趣装饰：时间线节点轮换的小徽章（纸飞机 / 小火车 / 小脚印 / 指南针） */
-const JOURNEY_ICONS = [Send, TrainFront, Footprints, Compass]
+/** 童趣装饰：时间线节点轮换的小徽章（纸飞机 / 小火车 / 小脚印 / 指南针 / 小山 / 相机 / 小船） */
+const JOURNEY_ICONS = [Send, TrainFront, Footprints, Compass, Mountain, Camera, Ship]
 
 /** 单个时间线节点 — 大照片 + 文字 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
@@ -85,7 +85,7 @@ function TimelineItem({ item, index }: { item: Checkin; index: number }) {
         >
           {(() => {
             const Deco = JOURNEY_ICONS[index % JOURNEY_ICONS.length]
-            return <Deco className="h-3.5 w-3.5" />
+            return <Deco className="h-3.5 w-3.5 sticker-wiggle" />
           })()}
         </span>
         <span className="mt-1 w-0 flex-1 border-l-2 border-dashed" style={{ borderColor: 'var(--border)' }} />

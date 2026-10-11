@@ -424,6 +424,24 @@
   50% { transform: rotate(8deg) scale(1.08); }
 }
 
+/* 季节限定粒子：随月份飘落/浮起（春花瓣 / 夏光斑 / 秋黄叶 / 冬雪），不抢内容 */
+.season-particle {
+  position: absolute;
+  top: -6%;
+  pointer-events: none;
+  animation: season-fall linear infinite;
+  will-change: transform;
+}
+@keyframes season-fall {
+  0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+  8% { opacity: var(--peak, 0.7); }
+  92% { opacity: var(--peak, 0.7); }
+  100% { transform: translateY(112vh) translateX(var(--sway, 24px)) rotate(320deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .season-particle { display: none; }
+}
+
 /* 点亮发光（心愿点亮态 —— 鲜活绿光） */
 .lit-glow {
   box-shadow:

@@ -235,7 +235,10 @@ export default function Stats() {
               { ...fourthStat },
             ].map((stat, i) => (
               <div key={i} className="flex-1 text-center">
-                <div className="font-display text-4xl font-black leading-none tabular-nums" style={{ color: 'var(--primary)' }}>
+                <div
+                  className="font-display text-4xl font-black leading-none tabular-nums"
+                  style={{ color: [ 'var(--primary)', 'var(--accent)', 'var(--theme-blue)', 'var(--theme-rose)' ][i % 4] }}
+                >
                   <CountUp value={stat.n} />
                 </div>
                 <div className="mt-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
@@ -266,17 +269,17 @@ export default function Stats() {
                   <div key={c.key} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-1.5">
-                        <Icon className="h-3.5 w-3.5" style={{ color: 'var(--muted-foreground)' }} />
+                        <Icon className="h-3.5 w-3.5" style={{ color: c.color }} />
                         {t(c.label)}
                       </span>
-                      <span className="tabular-nums" style={{ color: 'var(--muted-foreground)' }}>
+                      <span className="tabular-nums font-semibold" style={{ color: c.color }}>
                         {c.count}
                       </span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
                       <motion.div
                         className="h-full rounded-full"
-                        style={{ background: 'var(--primary)' }}
+                        style={{ background: c.color }}
                         initial={{ width: 0 }}
                         whileInView={{ width: `${pct}%` }}
                         viewport={{ once: true }}
@@ -340,17 +343,17 @@ export default function Stats() {
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2">
-                <Globe2 className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                <Globe2 className="h-4 w-4" style={{ color: 'var(--theme-blue)' }} />
                 <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('省份点亮')}</span>
               </div>
-              <span className="text-sm font-semibold tabular-nums" style={{ color: 'var(--primary)' }}>
+              <span className="text-sm font-semibold tabular-nums" style={{ color: 'var(--theme-blue)' }}>
                 {t('{{n}} / {{m}}', { n: litProvinces.size, m: PROVINCES.length })}
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ background: 'var(--primary)' }}
+                style={{ background: 'var(--theme-blue)' }}
                 initial={{ width: 0 }}
                 whileInView={{ width: `${(litProvinces.size / PROVINCES.length) * 100}%` }}
                 viewport={{ once: true }}

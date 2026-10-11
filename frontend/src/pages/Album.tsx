@@ -7,7 +7,7 @@ import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
 import WavyUnderline from '@/components/WavyUnderline'
 import { FadeIn } from '@/components/MotionPrimitives'
-import { ArrowLeft, LogIn, Download } from 'lucide-react'
+import { ArrowLeft, LogIn, Download, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
@@ -129,6 +129,7 @@ export default function Album() {
           <div className="mt-2">
             <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
               {t('足迹相册')}
+              <Star className="sticker-wiggle ml-2 inline h-5 w-5" style={{ color: 'var(--theme-gold, #EFC241)' }} />
             </h1>
             <WavyUnderline />
             <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
@@ -151,13 +152,18 @@ export default function Album() {
                 type="button"
                 onClick={() => navigate(`/checkin/${ph.checkin.id}`)}
                 className="relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl text-left"
-                style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.05)' }}
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(43,36,32,0.05)', transition: 'transform 0.25s ease' }}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
                 transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.25) }}
               >
-                <img src={ph.url} alt={ph.checkin.place_name} loading="lazy" className="w-full object-cover" />
+                {/* 拍立得胶带角 */}
+                <span
+                  className="pointer-events-none absolute -top-1.5 left-1/2 h-4 w-12 -translate-x-1/2 rotate-[-5deg]"
+                  style={{ background: 'rgba(242,151,85,0.55)', boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+                />
+                <img src={ph.url} alt={ph.checkin.place_name} loading="lazy" className="w-full object-cover transition-transform duration-300 hover:scale-[1.03]" />
                 {/* 保存带水印的图片（地名+日期+小徽标） */}
                 <span
                   role="button"

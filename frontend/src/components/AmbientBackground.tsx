@@ -52,6 +52,36 @@ const SHOOTINGS = [
   { left: '24%', top: '30%', dur: '14s', delay: '17s' },
 ]
 
+/** 季节限定粒子：按当前月份切换（春花瓣 / 夏光斑 / 秋黄叶 / 冬雪） */
+const SEASON = (() => {
+  const m = new Date().getMonth() + 1
+  if (m >= 3 && m <= 5) return 'spring'
+  if (m >= 6 && m <= 8) return 'summer'
+  if (m >= 9 && m <= 11) return 'autumn'
+  return 'winter'
+})()
+const SEASON_PARTICLES = Array.from({ length: 9 }, (_, i) => ({
+  left: `${(i * 11 + 4) % 96}%`,
+  dur: `${10 + (i % 5) * 3}s`,
+  delay: `${(i * 2.3) % 14}s`,
+  sway: `${(i % 2 ? 1 : -1) * (18 + (i % 3) * 10)}px`,
+  scale: 0.7 + (i % 4) * 0.18,
+  peak: 0.55 + (i % 3) * 0.12,
+}))
+
+function SeasonGlyph() {
+  switch (SEASON) {
+    case 'spring':
+      return <span className="block h-2.5 w-2.5 rounded-full" style={{ background: 'color-mix(in oklab, var(--theme-rose, #e0a3a3) 70%, transparent)' }} />
+    case 'summer':
+      return <span className="block h-2 w-2 rounded-full" style={{ background: 'color-mix(in oklab, var(--theme-gold, #EFC241) 65%, transparent)', filter: 'blur(0.5px)' }} />
+    case 'autumn':
+      return <span className="block h-3 w-2 rounded-sm rotate-12" style={{ background: 'color-mix(in oklab, var(--accent) 70%, transparent)' }} />
+    default:
+      return <span className="block h-2 w-2 rounded-full bg-white" style={{ opacity: 0.85 }} />
+  }
+}
+
 function PlaneGlyph() {
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -164,6 +194,22 @@ export default function AmbientBackground() {
           className="ambient-spark"
           style={{ left: s.left, top: s.top, ['--dur' as string]: s.dur, ['--delay' as string]: s.delay }}
         />
+      ))}
+      {SEASON_PARTICLES.map((p, i) => (
+        <span
+          key={`season-${i}`}
+          className="season-particle"
+          style={{
+            left: p.left,
+            ['--dur' as string]: p.dur,
+            ['--delay' as string]: p.delay,
+            ['--sway' as string]: p.sway,
+            ['--peak' as string]: p.peak,
+            transform: `scale(${p.scale})`,
+          }}
+        >
+          <SeasonGlyph />
+        </span>
       ))}
     </div>
   )
