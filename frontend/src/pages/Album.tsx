@@ -114,25 +114,26 @@ export default function Album() {
     <div className="relative min-h-full px-4 pb-28 pt-6" style={{ background: 'transparent' }}>
       <main className="space-y-5">
         <FadeIn>
-          <div className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-[var(--background)]/90 px-4 py-2 backdrop-blur" style={{ marginTop: '-0.5rem' }}>
-            <button
-              type="button"
-              onClick={goBack}
-              className="flex h-9 w-9 items-center justify-center rounded-full"
-              style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
-              aria-label={t('返回')}
-            >
-              <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
-            </button>
-            <span className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>{t('足迹相册')}</span>
-          </div>
-          <div className="mt-2">
-            <h1 className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
-              {t('足迹相册')}
-              <Star className="sticker-wiggle ml-2 inline h-5 w-5" style={{ color: 'var(--theme-gold, #EFC241)' }} />
-            </h1>
-            <WavyUnderline />
-            <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          <div className="sticky top-0 z-20 -mx-4 bg-[var(--background)]/90 px-4 py-2 backdrop-blur" style={{ marginTop: '-0.5rem' }}>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={goBack}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                style={{ background: 'var(--secondary)', color: 'var(--foreground)' }}
+                aria-label={t('返回')}
+              >
+                <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
+              </button>
+              <div className="min-w-0">
+                <h1 className="font-display text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
+                  {t('足迹相册')}
+                  <Star className="sticker-wiggle ml-2 inline h-5 w-5" style={{ color: 'var(--theme-gold, #EFC241)' }} />
+                </h1>
+                <WavyUnderline />
+              </div>
+            </div>
+            <p className="mt-1.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
               {t('{{n}} 张照片，{{m}} 段旅程', { n: photos.length, m: tripCount })}
             </p>
           </div>

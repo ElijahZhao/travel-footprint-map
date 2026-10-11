@@ -56,6 +56,9 @@ function Stars({ n }: { n: number }) {
 /** 童趣装饰：时间线节点轮换的小徽章（纸飞机 / 小火车 / 小脚印 / 指南针 / 小山 / 相机 / 小船） */
 const JOURNEY_ICONS = [Send, TrainFront, Footprints, Compass, Mountain, Camera, Ship]
 
+/** 年份/月份标题轮换的糖果色（相邻的年份与月份颜色不同） */
+const YEAR_PALETTE = ['var(--primary)', 'var(--accent)', 'oklch(0.62 0.16 300)', 'var(--theme-blue)', 'var(--theme-rose)']
+
 /** 单个时间线节点 — 大照片 + 文字 */
 function TimelineItem({ item, index }: { item: Checkin; index: number }) {
   const navigate = useNavigate()
@@ -366,19 +369,19 @@ export default function Timeline() {
                     </div>
                   )}
                   <section className="space-y-6">
-                    {/* 年份大标题 */}
+                    {/* 年份大标题 — 每个年份轮换糖果色 */}
                     <FadeIn duration={0.4}>
                       <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
                         <div className="flex items-center gap-2">
                           {/* 邮戳徽章：像护照章一样斜盖在年份旁 */}
                           <span
                             className="flex h-7 w-7 -rotate-12 items-center justify-center rounded-full border-2 border-dashed"
-                            style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                            style={{ borderColor: YEAR_PALETTE[gi % YEAR_PALETTE.length], color: YEAR_PALETTE[gi % YEAR_PALETTE.length] }}
                             aria-hidden="true"
                           >
                             <Send className="h-3.5 w-3.5" />
                           </span>
-                          <span className="font-display text-3xl font-black tracking-tight" style={{ color: 'var(--primary)' }}>
+                          <span className="font-display text-3xl font-black tracking-tight" style={{ color: YEAR_PALETTE[gi % YEAR_PALETTE.length] }}>
                             {year}
                           </span>
                         </div>
@@ -387,13 +390,13 @@ export default function Timeline() {
                         </span>
                       </div>
                     </FadeIn>
-                    {monthGroups.map(([month, items]) => (
+                    {monthGroups.map(([month, items], mi) => (
                       <section key={month} className="space-y-4">
-                        {/* 月份小标题 — 杂志期号感 */}
+                        {/* 月份小标题 — 杂志期号感，月份用与年份不同的颜色 */}
                         <FadeIn duration={0.4}>
                           <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: 'var(--border)' }}>
                             <div className="flex items-baseline gap-2">
-                              <span className="font-display text-5xl font-black leading-none" style={{ color: 'var(--primary)' }}>
+                              <span className="font-display text-5xl font-black leading-none" style={{ color: YEAR_PALETTE[(gi + 1 + mi) % YEAR_PALETTE.length] }}>
                                 {isMonthKey(month) ? Number(month.split('-')[1]) : '—'}
                               </span>
                               {isMonthKey(month) && <span className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{t('月')}</span>}
