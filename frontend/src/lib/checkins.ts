@@ -8,10 +8,21 @@ import type { Checkin, CheckinInput, PhotoItem } from './types'
  * （例如 PostgREST schema 缓存未刷新时的「Could not find the table ... in the schema cache」）。
  */
 export function describeDbError(e: unknown): string {
-  const raw = e instanceof Error ? e.message : String(e ?? '')
+  // 云数据库 SDK 抛出的是 PostgREST 错误对象（形如 { message, code, details, hint }），
+  // 不是 Error 实例；优先取 .message，实在没有再 JSON 序列化，避免出现 "[object Object]"。
+  const obj = e as { message?: unknown; error?: unknown }
+  const raw: string =
+    (typeof obj?.message === 'string' && obj.message) ||
+    (typeof obj?.error === 'string' && obj.error) ||
+    (typeof e === 'string' && e) ||
+    (e ? JSON.stringify(e) : '') ||
+    ''
   const msg = raw.toLowerCase()
   if (/schema cache|could not find the table|pgrst/i.test(msg)) {
-    return t('云端数据表暂未就绪，请在 CloudBase 控制台对 PostgreSQL 执行「刷新 API schema」后重试')
+    return t('云端数据表暂未就绪，请稍后重试或联系管理员')
+  }
+  if (/check constraint|23514|violat/i.test(msg)) {
+    return t('数据校验未通过，请确认评分在 0–5 之间后重试')
   }
   if (/permission_denied|42501|row-level|rls/i.test(msg)) {
     return t('没有该数据的写入权限，请重新登录后再试')
@@ -41,7 +52,7 @@ export async function fetchMyCheckins(): Promise<Checkin[]> {
     .from('checkins')
     .select('*')
     .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
   return (data ?? []).map(normalize)
 }
 
@@ -53,7 +64,7 @@ export async function fetchPublicCheckins(publicId: string): Promise<Checkin[]> 
     .eq('user_id', publicId)
     .eq('is_public', true)
     .order('visit_date', { ascending: false })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
   return (data ?? []).map(normalize)
 }
 
@@ -64,7 +75,7 @@ export async function fetchCheckinById(id: number): Promise<Checkin | null> {
     .select('*')
     .eq('id', id)
     .maybeSingle()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
   return data ? normalize(data as Record<string, unknown>) : null
 }
 
