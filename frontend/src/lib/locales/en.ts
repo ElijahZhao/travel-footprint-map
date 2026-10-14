@@ -370,6 +370,33 @@ const en = {
   // 纪念日
   '{{n}} 年前的今天': '{{n}} year(s) ago today',
   '你在 {{place}}': 'You were in {{place}}',
+
+  // ===== 补漏：审计发现的缺失英文映射 =====
+  'AI 帮我写': 'AI write',
+  'AI 标签生成失败': 'AI tag generation failed',
+  '个省份': 'provinces',
+  '先填写或搜索地点，AI 才能给出合适的标签': 'Fill in or search a place first so AI can suggest fitting tags',
+  '去登录 →': 'Go to sign in →',
+  '定位我的位置（可拖动）': 'Locate me (draggable)',
+  '导入': 'Import',
+  '展开列表': 'Expand list',
+  '展开足迹条': 'Expand trail bar',
+  '座城市': 'cities',
+  '心愿清单': 'Wishlist',
+  '想去的地方': 'Places to visit',
+  '成就徽章': 'Achievement badges',
+  '我的足迹列表': 'My trail list',
+  '搜索足迹': 'Search check-ins',
+  '收起': 'Collapse',
+  '收起成角标': 'Collapse to badge',
+  '旅行年鉴': 'Travel yearbook',
+  '照片上传失败': 'Photo upload failed',
+  '登录': 'Sign in',
+  '返回': 'Back',
+  '还没有点亮省份': 'No provinces lit up yet',
+  '这个地方': 'this place',
+  '退出': 'Sign out',
+  '验证码': 'Verification code',
 }
 
 export default en
