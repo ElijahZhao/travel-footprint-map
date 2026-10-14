@@ -26,11 +26,13 @@ import {
   CalendarCheck,
   BadgeCheck,
   Languages,
+  Palette,
   ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { setLanguage, getLanguage } from '@/lib/i18n'
+import { useSeason, SEASONS, SEASON_META, type SeasonMode } from '@/lib/season'
 
 /** 设置列表行 */
 function SettingRow({
@@ -71,6 +73,7 @@ export default function Me() {
   const { user, guest, loading, signOut, enterGuest } = useAuth()
   const { t } = useTranslation()
   const lang = getLanguage()
+  const { mode, setMode } = useSeason()
   const { data: checkins = [] } = useMyCheckins()
   const updateMut = useUpdateCheckin()
   const navigate = useNavigate()
@@ -357,6 +360,43 @@ export default function Me() {
         {/* 设置菜单 */}
         <FadeIn>
           <div className="space-y-2">
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+            >
+              <div className="mb-2.5 flex items-center gap-2">
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: 'var(--secondary)', color: 'var(--primary)' }}
+                >
+                  <Palette className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{t('季节皮肤')}</p>
+                  <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>{t('随季节切换整站配色')}</p>
+                </div>
+              </div>
+              <div className="flex gap-1.5 rounded-full p-1" style={{ background: 'var(--secondary)' }}>
+                {(['auto', ...SEASONS] as SeasonMode[]).map((m) => {
+                  const active = mode === m
+                  return (
+                    <button
+                      key={m}
+                      onClick={() => setMode(m)}
+                      className="flex flex-1 items-center justify-center gap-1 rounded-full px-1 py-1.5 text-xs font-medium"
+                      style={{
+                        background: active ? 'var(--card)' : 'transparent',
+                        color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
+                        boxShadow: active ? 'var(--ds-shadow-sm)' : 'none',
+                      }}
+                    >
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: SEASON_META[m].swatch }} />
+                      {t(SEASON_META[m].label)}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
             <SettingRow
               icon={Languages}
               title={t('语言')}

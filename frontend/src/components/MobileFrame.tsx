@@ -1,11 +1,13 @@
 import { type ReactNode } from 'react'
 import AmbientBackground from './AmbientBackground'
+import { useSeason } from '@/lib/season'
 
 /**
  * 移动端外壳：在桌面端居中显示一个带手机边框的"真机"视图，
  * 在手机端则铺满全屏。所有页面内容都限制在这个框内滚动。
  */
 export default function MobileFrame({ children }: { children: ReactNode }) {
+  const { season } = useSeason()
   return (
     <div
       className="flex min-h-[100dvh] w-full justify-center paper-texture"
@@ -19,7 +21,7 @@ export default function MobileFrame({ children }: { children: ReactNode }) {
         style={{ boxShadow: '0 24px 60px -12px oklch(0.3 0.02 80 / 0.35), 0 0 0 1px oklch(0.7 0.02 80 / 0.2)' }}
       >
         {/* 全站动态背景：铺在手机框内、内容滚动层之下，所有页面共享 */}
-        <AmbientBackground />
+        <AmbientBackground season={season} />
         {children}
       </div>
     </div>

@@ -4,6 +4,8 @@
  * 挂在手机框内、内容滚动层之下，所有页面共享。
  * 尊重系统「减少动效」设置；不参与交互、不抢内容可读性。
  */
+import type { Season } from '@/lib/season'
+
 const DOTS = [
   { left: '12%', size: 7, dur: '13s', delay: '0s', sway: '5vw', peak: 0.55, color: undefined },
   { left: '78%', size: 9, dur: '17s', delay: '3s', sway: '-6vw', peak: 0.5, color: 'color-mix(in oklab, var(--accent) 55%, transparent)' },
@@ -52,14 +54,7 @@ const SHOOTINGS = [
   { left: '24%', top: '30%', dur: '14s', delay: '17s' },
 ]
 
-/** 季节限定粒子：按当前月份切换（春花瓣 / 夏光斑 / 秋黄叶 / 冬雪） */
-const SEASON = (() => {
-  const m = new Date().getMonth() + 1
-  if (m >= 3 && m <= 5) return 'spring'
-  if (m >= 6 && m <= 8) return 'summer'
-  if (m >= 9 && m <= 11) return 'autumn'
-  return 'winter'
-})()
+/** 季节限定粒子：随当前生效季节切换（春花瓣 / 夏光斑 / 秋黄叶 / 冬雪） */
 const SEASON_PARTICLES = Array.from({ length: 9 }, (_, i) => ({
   left: `${(i * 11 + 4) % 96}%`,
   dur: `${10 + (i % 5) * 3}s`,
@@ -69,8 +64,8 @@ const SEASON_PARTICLES = Array.from({ length: 9 }, (_, i) => ({
   peak: 0.55 + (i % 3) * 0.12,
 }))
 
-function SeasonGlyph() {
-  switch (SEASON) {
+function SeasonGlyph({ season }: { season: Season }) {
+  switch (season) {
     case 'spring':
       return <span className="block h-2.5 w-2.5 rounded-full" style={{ background: 'color-mix(in oklab, var(--theme-rose, #e0a3a3) 70%, transparent)' }} />
     case 'summer':
@@ -117,7 +112,7 @@ function BalloonGlyph({ scale }: { scale: number }) {
   )
 }
 
-export default function AmbientBackground() {
+export default function AmbientBackground({ season }: { season: Season }) {
   return (
     <div className="ambient-bg" aria-hidden="true">
       <span className="ambient-blob ambient-blob--1" />
@@ -208,7 +203,7 @@ export default function AmbientBackground() {
             transform: `scale(${p.scale})`,
           }}
         >
-          <SeasonGlyph />
+          <SeasonGlyph season={season} />
         </span>
       ))}
     </div>

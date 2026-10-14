@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatedRoutes } from "@/components/AnimatedRoutes";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/lib/AuthContext";
+import { SeasonProvider } from "@/lib/season";
 import AppShell from "@/components/AppShell";
 import Index from "./pages/Index";
 const CheckinDetail = lazy(() => import("./pages/CheckinDetail"));
@@ -59,7 +60,8 @@ function App() {
         <Toaster position="top-center" />
         <AuthProvider>
           <BrowserRouter>
-            <AppShell>
+            <SeasonProvider>
+              <AppShell>
               <Suspense fallback={<RouteFallback />}>
                 <AnimatedRoutes>
                   <Route path="/" data-genie-title="地图主页" data-genie-key="Home" element={<PageTransition transition="fade"><Index /></PageTransition>} />
@@ -83,6 +85,7 @@ function App() {
                 </AnimatedRoutes>
               </Suspense>
             </AppShell>
+            </SeasonProvider>
           </BrowserRouter>
         </AuthProvider>
       </TooltipProvider>

@@ -413,6 +413,13 @@ const en = {
   '足迹覆盖 10 座城市': 'Footprints across 10 cities',
   '行程规划师': 'Trip planner',
   '收藏 3 个想去的地方': 'Save 3 places to visit',
+  '季节皮肤': 'Season theme',
+  '随季节切换整站配色': 'Whole app recolors with the season',
+  '自动': 'Auto',
+  '春': 'Spring',
+  '夏': 'Summer',
+  '秋': 'Autumn',
+  '冬': 'Winter',
 }
 
 export default en

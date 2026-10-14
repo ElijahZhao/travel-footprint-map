@@ -818,6 +818,65 @@
   transform: rotate(6deg);
 }
 
+/* ================================================================
+   季节限定皮肤 —— 在 :root 变量之上按 data-season 覆盖整站配色。
+   深色模式沿用各自变量（项目当前未启用深色运行时切换，仅保留浅色覆盖）。
+   可读性保障：foreground / card-foreground 始终深棕，确保文字对比度。
+   ================================================================ */
+:root[data-season="spring"] {
+  --background: #F2F6EC;
+  --secondary: #E6EEDB;
+  --muted: #DEE7D3;
+  --muted-foreground: #6E7A66;
+  --border: #D9E3CE;
+  --primary: #4BA85F;
+  --accent: #E58BA8;
+  --ring: #4BA85F;
+  --theme-green: oklch(0.68 0.16 148);
+  --theme-rose: oklch(0.74 0.14 5);
+  --hero: oklch(0.58 0.16 150);
+}
+:root[data-season="summer"] {
+  --background: #EAF4F7;
+  --secondary: #DCEEF3;
+  --muted: #CFE4EA;
+  --muted-foreground: #5E7C86;
+  --border: #C6DDE6;
+  --primary: #2E9FC4;
+  --accent: #F2B33D;
+  --ring: #2E9FC4;
+  --theme-blue: oklch(0.62 0.13 230);
+  --theme-gold: oklch(0.82 0.15 92);
+  --hero: oklch(0.6 0.13 232);
+}
+:root[data-season="autumn"] {
+  --background: #F6EEE1;
+  --secondary: #EFE2D1;
+  --muted: #E7D7C3;
+  --muted-foreground: #836451;
+  --border: #E6D4BF;
+  --primary: #D98441;
+  --accent: #C9A23A;
+  --ring: #D98441;
+  --theme-gold: oklch(0.80 0.14 88);
+  --theme-rose: oklch(0.66 0.16 25);
+  --hero: oklch(0.62 0.14 55);
+}
+:root[data-season="winter"] {
+  --background: #EDF2F7;
+  --secondary: #DDE7F0;
+  --muted: #CFD9E6;
+  --muted-foreground: #5C7186;
+  --border: #C5D4E2;
+  --primary: #5B8FC9;
+  --accent: #8FB4DE;
+  --ring: #5B8FC9;
+  --theme-blue: oklch(0.62 0.13 232);
+  --theme-rose: oklch(0.72 0.10 350);
+  --theme-gold: oklch(0.82 0.13 95);
+  --hero: oklch(0.58 0.13 235);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ambient-blob, .ambient-ring, .ambient-dot, .ambient-spark { animation: none; }
   .ambient-ring, .ambient-dot, .ambient-spark { display: none; }
