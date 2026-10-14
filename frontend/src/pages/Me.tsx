@@ -107,20 +107,32 @@ export default function Me() {
     setShareOn(checkins.some((c) => c.is_public))
   }, [checkins])
 
-  const publicCount = useMemo(() => checkins.filter((c) => c.is_public).length, [checkins])
-  const visitedCount = useMemo(() => checkins.filter((c) => c.status === 'visited').length, [checkins])
-  const photoCount = useMemo(() => checkins.reduce((a, c) => a + (c.photos?.length ?? 0), 0), [checkins])
+  const visited = useMemo(() => checkins.filter((c) => c.status === 'visited'), [checkins])
+  const visitedCount = visited.length
+  const wishCount = checkins.length - visitedCount
+  const publicCount = checkins.filter((c) => c.is_public).length
+  const photoCount = visited.reduce((a, c) => a + (c.photos?.length ?? 0), 0)
+  const yearsCount = new Set(visited.map((c) => (c.visit_date || '').slice(0, 4)).filter(Boolean)).size
+  const citiesCount = new Set(
+    visited.map((c) => c.address?.replace(/^(.{2}省|.{2}市|.{2}自治区|.{2}特别行政区)/, '') || c.place_name),
+  ).size
+  const nationsCount = new Set(visited.map((c) => c.nation).filter(Boolean)).size
+  const catsCovered = new Set(visited.map((c) => c.category)).size
 
   const badges = useMemo(
     () => [
-      { key: 'first', label: t('初次出发'), icon: Sparkles, got: visitedCount >= 1 },
-      { key: 'five', label: t('五处打卡'), icon: MapPin, got: visitedCount >= 5 },
-      { key: 'photo', label: t('影像记录'), icon: Camera, got: photoCount >= 1 },
-      { key: 'year', label: t('跨年旅行'), icon: CalendarCheck, got: new Set(checkins.map((c) => (c.visit_date || '').slice(0, 4)).filter(Boolean)).size >= 2 },
-      { key: 'explorer', label: t('探索者'), icon: Mountain, got: visitedCount >= 10 },
-      { key: 'curator', label: t('精选策展'), icon: BadgeCheck, got: publicCount >= 1 },
+      { key: 'first', label: t('初次出发'), icon: Sparkles, got: visitedCount >= 1, hint: t('记录你的第一个足迹') },
+      { key: 'five', label: t('五处打卡'), icon: MapPin, got: visitedCount >= 5, hint: t('累计 5 处已打卡') },
+      { key: 'photo', label: t('影像记录'), icon: Camera, got: photoCount >= 1, hint: t('上传第一张照片') },
+      { key: 'year', label: t('跨年旅行'), icon: CalendarCheck, got: yearsCount >= 2, hint: t('在两年都留下足迹') },
+      { key: 'explorer', label: t('探索者'), icon: Mountain, got: visitedCount >= 10, hint: t('累计 10 处已打卡') },
+      { key: 'curator', label: t('精选策展'), icon: BadgeCheck, got: publicCount >= 1, hint: t('把一条打卡设为公开精选') },
+      { key: 'nation', label: t('环球旅人'), icon: Globe2, got: nationsCount >= 1, hint: t('踏足第一个不同国家') },
+      { key: 'category', label: t('集齐分类'), icon: Compass, got: catsCovered >= 6, hint: t('走遍全部 6 类主题') },
+      { key: 'cities', label: t('十城行者'), icon: MapPin, got: citiesCount >= 10, hint: t('足迹覆盖 10 座城市') },
+      { key: 'planner', label: t('行程规划师'), icon: Compass, got: wishCount >= 3, hint: t('收藏 3 个想去的地方') },
     ],
-    [visitedCount, photoCount, checkins, publicCount, t],
+    [visitedCount, photoCount, yearsCount, citiesCount, nationsCount, catsCovered, wishCount, publicCount, t],
   )
 
   if (!loading && !user && !guest) {
@@ -222,7 +234,7 @@ export default function Me() {
                 </p>
                 <div className="mt-1.5 flex gap-3 text-[11px]" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   <span>{t('足迹 {{n}}', { n: visitedCount })}</span>
-                  <span>{t('心愿 {{n}}', { n: checkins.length - visitedCount })}</span>
+                  <span>{t('心愿 {{n}}', { n: wishCount })}</span>
                   <span>{t('照片 {{n}}', { n: photoCount })}</span>
                 </div>
               </div>
@@ -281,46 +293,60 @@ export default function Me() {
           </FadeIn>
         )}
 
-        {/* 成就徽章 */}
+        {/* 集章手册 */}
         <FadeIn>
           <div className="rounded-2xl p-5" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Award className="sticker-wiggle h-4 w-4" style={{ color: 'var(--primary)' }} />
-                <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('成就徽章')}</span>
+                <span className="font-display text-lg font-bold" style={{ color: 'var(--foreground)' }}>{t('集章手册')}</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                {t('{{got}} / {{total}}', { got: badges.filter((b) => b.got).length, total: badges.length })}
+                {t('已集 {{got}} / {{total}} 枚', { got: badges.filter((b) => b.got).length, total: badges.length })}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-x-3 gap-y-4">
               {badges.map((b, i) => {
                 const Icon = b.icon
-                const pal = ['var(--primary)', 'var(--accent)', 'var(--theme-blue)', 'var(--theme-rose)', 'var(--theme-gold, #EFC241)', 'oklch(0.62 0.16 300)']
+                const pal = ['var(--primary)', 'var(--accent)', 'var(--theme-blue)', 'var(--theme-rose)', 'var(--theme-gold, #EFC241)', 'oklch(0.62 0.16 300)', 'var(--primary)', 'var(--accent)', 'var(--theme-blue)', 'var(--theme-rose)']
                 const gotColor = pal[i % pal.length]
                 return (
                   <motion.div
                     key={b.key}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-1 text-center"
                     initial={{ opacity: 0, y: 8 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: i * 0.04 }}
                   >
                     <span
-                      className="flex h-12 w-12 items-center justify-center rounded-full"
+                      className="relative flex h-12 w-12 items-center justify-center rounded-full"
                       style={{
                         background: b.got ? gotColor : 'transparent',
                         color: b.got ? '#fff' : 'var(--muted-foreground)',
                         border: b.got ? 'none' : '1.5px dashed var(--border)',
                         boxShadow: b.got ? `0 6px 16px color-mix(in oklab, ${gotColor} 32%, transparent)` : 'none',
+                        opacity: b.got ? 1 : 0.7,
                       }}
                     >
                       <Icon className="h-5 w-5" />
+                      {b.got && (
+                        <span
+                          className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white"
+                          style={{ background: 'var(--theme-green, #2Faa66)', border: '1.5px solid var(--card)' }}
+                        >
+                          ✓
+                        </span>
+                      )}
                     </span>
-                    <span className="text-[11px] font-medium" style={{ color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)' }}>
+                    <span className="text-[11px] font-medium leading-tight" style={{ color: b.got ? 'var(--foreground)' : 'var(--muted-foreground)' }}>
                       {b.label}
                     </span>
+                    {!b.got && (
+                      <span className="text-[10px] leading-tight" style={{ color: 'var(--muted-foreground)', opacity: 0.8 }}>
+                        {b.hint}
+                      </span>
+                    )}
                   </motion.div>
                 )
               })}

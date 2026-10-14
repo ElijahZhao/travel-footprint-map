@@ -397,6 +397,22 @@ const en = {
   '这个地方': 'this place',
   '退出': 'Sign out',
   '验证码': 'Verification code',
+  '集章手册': 'Stamp collection',
+  '已集 {{got}} / {{total}} 枚': '{{got}} / {{total}} stamps collected',
+  '记录你的第一个足迹': 'Log your very first check-in',
+  '累计 5 处已打卡': 'Reach 5 visited places',
+  '上传第一张照片': 'Upload your first photo',
+  '在两年都留下足迹': 'Leave tracks in two different years',
+  '累计 10 处已打卡': 'Reach 10 visited places',
+  '把一条打卡设为公开精选': 'Mark one check-in as public pick',
+  '环球旅人': 'Globetrotter',
+  '踏足第一个不同国家': 'Set foot in a foreign country',
+  '集齐分类': 'All categories',
+  '走遍全部 6 类主题': 'Cover all 6 themes',
+  '十城行者': 'Ten-city traveler',
+  '足迹覆盖 10 座城市': 'Footprints across 10 cities',
+  '行程规划师': 'Trip planner',
+  '收藏 3 个想去的地方': 'Save 3 places to visit',
 }
 
 export default en
