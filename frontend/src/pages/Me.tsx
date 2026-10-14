@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/AuthContext'
 import { useMyCheckins, useUpdateCheckin } from '@/lib/hooks'
-import { mergeLocalCheckinsToCloud, getLocalGuestCheckinCount } from '@/lib/checkins'
+import { mergeLocalCheckinsToCloud, getLocalGuestCheckinCount, cloneSampleCheckinsToCloud } from '@/lib/checkins'
 import { setGuestCheckins } from '@/lib/guest'
 import EmptyState from '@/components/EmptyState'
 import TravelIllustration from '@/components/TravelIllustration'
@@ -80,6 +80,7 @@ export default function Me() {
   const queryClient = useQueryClient()
   const [shareOn, setShareOn] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [cloning, setCloning] = useState(false)
 
   // 已登录但本设备仍残留未同步的游客足迹时，提示可手动导入
   const leftoverCount = useMemo(
@@ -203,6 +204,20 @@ export default function Me() {
     navigate('/login')
   }
 
+  const cloneSample = async () => {
+    setCloning(true)
+    try {
+      const n = await cloneSampleCheckinsToCloud()
+      queryClient.invalidateQueries({ queryKey: ['my-checkins'] })
+      if (n > 0) toast.success(t('已克隆 {{n}} 条示例足迹到你的账号', { n }))
+      else toast.success(t('示例足迹已在你的账号中'))
+    } catch (e: any) {
+      toast.error(e?.message || t('克隆失败'))
+    } finally {
+      setCloning(false)
+    }
+  }
+
   const displayName = user?.name || user?.email?.split('@')[0] || (guest ? t('游客') : t('旅行者'))
 
   return (
@@ -291,6 +306,37 @@ export default function Me() {
                 style={{ background: 'var(--primary)' }}
               >
                 {importing ? t('生成中…') : t('导入')}
+              </button>
+            </div>
+          </FadeIn>
+        )}
+
+        {/* 新账号引导：一键克隆游客示例足迹，降低上手门槛 */}
+        {!guest && checkins.length === 0 && (
+          <FadeIn>
+            <div
+              className="flex items-center gap-3 rounded-2xl p-4"
+              style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+            >
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: 'color-mix(in oklab, var(--primary) 16%, transparent)', color: 'var(--primary)' }}
+              >
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{t('体验示例足迹')}</p>
+                <p className="truncate text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  {t('一键把示例地点克隆到你的账号，快速感受完整功能')}
+                </p>
+              </div>
+              <button
+                onClick={cloneSample}
+                disabled={cloning}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                style={{ background: 'var(--primary)' }}
+              >
+                {cloning ? t('生成中…') : t('克隆示例')}
               </button>
             </div>
           </FadeIn>

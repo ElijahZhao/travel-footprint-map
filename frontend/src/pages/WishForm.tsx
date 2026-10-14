@@ -14,7 +14,7 @@ import { CATEGORIES } from '@/lib/categories'
 import { useAuth } from '@/lib/AuthContext'
 import { useCreateCheckin } from '@/lib/hooks'
 import { uploadPhoto } from '@/lib/storage'
-import { createClient, LBSError, type POI } from '@/lib/tencent-lbs'
+import { createClient, LBSError, LBS_ERROR_CODES, type POI } from '@/lib/tencent-lbs'
 import type { CategoryKey, CheckinInput, PhotoItem } from '@/lib/types'
 
 interface WishFormState {
@@ -74,7 +74,12 @@ export default function WishForm() {
       setResults(list)
       if (list.length === 0) toast.message(t('没有找到这个地点，试试更完整的名称'))
     } catch (e) {
-      toast.error(e instanceof LBSError ? e.message : '搜索失败，请稍后重试')
+      // 与打卡表单一致：域名未授权给出简短、指向真实解法的提示，避免甩出 SDK 长报错。
+      if (e instanceof LBSError && e.status === LBS_ERROR_CODES.UNAUTHORIZED_REFERER) {
+        toast.error(t('地点搜索暂不可用：需要把本站域名加入腾讯位置服务的授权名单'))
+      } else {
+        toast.error(e instanceof LBSError ? t(e.getSolution()) : t('地点搜索失败，请稍后重试'))
+      }
     } finally {
       setSearching(false)
     }

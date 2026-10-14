@@ -89,7 +89,7 @@ export function buildGuestCheckin(input: CheckinInput): Checkin {
   }
 }
 
-const SAMPLE_CHECKINS: Checkin[] = [
+export const SAMPLE_CHECKINS: Checkin[] = [
   {
     id: 1001, user_id: 'guest', place_name: '西湖', address: '浙江省杭州市西湖区',
     lng: 120.148, lat: 30.243, category: 'scenery', status: 'visited',

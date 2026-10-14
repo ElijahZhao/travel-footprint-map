@@ -22,10 +22,12 @@
  * const result = await client.geocode('北京市海淀区中关村大街1号');
  */
 
+import { TENCENT_MAP_KEY, isMapKeyConfigured } from './map-config'
+
 // ============ 常量配置 ============
 
-/** 硬编码的 Web 端 API Key（需要在控制台配置域名白名单） */
-const TENCENT_LBS_KEY = 'SLFBZ-TELYZ-FCEXY-ZSJNE-Z5FMF-ADBLT';
+/** 地图 Key（可经 VITE_TENCENT_MAP_KEY 覆盖，见 ./map-config） */
+const TENCENT_LBS_KEY = TENCENT_MAP_KEY;
 
 /** WebService API 基础 URL */
 const BASE_URL = 'https://apis.map.qq.com';
@@ -569,6 +571,15 @@ export async function loadTMapGL(options?: {
   // 如果正在加载，等待加载完成
   if (glApiLoading) {
     return glApiLoading;
+  }
+
+  // Key 未配置（如 VITE_TENCENT_MAP_KEY 留空或占位符）：提前给出明确引导，
+  // 避免加载一个必然失败的脚本、把用户丢给白屏。
+  if (!options?.key && !isMapKeyConfigured()) {
+    throw new LBSError(
+      -6,
+      '地图服务未配置 Key：请在环境变量 VITE_TENCENT_MAP_KEY 中填入腾讯地图 JS API Key',
+    );
   }
 
   const key = options?.key ?? TENCENT_LBS_KEY;

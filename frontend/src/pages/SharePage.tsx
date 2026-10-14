@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { toPng } from 'html-to-image'
 import { usePublicCheckins } from '@/lib/hooks'
@@ -11,6 +11,17 @@ import { FadeIn, Stagger } from '@/components/MotionPrimitives'
 import { Surface } from '@/components/Surface'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Globe2, ArrowRight, UserRound, Download, ImageIcon, X } from 'lucide-react'
+
+/** 设置/更新 <head> 中的 OG / Twitter 元信息（分享页按内容动态生成预览卡片）。 */
+function setMetaContent(attr: 'property' | 'name', key: string, value: string) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', value)
+}
 
 export default function SharePage() {
   const { t } = useTranslation()
@@ -48,6 +59,20 @@ export default function SharePage() {
     1,
     (Math.min(vw, 460) - 48) / (variant === 'postcard' ? 1000 : 540),
   )
+
+  // 分享页挂载后动态刷新社交预览元信息：标题带上足迹数、URL 带上分享者 id，
+  // 让微信/QQ 等抓取时拿到「这一个」分享页的专属卡片（JS 可执行的爬虫生效）。
+  useEffect(() => {
+    if (!publicId) return
+    const url = `${window.location.origin}/share/${publicId}`
+    const title = t('旅行精选 · 共 {{n}} 个精选地点', { n: checkins.length })
+    const desc = t('来自一位旅行者的公开足迹，在地图上点亮去过与想去的地方')
+    setMetaContent('property', 'og:title', title)
+    setMetaContent('property', 'og:url', url)
+    setMetaContent('property', 'og:description', desc)
+    setMetaContent('name', 'twitter:title', title)
+    setMetaContent('name', 'twitter:description', desc)
+  }, [publicId, checkins.length, t])
 
   return (
     <div className="page-bg paper-texture relative min-h-full px-4 pb-28 pt-5">

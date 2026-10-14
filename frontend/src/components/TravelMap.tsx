@@ -159,7 +159,17 @@ function hasWebGL(): boolean {
 
 /** 把底层异常翻译成用户能看懂、且指向真实原因的提示。 */
 function describeMapError(e: unknown): string {
-  if (e instanceof LBSError) return e.message
+  if (e instanceof LBSError) {
+    // 前端未配置 Key
+    if (e.status === -6) {
+      return '地图服务未配置 Key，地图暂不可用；你仍可以浏览列表、新增与编辑打卡'
+    }
+    // Key 失效 / 超额 / 白名单未配置等可识别的地图 Key 问题
+    if (/key|配额|quota|停用|白名单|未授权|referer|invalid|expired/i.test(e.message)) {
+      return '地图 Key 可能已失效或超额，地图功能暂不可用；列表与新增打卡不受影响'
+    }
+    return e.message
+  }
   const msg = e instanceof Error ? e.message : String(e ?? '')
   if (/isWebGL2|webgl|createContext/i.test(msg) || !hasWebGL()) {
     return '当前浏览器未启用 WebGL，无法渲染地图。请更换浏览器或开启硬件加速后重试'

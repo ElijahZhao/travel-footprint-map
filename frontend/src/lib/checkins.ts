@@ -1,5 +1,5 @@
 import { db, rpc } from '@/lib/cloudbase'
-import { isGuest, getGuestCheckins, setGuestCheckins, buildGuestCheckin } from './guest'
+import { isGuest, getGuestCheckins, setGuestCheckins, buildGuestCheckin, SAMPLE_CHECKINS } from './guest'
 import type { Checkin, CheckinInput, PhotoItem } from './types'
 
 /** 云端行 → Checkin 的显式映射，避免直接 `as unknown as` 绕过类型校验导致运行时崩溃。 */
@@ -154,6 +154,39 @@ export async function mergeLocalCheckinsToCloud(): Promise<number> {
     }
   }
   return merged
+}
+
+/**
+ * 把游客示例足迹一键克隆进当前登录的云端账号（仅正式账号可用，游客模式返回 0）。
+ * 示例数据以占位 id 存于本机，克隆时由云端自增 id，避免与已有数据冲突。
+ * 逐条插入、单条失败不阻断其余，返回成功克隆的条数。
+ */
+export async function cloneSampleCheckinsToCloud(): Promise<number> {
+  if (isGuest()) return 0
+  let cloned = 0
+  for (const c of SAMPLE_CHECKINS) {
+    try {
+      const { error } = await db.from('checkins').insert({
+        place_name: c.place_name,
+        address: c.address ?? null,
+        lng: c.lng,
+        lat: c.lat,
+        category: c.category,
+        status: c.status,
+        visit_date: c.visit_date ?? null,
+        mood_text: c.mood_text ?? null,
+        tags: c.tags ?? [],
+        photos: c.photos ?? [],
+        rating: c.rating ?? 0,
+        is_public: c.is_public ?? false,
+        nation: (c as { nation?: string | null }).nation ?? null,
+      })
+      if (!error) cloned++
+    } catch {
+      /* 单条失败不阻断其余 */
+    }
+  }
+  return cloned
 }
 
 export interface TravelStats {

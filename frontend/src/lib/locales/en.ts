@@ -420,6 +420,25 @@ const en = {
   '夏': 'Summer',
   '秋': 'Autumn',
   '冬': 'Winter',
+
+  // ===== Map key guidance (tencent-lbs / TravelMap) =====
+  '地图服务未配置 Key，地图暂不可用；你仍可以浏览列表、新增与编辑打卡':
+    'Map key is not configured, so the map is unavailable; you can still browse, add and edit check-ins',
+  '地图 Key 可能已失效或超额，地图功能暂不可用；列表与新增打卡不受影响':
+    'The map key may be invalid or over quota, so the map is unavailable; lists and new check-ins still work',
+
+  // ===== Guest → login clone sample (Me) =====
+  '体验示例足迹': 'Try sample trails',
+  '一键把示例地点克隆到你的账号，快速感受完整功能': 'Clone the sample places into your account in one tap to explore the full app',
+  '克隆示例': 'Clone samples',
+  '已克隆 {{n}} 条示例足迹到你的账号': 'Cloned {{n}} sample trails into your account',
+  '示例足迹已在你的账号中': 'Sample trails are already in your account',
+  '克隆失败': 'Clone failed',
+
+  // ===== Share page dynamic OG =====
+  '旅行精选 · 共 {{n}} 个精选地点': 'Travel picks · {{n}} featured places',
+  '来自一位旅行者的公开足迹，在地图上点亮去过与想去的地方':
+    'A traveler’s public trails, lighting up places visited and places to go on the map',
 }
 
 export default en
