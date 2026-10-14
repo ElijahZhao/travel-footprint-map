@@ -46,4 +46,7 @@ export function getLanguage(): Lang {
   return (i18n.language as Lang) || 'zh'
 }
 
+/** 供非 React 模块（如数据层）直接调用，等价于组件内的 useTranslation().t */
+export const t = i18n.t.bind(i18n)
+
 export default i18n

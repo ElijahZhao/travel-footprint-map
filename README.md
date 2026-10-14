@@ -75,6 +75,22 @@
 |---|---|
 | ![Stats](docs/screenshots/guest-en/04-stats.png) | ![Me](docs/screenshots/guest-en/05-me.png) |
 
+### 海外用户实测（真实定位）
+
+国外用户实测可正常定位到海外（欧洲、北美），地图按大洲 / 国界轮廓呈现：
+
+| 欧洲（14:10 定位） | 北美（9:59 定位） |
+|---|---|
+| ![欧洲定位](docs/screenshots/overseas/01-europe.jpg) | ![北美定位](docs/screenshots/overseas/02-north-america.jpg) |
+
+> 说明：腾讯地图的海外矢量底图与地点详情属增值服务（需付费开通），因此海外区域目前仅显示大洲与国界轮廓；国内区域为完整街道级底图。打卡 / 心愿 / 统计等功能本身不受地域限制，海外地点同样可以记录。
+
+> 备注：曾在云端 PostgREST 的 schema 缓存未包含数据表时，保存打卡会报 `Could not find the table 'public.checkins' in the schema cache`（见下图）。该问题已通过重新应用数据库迁移（在 CloudBase 控制台对 PostgreSQL 执行「刷新 API schema」效果相同）解决，不影响已存数据。
+
+| 保存报错示例（已修复） |
+|---|
+| ![保存报错](docs/screenshots/overseas/03-checkin-error.png) |
+
 > 界面以公网部署为准。
 
 ## 整体架构
@@ -205,7 +221,7 @@ frontend/
 docs/
   产品方案.md        方案推演文档（以 frontend/src 代码为准）
   product/features.md 产品功能说明
-  screenshots/     实机截图（guest-zh / real-user / guest-en）
+  screenshots/     实机截图（guest-zh / real-user / guest-en / overseas 海外实测）
 ```
 
 ## 快速开始

@@ -1,6 +1,26 @@
 import { db, rpc } from '@/lib/cloudbase'
 import { isGuest, getGuestCheckins, setGuestCheckins, buildGuestCheckin, SAMPLE_CHECKINS } from './guest'
+import { t } from '@/lib/i18n'
 import type { Checkin, CheckinInput, PhotoItem } from './types'
+
+/**
+ * 把云端数据库错误翻译成用户能看懂的提示，避免直接暴露英文原句
+ * （例如 PostgREST schema 缓存未刷新时的「Could not find the table ... in the schema cache」）。
+ */
+export function describeDbError(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e ?? '')
+  const msg = raw.toLowerCase()
+  if (/schema cache|could not find the table|pgrst/i.test(msg)) {
+    return t('云端数据表暂未就绪，请在 CloudBase 控制台对 PostgreSQL 执行「刷新 API schema」后重试')
+  }
+  if (/permission_denied|42501|row-level|rls/i.test(msg)) {
+    return t('没有该数据的写入权限，请重新登录后再试')
+  }
+  if (/network|fetch|timeout|failed to/i.test(msg)) {
+    return t('网络异常，保存失败，请检查网络后重试')
+  }
+  return raw || t('保存失败')
+}
 
 /** 云端行 → Checkin 的显式映射，避免直接 `as unknown as` 绕过类型校验导致运行时崩溃。 */
 function normalize(row: Record<string, unknown>): Checkin {
@@ -69,7 +89,7 @@ export async function createCheckin(input: CheckinInput): Promise<void> {
     is_public: input.is_public ?? false,
     nation: input.nation ?? null,
   })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
 }
 
 export async function updateCheckin(id: number, input: CheckinInput): Promise<void> {
@@ -100,7 +120,7 @@ export async function updateCheckin(id: number, input: CheckinInput): Promise<vo
       nation: input.nation ?? null,
     })
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
 }
 
 export async function deleteCheckin(id: number): Promise<void> {
@@ -109,7 +129,7 @@ export async function deleteCheckin(id: number): Promise<void> {
     return
   }
   const { error } = await db.from('checkins').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(describeDbError(error))
 }
 
 /** 游客示例数据的固定 id，合并时应跳过，避免把演示数据带进正式账号。 */
