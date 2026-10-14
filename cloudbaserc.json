@@ -1,0 +1,19 @@
+{
+  "envId": "travel-footprint-d8em6aa6331d820",
+  "functionRoot": "cloudbase/functions",
+  "functions": [
+    {
+      "name": "keepalive-db",
+      "runtime": "Nodejs20.19",
+      "timeout": 30,
+      "memorySize": 128,
+      "installDependency": false,
+      "envVariables": {
+        "PG_PUBLISH_KEY": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjUwNWYxNzA3LTJjN2UtNDY4MS1iNzIzLWQ0MTk2YmRlNjMwNSJ9.eyJpc3MiOiJodHRwczovL3RyYXZlbC1mb290cHJpbnQtZDhlbTZhYTYzMzFkODIwLmFwLXNoYW5naGFpLnRjYi1hcGkudGVuY2VudGNsb3VkYXBpLmNvbSIsInN1YiI6ImFub24iLCJhdWQiOiJ0cmF2ZWwtZm9vdHByaW50LWQ4ZW02YWE2MzMxZDgyMCIsImV4cCI6NDA5NTA1MjE4OCwiaWF0IjoxNzkxMzY4OTg4LCJub25jZSI6ImstbDYyTXdaU1otYklUTHhpZ0kzN3ciLCJhdF9oYXNoIjoiay1sNjJNd1pTWi1iSVRMeGlnSTM3dyIsIm5hbWUiOiJBbm9ueW1vdXMiLCJzY29wZSI6ImFub255bW91cyIsInByb2plY3RfaWQiOiJ0cmF2ZWwtZm9vdHByaW50LWQ4ZW02YWE2MzMxZDgyMCIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.wvp5ehtXZU-RCDEoECNM2I2XGbQeiOQckSo65SrsmnQhUCGZoNGRH5MM21tSUN3zmsJJlsf-PS-gCjx59_ELtNerIF375ZwIhLkfZITuv5-kgkoyu_X9E02MAIeaZWkM4sFHRZtzmvcSc71LdVlL2mAPla2TTWWP5z5x-_xgHoXqrhKetfAMgzkZILNwKJP5fWiwU0RUIZBe21u8Rhs4i1LBvxfR23FzIEZYZ54Lf01ePXdzRFcp6PDJKiTROJgzUbX6G27qvleG6RpzpYc4bVUelYr1IZB9QtrKT1IARrCPkf9cWSo-4NkFMX9mjXcqC_S3_BYi2QzfmVaiqH6uoQ"
+      },
+      "triggers": [
+        { "name": "every-5min", "type": "timer", "config": "*/5 * * * *" }
+      ]
+    }
+  ]
+}

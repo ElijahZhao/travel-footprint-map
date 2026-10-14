@@ -1,0 +1,8 @@
+{
+  "name": "keepalive-db",
+  "version": "1.0.0",
+  "description": "Keep the managed PostgreSQL instance warm and verify checkins visibility",
+  "main": "index.js",
+  "private": true,
+  "runtime": "Nodejs20.19"
+}

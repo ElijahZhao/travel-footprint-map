@@ -24,4 +24,7 @@ echo "==> 构建前端..."
 echo "==> 上传到 CloudBase 静态托管..."
 tcb hosting deploy ./frontend/dist -e "$ENV_ID"
 
+echo "==> 校验/自愈数据库..."
+bash scripts/keepalive.sh
+
 echo "==> 完成。访问：https://${ENV_ID}-1495478913.tcloudbaseapp.com/"

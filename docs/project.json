@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "旅行足迹地图",
   "app_slug": "travel-footprint",
-  "version_description": "新增地图Key引导 OG卡片 克隆示例 PWA",
+  "version_description": "修复打卡数据表并补充海外实测截图",
   "preview_type": "mobile"
 }

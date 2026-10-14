@@ -85,7 +85,7 @@
 
 > 说明：腾讯地图的海外矢量底图与地点详情属增值服务（需付费开通），因此海外区域目前仅显示大洲与国界轮廓；国内区域为完整街道级底图。打卡 / 心愿 / 统计等功能本身不受地域限制，海外地点同样可以记录。
 
-> 备注：曾在云端 PostgREST 的 schema 缓存未包含数据表时，保存打卡会报 `Could not find the table 'public.checkins' in the schema cache`（见下图）。该问题已通过重新应用数据库迁移（在 CloudBase 控制台对 PostgreSQL 执行「刷新 API schema」效果相同）解决，不影响已存数据。
+> 备注：云端托管版 PostgreSQL 在闲置时会被自动挂起，恢复后可能出现数据表丢失、保存打卡报 `Could not find the table 'public.checkins' in the schema cache`（见下图）。该问题现已由**常态化机制**兜底（见「数据库保活与自愈」一节），不再需要人工干预。
 
 | 保存报错示例（已修复） |
 |---|
@@ -222,6 +222,12 @@ docs/
   产品方案.md        方案推演文档（以 frontend/src 代码为准）
   product/features.md 产品功能说明
   screenshots/     实机截图（guest-zh / real-user / guest-en / overseas 海外实测）
+cloudbase/
+  migrations/      数据库迁移（建表/RLS/统计函数，含 ping_db 保活函数，全部幂等）
+  functions/keepalive-db/  定时云函数：每 5 分钟保活 PostgreSQL 实例
+scripts/
+  deploy.sh        构建并上传静态托管，末尾跑 keepalive 自愈校验
+  keepalive.sh     探测 checkins 可达性，不可达则自动重应用迁移
 ```
 
 ## 快速开始
@@ -259,6 +265,15 @@ pnpm test
 
 项目用 `scripts/deploy.sh` 重新构建前端并上传到 CloudBase 静态托管（公网链接即产物）。改动前端后跑一次即可同步线上。
 
+### 数据库保活与自愈（常态化机制）
+
+云端托管版 PostgreSQL 在长时间无连接时会被自动挂起，恢复后偶发数据表丢失（表现为保存打卡报 `Could not find the table 'public.checkins' in the schema cache`）。为避免再次出现，项目内置两层机制：
+
+1. **定时保活（治本）**：CloudBase 定时云函数 `keepalive-db` 每 5 分钟调用一次 `ping_db()`（一个无参数的 PostgreSQL 函数，`cloudbase/migrations/20261014230000_add_ping_db.sql` 定义），主动触碰数据库引擎，使实例永远不会因闲置被挂起。任何查询都会重置挂起计时器，因此只要函数按时触发，表就不会被清空。
+2. **部署自愈（兜底）**：`scripts/deploy.sh` 末尾会调用 `scripts/keepalive.sh`，探测 `checkins` 表对 REST 网关是否可达（HTTP 200）。若不可达（表丢失 / schema 缓存失效），脚本自动执行 `tcb db pg migration up` 重新应用迁移（`cloudbase/migrations/` 下的建表 + RLS + 统计函数 + `ping_db`，全部幂等），把表恢复回来。
+
+> 即使手动维护，也可随时运行 `bash scripts/keepalive.sh` 自检；若云函数被停用，仅保活失效，但部署/手动自愈仍可用。配置见 `cloudbaserc.json`。
+
 ## 常见问题
 
 - **地图不显示？** 腾讯地图 Key 需把当前访问域名加入白名单，否则定位/打卡点加载失败；浏览器也要开启 WebGL。
@@ -290,3 +305,5 @@ pnpm test
 | 全局错误兜底 ErrorBoundary 包裹应用入口 | `frontend/src/components/ErrorBoundary.tsx`、`main.tsx` |
 | 单元测试 Vitest，覆盖数据层纯函数 | `frontend/vitest.config.ts`、`src/lib/__tests__/*.test.ts` |
 | 持续集成 GitHub Actions 跑 typecheck/lint/test/build | `.github/workflows/ci.yml` |
+| 定时云函数 `keepalive-db` 每 5 分钟调用 `ping_db()` 保活 PG 实例 | `cloudbase/functions/keepalive-db/index.js`、`migrations/20261014230000_add_ping_db.sql`、`cloudbaserc.json` |
+| 部署脚本末尾 `keepalive.sh` 自检 checkins 可达性，不可达则重应用迁移 | `scripts/keepalive.sh`、`scripts/deploy.sh` |
